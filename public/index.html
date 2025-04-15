@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>SALE SUSHI</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #ff6f61;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .logo {
+      width: 500px;
+      margin-bottom: 1rem;
+    }
+
+    .btn {
+      background-color: transparent;
+      border: 2px dashed #ff6f61;
+      color: #ff6f61;
+      padding: 1rem 2rem;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 1rem;
+    }
+
+    .btn:hover {
+      background-color: #ff6f61;
+      color: #000;
+    }
+
+    .linea {
+      height: 3px;
+      background-color: #ff6f61;
+      width: 100px;
+      margin: 2rem auto;
+    }
+
+    .admin-login {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+    }
+
+    .admin-login input {
+      padding: 0.3rem;
+      border: 1px solid #ff6f61;
+      border-radius: 5px;
+      background: transparent;
+      color: #ff6f61;
+      margin-right: 0.4rem;
+    }
+
+    .admin-login button {
+      padding: 0.4rem 1rem;
+      border: 1px dashed #ff6f61;
+      background: transparent;
+      color: #ff6f61;
+      cursor: pointer;
+    }
+
+    .admin-login button:hover {
+      background: #ff6f61;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-login">
+    <input type="text" id="usuario" placeholder="Usuario">
+    <input type="password" id="clave" placeholder="Contraseña">
+    <button onclick="accederAdmin()">Admin</button>
+  </div>
+
+  <!-- Logo -->
+  <img src="logo.png" alt="Logo Sale Sushi" class="logo">
+
+  <div class="linea"></div>
+
+  <button class="btn" onclick="verMenu()">Ver menú</button>
+
+  <script>
+    function verMenu() {
+      localStorage.removeItem("todosLosRolls");
+      localStorage.removeItem("pedido");
+      window.location.href = "menu.html";
+    }
+
+    function accederAdmin() {
+      const user = document.getElementById("usuario").value;
+      const pass = document.getElementById("clave").value;
+
+      if (user === "emi528" && pass === "47393929Emi") {
+        window.location.href = "admin.html";
+      } else {
+        alert("Usuario o contraseña incorrectos.");
+      }
+    }
+  </script>
+</body>
+</html>

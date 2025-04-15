@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Elegí tus vegetales</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #ff6f61;
+      font-family: sans-serif;
+      padding: 2rem;
+      margin: 0;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 4rem;
+    }
+
+    .vegetales {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      width: 35%;
+      margin-left: 5%;
+    }
+
+    .opcion {
+      border: 2px solid #ff6f61;
+      padding: 0.6rem 1rem;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.3s;
+      font-size: 0.95rem;
+    }
+
+    .opcion:hover {
+      background-color: #ff6f61;
+      color: #000;
+    }
+
+    .opcion.seleccionada {
+      background-color: #ff6f61;
+      color: #000;
+    }
+
+    .maqueta-roll {
+      position: relative;
+      width: 260px;
+      height: auto;
+      margin-left: 15%;
+    }
+
+    .maqueta-roll img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+    }
+
+    .btn-siguiente {
+      margin-top: 2rem;
+      padding: 1rem 2rem;
+      background-color: transparent;
+      border: 2px dashed #ff6f61;
+      color: #ff6f61;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .btn-siguiente:hover {
+      background-color: #ff6f61;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <h1>Paso 2: Elegí tus vegetales</h1>
+
+  <div class="container">
+    <div id="contenedor" class="vegetales"></div>
+
+    <div class="maqueta-roll">
+      <img src="maqueta.png">
+      <img id="img-proteina" src="">
+      <img id="img-vegetal1" src="">
+      <img id="img-vegetal2" src="">
+    </div>
+  </div>
+
+  <button class="btn-siguiente" onclick="siguiente()">Siguiente</button>
+
+  <script>
+    const vegetalesDisponibles = [
+      "Ciboulette", "Cebollín", "Palta", "Mix de morrón",
+      "Pepino", "Palmito", "Zanahoria"
+    ];
+
+    let seleccion = JSON.parse(localStorage.getItem("pedido")) || {};
+    let seleccionados = [];
+
+    function normalizarNombre(nombre) {
+      return nombre
+        .toLowerCase()
+        .replace(/mix de /g, "")
+        .replace(/\s+/g, "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function cargarVegetales() {
+      const contenedor = document.getElementById("contenedor");
+
+      // Cargar imagen de proteína si no es vegetariano
+      if (seleccion.proteina && seleccion.proteina !== "Vegetariano") {
+        const nombreProteina = normalizarNombre(seleccion.proteina);
+        document.getElementById("img-proteina").src = `proteinas/${nombreProteina}proteina.png`;
+      } else {
+        document.getElementById("img-proteina").src = "";
+      }
+
+      vegetalesDisponibles.forEach(v => {
+        const div = document.createElement("div");
+        div.className = "opcion";
+        div.textContent = v;
+
+        div.onclick = () => {
+          if (seleccion.proteina === "Vegetariano") {
+            if (div.classList.contains("seleccionada")) {
+              div.classList.remove("seleccionada");
+              seleccionados = seleccionados.filter(s => s !== v);
+            } else if (seleccionados.length < 2) {
+              div.classList.add("seleccionada");
+              seleccionados.push(v);
+            } else {
+              alert("Solo podés elegir 2 vegetales.");
+            }
+          } else {
+            document.querySelectorAll(".opcion").forEach(el => el.classList.remove("seleccionada"));
+            div.classList.add("seleccionada");
+            seleccionados = [v];
+          }
+
+          actualizarImagenes();
+        };
+
+        contenedor.appendChild(div);
+      });
+
+      actualizarImagenes();
+    }
+
+    function actualizarImagenes() {
+      const img1 = document.getElementById("img-vegetal1");
+      const img2 = document.getElementById("img-vegetal2");
+
+      if (seleccion.proteina === "Vegetariano") {
+        if (seleccionados.length === 2) {
+          // Primera va desde "proteinas" con forma triangular
+          img1.src = "proteinas/" + normalizarNombre(seleccionados[0]) + "proteina.png";
+          // Segunda desde carpeta vegetales
+          img2.src = "vegetales/" + normalizarNombre(seleccionados[1]) + "vegetal.png";
+        } else {
+          img1.src = "";
+          img2.src = "";
+        }
+      } else {
+        if (seleccionados.length === 1) {
+          img1.src = "vegetales/" + normalizarNombre(seleccionados[0]) + "vegetal.png";
+          img2.src = "";
+        } else {
+          img1.src = "";
+          img2.src = "";
+        }
+      }
+    }
+
+    function siguiente() {
+      if (seleccion.proteina === "Vegetariano") {
+        if (seleccionados.length !== 2) {
+          alert("Debés elegir exactamente 2 vegetales para el roll vegetariano.");
+          return;
+        }
+      } else {
+        if (seleccionados.length === 0) {
+          alert("Elegí al menos un vegetal.");
+          return;
+        }
+      }
+
+      seleccion.vegetal = seleccionados.join(", ");
+      localStorage.setItem("pedido", JSON.stringify(seleccion));
+      window.location.href = "cobertura.html";
+    }
+
+    cargarVegetales();
+  </script>
+</body>
+</html>

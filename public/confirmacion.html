@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Resumen del Roll   </title>
+  <style>
+    body {
+      background-color: #000;
+      color: #ff6f61;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    .resumen {
+      background-color: #111;
+      border: 2px solid #ff6f61;
+      padding: 1.5rem;
+      border-radius: 10px;
+      max-width: 400px;
+      margin: 0 auto 2rem auto;
+    }
+    .resumen p {
+      margin: 0.5rem 0;
+      font-size: 1.1rem;
+    }
+    .roll-img {
+      width: 250px;
+      margin-top: 1.5rem;
+    }
+    .botones {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+    .btn {
+      padding: 1rem 2rem;
+      border: 2px dashed #ff6f61;
+      background-color: transparent;
+      color: #ff6f61;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .btn:hover {
+      background-color: #ff6f61;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <h1>Resumen del Roll</h1>
+
+  <div id="resumen" class="resumen"></div>
+
+  <div class="botones">
+    <button class="btn" onclick="agregarOtro()">Agregar otro roll</button>
+    <button class="btn" onclick="finalizar()">Finalizar pedido</button>
+  </div>
+
+  <script>
+    const roll = JSON.parse(localStorage.getItem("pedido"));
+    const resumenDiv = document.getElementById("resumen");
+
+    if (roll) {
+      resumenDiv.innerHTML = `
+        <p><strong>Proteína:</strong> ${roll.proteina}</p>
+        <p><strong>Vegetal:</strong> ${roll.vegetal}</p>
+        <p><strong>Cobertura:</strong> ${roll.cobertura}</p>
+        <p><strong>Precio:</strong> $${roll.precio}</p>
+        <img src="${roll.imagen}" alt="Visual del roll" class="roll-img">
+      `;
+    } else {
+      resumenDiv.innerHTML = "<p>No hay roll cargado.</p>";
+    }
+
+    function agregarOtro() {
+      localStorage.removeItem("pedido");
+      window.location.href = "proteina.html";
+    }
+
+    function finalizar() {
+      window.location.href = "datos-cliente.html";
+    }
+  </script>
+</body>
+</html>

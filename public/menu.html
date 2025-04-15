@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Menú - Sale Sushi</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #ff6f61;
+      font-family: sans-serif;
+      margin: 0;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 2rem;
+      font-size: 2rem;
+    }
+
+    .menu-img {
+      width: 80%;
+      max-width: 600px;
+      height: auto;
+      border: 2px dashed #ff6f61;
+      border-radius: 10px;
+    }
+
+    .btn {
+      margin-top: 2rem;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      background-color: transparent;
+      border: 2px dashed #ff6f61;
+      color: #ff6f61;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-inline: 1rem;
+    }
+
+    .btn:hover {
+      background-color: #ff6f61;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <h1>Menú Sale Sushi</h1>
+
+  <img src="menu.png" alt="Menú" class="menu-img">
+
+  <div>
+    <button class="btn" onclick="window.location.href='index.html'">
+      Volver al inicio
+    </button>
+    <button class="btn" onclick="comenzarPedido()">
+      Comenzar pedido
+    </button>
+  </div>
+
+  <script>
+    async function comenzarPedido() {
+      try {
+        const res = await fetch('/estado-pedidos');
+        const data = await res.json();
+
+        if (data.activo) {
+          window.location.href = 'proteina.html';
+        } else {
+          alert("🚫 Los pedidos no están habilitados por el momento.");
+          window.location.href = 'index.html';
+        }
+      } catch (err) {
+        console.error("Error consultando el estado:", err);
+        alert("Error consultando el estado de los pedidos.");
+        window.location.href = 'index.html';
+      }
+    }
+  </script>
+</body>
+</html>

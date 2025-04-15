@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Finalizar Pedido</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #ff6f61;
+      font-family: sans-serif;
+      padding: 2rem;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    form {
+      max-width: 500px;
+      margin: 0 auto 2rem auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    input, select {
+      padding: 0.8rem;
+      border: 2px solid #ff6f61;
+      border-radius: 8px;
+      background-color: transparent;
+      color: #ff6f61;
+    }
+    .resumen {
+      max-width: 600px;
+      margin: 0 auto 2rem auto;
+      border: 2px solid #ff6f61;
+      border-radius: 10px;
+      padding: 1rem;
+    }
+    .roll {
+      border-bottom: 1px dashed #ff6f61;
+      padding: 0.5rem 0;
+    }
+    .roll-img {
+      width: 200px;
+      margin: 1rem auto;
+      display: block;
+      border-radius: 10px;
+    }
+    .total {
+      margin-top: 1rem;
+      font-size: 1.3rem;
+      font-weight: bold;
+    }
+    button {
+      padding: 1rem;
+      font-size: 1rem;
+      border: 2px dashed #ff6f61;
+      background-color: transparent;
+      color: #ff6f61;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background-color: #ff6f61;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Finalizar Pedido</h1>
+
+  <div class="resumen" id="resumen-rolls"></div>
+
+  <form id="formulario">
+    <input type="text" id="nombre" placeholder="Nombre" required>
+    <input type="text" id="apellido" placeholder="Apellido" required>
+    <input type="text" id="celular" placeholder="Celular" required>
+    
+    <select id="pago" required>
+      <option value="">Forma de pago</option>
+      <option value="Transferencia">Transferencia</option>
+      <option value="Efectivo">Efectivo</option>
+    </select>
+
+    <button type="submit">Confirmar pedido</button>
+  </form>
+
+  <script>
+    const rolls = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
+    const resumen = document.getElementById("resumen-rolls");
+
+    if (rolls.length === 0) {
+      resumen.innerHTML = "<p>No hay rolls cargados.</p>";
+    } else {
+      const total = rolls.reduce((sum, roll) => sum + roll.precio, 0);
+
+      resumen.innerHTML = `
+        <h3>Tu pedido:</h3>
+        ${rolls.map((roll, index) => `
+          <div class="roll">
+            <p><strong>Roll ${index + 1}</strong></p>
+            <p>Proteína: ${roll.proteina}</p>
+            <p>Vegetal: ${roll.vegetal}</p>
+            <p>Cobertura: ${roll.cobertura}</p>
+            <p>Precio: $${roll.precio}</p>
+            ${roll.imagen ? `<img src="${roll.imagen}" alt="Roll ${index + 1}" class="roll-img">` : ""}
+          </div>
+        `).join('')}
+        <div class="total">Total del pedido: $${total}</div>
+      `;
+    }
+
+    document.getElementById("formulario").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const nombre = document.getElementById("nombre").value.trim();
+      const apellido = document.getElementById("apellido").value.trim();
+      const celular = document.getElementById("celular").value.trim();
+      const pago = document.getElementById("pago").value;
+
+      if (!nombre || !apellido || !celular || !pago) {
+        alert("Por favor completá todos los campos.");
+        return;
+      }
+
+      for (const roll of rolls) {
+        const payload = {
+          nombre_cliente: nombre,
+          apellido_cliente: apellido,
+          celular_cliente: celular,
+          metodo_pago: pago,
+          proteina: roll.proteina,
+          cobertura: roll.cobertura,
+          vegetal: roll.vegetal,
+          precio: roll.precio
+        };
+
+        const res = await fetch('/guardar-pedido', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          console.error("Error al guardar:", data.error);
+          alert("Hubo un error al guardar el pedido.");
+          return;
+        }
+      }
+
+      alert("¡Pedido confirmado! 🎉");
+      localStorage.removeItem("todosLosRolls");
+      localStorage.removeItem("pedido");
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 100);
+    });
+  </script>
+
+</body>
+</html>

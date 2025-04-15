@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Administración de Pedidos</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #ff6f61;
+      font-family: sans-serif;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .top-bar button {
+      padding: 0.6rem 1.2rem;
+      background-color: transparent;
+      border: 2px dashed #ff6f61;
+      color: #ff6f61;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+
+    .switch-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .switch-label input[type="checkbox"] {
+      width: 40px;
+      height: 20px;
+      appearance: none;
+      background: #333;
+      border-radius: 20px;
+      position: relative;
+      outline: none;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .switch-label input[type="checkbox"]:checked {
+      background: #ff6f61;
+    }
+
+    .switch-label input[type="checkbox"]::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: #fff;
+      border-radius: 50%;
+      top: 1px;
+      left: 1px;
+      transition: 0.3s;
+    }
+
+    .switch-label input[type="checkbox"]:checked::before {
+      transform: translateX(20px);
+    }
+
+    input[type="date"] {
+      padding: 0.5rem;
+      background-color: transparent;
+      color: #ff6f61;
+      border: 2px solid #ff6f61;
+      border-radius: 6px;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      margin: 0.5rem 0.5rem;
+      border: 2px dashed #ff6f61;
+      background: transparent;
+      color: #ff6f61;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th, td {
+      border: 1px solid #ff6f61;
+      padding: 0.5rem;
+      text-align: center;
+    }
+
+    .btn-accion {
+      padding: 0.3rem 0.6rem;
+      margin: 2px;
+    }
+
+    .vacio {
+      text-align: center;
+      color: #ccc;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Administración de Pedidos</h1>
+
+  <div class="top-bar">
+    <button onclick="window.location.href='index.html'">🔙 Volver</button>
+    <label class="switch-label">
+      <span>Pedidos habilitados</span>
+      <input type="checkbox" id="switchPedidos">
+    </label>
+  </div>
+
+  <input type="date" id="fechaFiltro">
+  <button onclick="filtrarPorFecha()">Buscar</button>
+  <button onclick="cargarPedidos()">Ver todos</button>
+
+  <div id="sinPedidos" class="vacio" style="display: none;">No hay pedidos cargados.</div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Cliente</th>
+        <th>Teléfono</th>
+        <th>Pago</th>
+        <th>Proteína</th>
+        <th>Vegetal</th>
+        <th>Cobertura</th>
+        <th>Precio</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="tablaPedidos"></tbody>
+  </table>
+
+  <script>
+    const switchPedidos = document.getElementById("switchPedidos");
+
+    async function cargarEstado() {
+      try {
+        const res = await fetch('/estado-pedidos');
+        const data = await res.json();
+        switchPedidos.checked = data.activo;
+      } catch (err) {
+        console.error("❌ Error al consultar estado de pedidos");
+      }
+    }
+
+    async function actualizarEstado() {
+      const activo = switchPedidos.checked;
+      try {
+        const res = await fetch('/estado-pedidos', {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ activo })
+        });
+        const data = await res.json();
+        console.log("🔁 Estado actualizado:", data);
+      } catch (err) {
+        console.error("❌ Error actualizando estado:", err);
+      }
+    }
+
+    switchPedidos.addEventListener("change", actualizarEstado);
+
+    async function cargarPedidos(fecha = "") {
+      try {
+        const res = await fetch('/pedidos');
+        const data = await res.json();
+        let pedidos = Array.isArray(data) ? data : [];
+
+        if (fecha) {
+          pedidos = pedidos.filter(p => p.fecha?.startsWith(fecha));
+        }
+
+        pedidos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+        const tabla = document.getElementById("tablaPedidos");
+        const vacio = document.getElementById("sinPedidos");
+        tabla.innerHTML = "";
+
+        if (pedidos.length === 0) {
+          vacio.style.display = "block";
+          return;
+        }
+
+        vacio.style.display = "none";
+
+        pedidos.forEach(p => {
+          const fila = document.createElement("tr");
+          fila.innerHTML = `
+            <td>${p.fecha?.split("T")[0]}</td>
+            <td>${p.nombre_cliente} ${p.apellido_cliente}</td>
+            <td>${p.celular_cliente}</td>
+            <td>${p.metodo_pago}</td>
+            <td>${p.proteina}</td>
+            <td>${p.vegetal}</td>
+            <td>${p.cobertura}</td>
+            <td>$${p.precio}</td>
+            <td>
+              <button class="btn-accion" onclick="editarPedido('${p.id}')">Editar</button>
+              <button class="btn-accion" onclick="eliminarPedido('${p.id}')">Eliminar</button>
+            </td>
+          `;
+          tabla.appendChild(fila);
+        });
+      } catch (err) {
+        console.error("❌ Error cargando pedidos:", err);
+      }
+    }
+
+    function filtrarPorFecha() {
+      const fecha = document.getElementById("fechaFiltro").value;
+      cargarPedidos(fecha);
+    }
+
+    async function eliminarPedido(id) {
+      if (!confirm("¿Seguro que querés eliminar este pedido?")) return;
+      await fetch(`/eliminar-pedido/${id}`, { method: "DELETE" });
+      cargarPedidos();
+    }
+
+    function editarPedido(id) {
+      alert("Función de edición aún no implementada para el pedido: " + id);
+    }
+
+    // 🟢 Inicializa
+    cargarEstado();
+    cargarPedidos();
+  </script>
+
+</body>
+</html>

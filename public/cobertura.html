@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Elegí tu cobertura</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #ff6f61;
+      font-family: sans-serif;
+      padding: 2rem;
+      margin: 0;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 4rem;
+    }
+
+    .coberturas {
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      width: 35%;
+      margin-left: 5%;
+    }
+
+    .opcion {
+      border: 2px solid #ff6f61;
+      padding: 0.6rem 1rem;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.3s;
+      font-size: 0.95rem;
+    }
+
+    .opcion:hover {
+      background-color: #ff6f61;
+      color: #000;
+    }
+
+    .opcion.seleccionada {
+      background-color: #ff6f61;
+      color: #000;
+    }
+
+    .maqueta-roll {
+      position: relative;
+      width: 260px;
+      height: auto;
+      margin-left: 15%;
+    }
+
+    .maqueta-roll img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+    }
+
+    .btn-siguiente {
+      margin-top: 2rem;
+      padding: 1rem 2rem;
+      background-color: transparent;
+      border: 2px dashed #ff6f61;
+      color: #ff6f61;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .btn-siguiente:hover {
+      background-color: #ff6f61;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Paso 3: Elegí tu cobertura</h1>
+
+  <div class="container">
+    <div id="contenedor" class="coberturas"></div>
+
+    <div class="maqueta-roll">
+      <img src="maqueta.png">
+      <img id="imgProteina" src="">
+      <img id="imgVegetal" src="">
+      <img id="imgCobertura" src="">
+    </div>
+  </div>
+
+  <button class="btn-siguiente" onclick="siguiente()">Siguiente</button>
+
+  <script>
+    const listaCoberturas = ["Sésamo", "Ciboulette", "Nori", "Panko", "Palta", "Salmón"];
+    let seleccion = JSON.parse(localStorage.getItem("pedido")) || {};
+
+    function formatear(nombre) {
+      return nombre.toLowerCase()
+                   .replace(/mix de morr[oó]n/g, 'morron') // 🔧 clave para arreglar esto
+                   .normalize("NFD")
+                   .replace(/\p{Diacritic}/gu, "")
+                   .replace(/ /g, "");
+    }
+
+    function cargarRollPreview() {
+      const imgProteina = document.getElementById("imgProteina");
+      const imgVegetal = document.getElementById("imgVegetal");
+
+      if (seleccion.proteina === "Vegetariano") {
+        const vegetales = seleccion.vegetal?.split(", ");
+        if (vegetales && vegetales.length === 2) {
+          const vegetal1 = formatear(vegetales[0]);
+          const vegetal2 = formatear(vegetales[1]);
+
+          imgProteina.src = `proteinas/${vegetal1}proteina.png`;
+          imgVegetal.src = `vegetales/${vegetal2}vegetal.png`;
+        } else {
+          imgProteina.src = "";
+          imgVegetal.src = "";
+        }
+      } else {
+        const proteina = formatear(seleccion.proteina);
+        const vegetal = formatear(seleccion.vegetal);
+
+        imgProteina.src = `proteinas/${proteina}proteina.png`;
+        imgVegetal.src = `vegetales/${vegetal}vegetal.png`;
+      }
+    }
+
+    function cargarCoberturas() {
+      const contenedor = document.getElementById("contenedor");
+
+      listaCoberturas.forEach(c => {
+        const div = document.createElement("div");
+        div.className = "opcion";
+        div.textContent = c;
+
+        div.onclick = () => {
+          document.querySelectorAll(".opcion").forEach(el => el.classList.remove("seleccionada"));
+          div.classList.add("seleccionada");
+          seleccion.cobertura = c;
+          const cobertura = formatear(c);
+          document.getElementById("imgCobertura").src = `coberturas/${cobertura}cobertura.png`;
+        };
+
+        contenedor.appendChild(div);
+      });
+    }
+
+    async function siguiente() {
+      if (!seleccion.cobertura) {
+        alert("Elegí una cobertura.");
+        return;
+      }
+
+      try {
+        const res = await fetch('/combinaciones');
+        const combinaciones = await res.json();
+
+        if (!res.ok || !Array.isArray(combinaciones)) {
+          throw new Error("Error al obtener combinaciones del servidor.");
+        }
+
+        const match = combinaciones.find(item =>
+          item.proteina.toLowerCase().trim() === seleccion.proteina.toLowerCase().trim() &&
+          item.cobertura.toLowerCase().trim() === seleccion.cobertura.toLowerCase().trim()
+        );
+
+        if (!match) {
+          alert("No se encontró la combinación en la base de datos.");
+          return;
+        }
+
+        seleccion.precio = match.precio;
+
+        let lista = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
+        const imagenNombre = `roll_${lista.length}.png`;
+        seleccion.imagen = `rolls/${imagenNombre}`;
+
+        await fetch('/generar-imagen', {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            proteina: seleccion.proteina,
+            vegetal: seleccion.vegetal,
+            cobertura: seleccion.cobertura,
+            imagen: imagenNombre
+          })
+        });
+
+        localStorage.setItem("pedido", JSON.stringify(seleccion));
+        lista.push(seleccion);
+        localStorage.setItem("todosLosRolls", JSON.stringify(lista));
+
+        window.location.href = "confirmacion.html";
+      } catch (error) {
+        console.error("❌ ERROR:", error);
+        alert("Hubo un error al procesar tu selección.");
+      }
+    }
+
+    cargarCoberturas();
+    cargarRollPreview();
+  </script>
+</body>
+</html>
