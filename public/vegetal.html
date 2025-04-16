@@ -16,24 +16,21 @@
     h1 {
       text-align: center;
       margin-bottom: 2rem;
-      font-size: 2rem;
     }
 
     .container {
       display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 4rem;
-      flex-wrap: wrap;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
     }
 
     .vegetales {
       display: flex;
       flex-direction: column;
       gap: 0.8rem;
-      width: 100%;
+      width: 90%;
       max-width: 300px;
-      margin: 0 auto;
     }
 
     .opcion {
@@ -59,7 +56,8 @@
     .maqueta-roll {
       position: relative;
       width: 260px;
-      margin: 2rem auto 0 auto;
+      margin-top: 1rem;
+      margin-bottom: 2rem;
     }
 
     .maqueta-roll img {
@@ -70,7 +68,6 @@
     }
 
     .btn-siguiente {
-      margin-top: 2rem;
       padding: 1rem 2rem;
       background-color: transparent;
       border: 2px dashed #ff6f61;
@@ -78,29 +75,11 @@
       font-size: 1rem;
       cursor: pointer;
       transition: all 0.3s ease;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
     }
 
     .btn-siguiente:hover {
       background-color: #ff6f61;
       color: #000;
-    }
-
-    @media (max-width: 600px) {
-      body {
-        padding: 1rem;
-      }
-
-      h1 {
-        font-size: 1.5rem;
-      }
-
-      .btn-siguiente {
-        font-size: 0.95rem;
-        padding: 0.8rem 1.2rem;
-      }
     }
   </style>
 </head>
@@ -116,9 +95,9 @@
       <img id="img-vegetal1" src="">
       <img id="img-vegetal2" src="">
     </div>
-  </div>
 
-  <button class="btn-siguiente" onclick="siguiente()">Siguiente</button>
+    <button class="btn-siguiente" onclick="siguiente()">Siguiente</button>
+  </div>
 
   <script>
     const vegetalesDisponibles = [

@@ -20,18 +20,17 @@
 
     .container {
       display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 4rem;
-      flex-wrap: wrap;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
     }
 
     .coberturas {
       display: flex;
       flex-direction: column;
       gap: 0.8rem;
-      width: 35%;
-      margin-left: 5%;
+      width: 90%;
+      max-width: 300px;
     }
 
     .opcion {
@@ -41,7 +40,7 @@
       text-align: center;
       cursor: pointer;
       transition: 0.3s;
-      font-size: 0.95rem;
+      font-size: 1rem;
     }
 
     .opcion:hover {
@@ -57,8 +56,8 @@
     .maqueta-roll {
       position: relative;
       width: 260px;
-      height: auto;
-      margin-left: 15%;
+      margin-top: 1rem;
+      margin-bottom: 2rem;
     }
 
     .maqueta-roll img {
@@ -69,7 +68,6 @@
     }
 
     .btn-siguiente {
-      margin-top: 2rem;
       padding: 1rem 2rem;
       background-color: transparent;
       border: 2px dashed #ff6f61;
@@ -77,42 +75,11 @@
       font-size: 1rem;
       cursor: pointer;
       transition: all 0.3s ease;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
     }
 
     .btn-siguiente:hover {
       background-color: #ff6f61;
       color: #000;
-    }
-
-    /* ✅ Estilo responsive */
-    @media (max-width: 768px) {
-      .container {
-        flex-direction: column;
-        align-items: center;
-        gap: 2rem;
-      }
-
-      .coberturas {
-        width: 90%;
-        margin-left: 0;
-      }
-
-      .maqueta-roll {
-        width: 220px;
-        margin-left: 0;
-      }
-
-      .opcion {
-        font-size: 1.1rem;
-        padding: 0.8rem 1rem;
-      }
-
-      .btn-siguiente {
-        width: 80%;
-      }
     }
   </style>
 </head>
@@ -129,9 +96,9 @@
       <img id="imgVegetal" src="">
       <img id="imgCobertura" src="">
     </div>
-  </div>
 
-  <button class="btn-siguiente" onclick="siguiente()">Siguiente</button>
+    <button class="btn-siguiente" onclick="siguiente()">Siguiente</button>
+  </div>
 
   <script>
     const listaCoberturas = ["Sésamo", "Ciboulette", "Nori", "Panko", "Palta", "Salmón"];
@@ -152,21 +119,15 @@
       if (seleccion.proteina === "Vegetariano") {
         const vegetales = seleccion.vegetal?.split(", ");
         if (vegetales && vegetales.length === 2) {
-          const vegetal1 = formatear(vegetales[0]);
-          const vegetal2 = formatear(vegetales[1]);
-
-          imgProteina.src = `proteinas/${vegetal1}proteina.png`;
-          imgVegetal.src = `vegetales/${vegetal2}vegetal.png`;
+          imgProteina.src = `proteinas/${formatear(vegetales[0])}proteina.png`;
+          imgVegetal.src = `vegetales/${formatear(vegetales[1])}vegetal.png`;
         } else {
           imgProteina.src = "";
           imgVegetal.src = "";
         }
       } else {
-        const proteina = formatear(seleccion.proteina);
-        const vegetal = formatear(seleccion.vegetal);
-
-        imgProteina.src = `proteinas/${proteina}proteina.png`;
-        imgVegetal.src = `vegetales/${vegetal}vegetal.png`;
+        imgProteina.src = `proteinas/${formatear(seleccion.proteina)}proteina.png`;
+        imgVegetal.src = `vegetales/${formatear(seleccion.vegetal)}vegetal.png`;
       }
     }
 
@@ -182,8 +143,7 @@
           document.querySelectorAll(".opcion").forEach(el => el.classList.remove("seleccionada"));
           div.classList.add("seleccionada");
           seleccion.cobertura = c;
-          const cobertura = formatear(c);
-          document.getElementById("imgCobertura").src = `coberturas/${cobertura}cobertura.png`;
+          document.getElementById("imgCobertura").src = `coberturas/${formatear(c)}cobertura.png`;
         };
 
         contenedor.appendChild(div);
@@ -247,3 +207,4 @@
   </script>
 </body>
 </html>
+
