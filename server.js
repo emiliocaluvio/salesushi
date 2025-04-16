@@ -132,6 +132,7 @@ app.post('/generar-imagen', async (req, res) => {
     const capaVegetal = path.join(basePath, 'vegetales', `${normalizar(veg)}vegetal.png`);
     const capaCobertura = path.join(basePath, 'coberturas', `${normalizar(cobertura)}cobertura.png`);
     const maqueta = path.join(basePath, 'maqueta.png');
+    
 
     const composiciones = [];
 
