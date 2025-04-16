@@ -92,7 +92,7 @@ app.post('/guardar-pedido', async (req, res) => {
   res.status(200).json({ message: 'Pedido guardado correctamente' });
 });
 
-// 🔹 Obtener pedidos
+// 🔹 Obtener pedidos te quiero
 app.get('/pedidos', async (req, res) => {
   const { data, error } = await supabase.from('pedidos').select('*');
   if (error) return res.status(500).json({ error: error.message });
