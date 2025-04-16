@@ -62,7 +62,8 @@
       top: 0;
       left: 0;
       width: 100%;
-      display: none;
+      height: auto;
+      display: block;
     }
 
     .btn-siguiente {
@@ -90,10 +91,10 @@
   <div id="contenedor" class="coberturas"></div>
 
   <div class="contenedor-roll">
-    <img src="maqueta.png" alt="maqueta">
-    <img id="imgProteina" src="" alt="proteina">
-    <img id="imgVegetal" src="" alt="vegetal">
-    <img id="imgCobertura" src="" alt="cobertura">
+    <img src="maqueta.png" alt="">
+    <img id="imgProteina" src="" alt="" style="display: none;">
+    <img id="imgVegetal" src="" alt="" style="display: none;">
+    <img id="imgCobertura" src="" alt="" style="display: none;">
   </div>
 
   <button class="btn-siguiente" onclick="siguiente()">Siguiente</button>
@@ -133,6 +134,10 @@
         imgProteina.src = `proteinas/${proteina}proteina.png`;
         imgVegetal.src = `vegetales/${vegetal}vegetal.png`;
       }
+
+      // Mostrar imágenes si existen
+      imgProteina.style.display = imgProteina.src ? "block" : "none";
+      imgVegetal.style.display = imgVegetal.src ? "block" : "none";
     }
 
     function cargarCoberturas() {
@@ -148,7 +153,9 @@
           div.classList.add("seleccionada");
           seleccion.cobertura = c;
           const cobertura = formatear(c);
-          document.getElementById("imgCobertura").src = `coberturas/${cobertura}cobertura.png`;
+          const imgCob = document.getElementById("imgCobertura");
+          imgCob.src = `coberturas/${cobertura}cobertura.png`;
+          imgCob.style.display = "block";
         };
 
         contenedor.appendChild(div);

@@ -55,7 +55,6 @@
       width: 260px;
       height: auto;
       margin-bottom: 2rem;
-      display: none;
     }
 
     .maqueta-roll img {
@@ -95,8 +94,8 @@
   <div id="contenedor" class="proteinas"></div>
 
   <div class="maqueta-roll contenedor-roll">
-    <img src="maqueta.png" alt="base roll">
-    <img id="img-proteina" src="" alt="proteína seleccionada">
+    <img src="maqueta.png" alt="">
+    <img id="img-proteina" src="" alt="" style="display: none;">
   </div>
 
   <button class="btn-siguiente" onclick="siguiente()">Siguiente</button>
@@ -136,7 +135,13 @@
           seleccion.proteina = p;
 
           const imgProteina = document.getElementById("img-proteina");
-          imgProteina.src = (p === "Vegetariano") ? "" : `proteinas/${normalizarNombre(p)}proteina.png`;
+          if (p === "Vegetariano") {
+            imgProteina.src = "";
+            imgProteina.style.display = "none";
+          } else {
+            imgProteina.src = `proteinas/${normalizarNombre(p)}proteina.png`;
+            imgProteina.style.display = "block";
+          }
         };
 
         contenedor.appendChild(div);

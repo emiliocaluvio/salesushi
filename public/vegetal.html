@@ -62,7 +62,6 @@
       top: 0;
       left: 0;
       width: 100%;
-      display: none;
     }
 
     .btn-siguiente {
@@ -90,10 +89,10 @@
   <div id="contenedor" class="vegetales"></div>
 
   <div class="contenedor-roll">
-    <img src="maqueta.png" alt="maqueta">
-    <img id="img-proteina" src="" alt="proteina">
-    <img id="img-vegetal1" src="" alt="vegetal1">
-    <img id="img-vegetal2" src="" alt="vegetal2">
+    <img src="maqueta.png" alt="">
+    <img id="img-proteina" src="" alt="" style="display:none;">
+    <img id="img-vegetal1" src="" alt="" style="display:none;">
+    <img id="img-vegetal2" src="" alt="" style="display:none;">
   </div>
 
   <button class="btn-siguiente" onclick="siguiente()">Siguiente</button>
@@ -119,11 +118,14 @@
     function cargarVegetales() {
       const contenedor = document.getElementById("contenedor");
 
+      const imgProteina = document.getElementById("img-proteina");
       if (seleccion.proteina && seleccion.proteina !== "Vegetariano") {
         const nombreProteina = normalizarNombre(seleccion.proteina);
-        document.getElementById("img-proteina").src = `proteinas/${nombreProteina}proteina.png`;
+        imgProteina.src = `proteinas/${nombreProteina}proteina.png`;
+        imgProteina.style.display = "block";
       } else {
-        document.getElementById("img-proteina").src = "";
+        imgProteina.src = "";
+        imgProteina.style.display = "none";
       }
 
       vegetalesDisponibles.forEach(v => {
@@ -164,18 +166,26 @@
       if (seleccion.proteina === "Vegetariano") {
         if (seleccionados.length === 2) {
           img1.src = "proteinas/" + normalizarNombre(seleccionados[0]) + "proteina.png";
+          img1.style.display = "block";
           img2.src = "vegetales/" + normalizarNombre(seleccionados[1]) + "vegetal.png";
+          img2.style.display = "block";
         } else {
           img1.src = "";
           img2.src = "";
+          img1.style.display = "none";
+          img2.style.display = "none";
         }
       } else {
         if (seleccionados.length === 1) {
           img1.src = "vegetales/" + normalizarNombre(seleccionados[0]) + "vegetal.png";
+          img1.style.display = "block";
           img2.src = "";
+          img2.style.display = "none";
         } else {
           img1.src = "";
           img2.src = "";
+          img1.style.display = "none";
+          img2.style.display = "none";
         }
       }
     }
