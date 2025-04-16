@@ -189,10 +189,8 @@
         seleccion.precio = match.precio;
 
         let lista = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
-        const timestamp = Date.now();
-const imagenNombre = `roll_${timestamp}.png`;
-seleccion.imagen = `rolls/${imagenNombre}`;
-
+        const imagenNombre = `roll_${lista.length}.png`;
+        seleccion.imagen = `rolls/${imagenNombre}`;
 
         await fetch('/generar-imagen', {
           method: "POST",
