@@ -1,3 +1,4 @@
+<!-- Reemplazá tu archivo con este completo -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -78,7 +79,7 @@
       font-weight: bold;
     }
 
-    button {
+    button, .btn-volver {
       padding: 1rem;
       font-size: 1rem;
       border: 2px dashed #ff6f61;
@@ -86,11 +87,19 @@
       color: #ff6f61;
       cursor: pointer;
       transition: 0.3s;
+      margin-top: 1rem;
     }
 
-    button:hover {
+    button:hover, .btn-volver:hover {
       background-color: #ff6f61;
       color: #000;
+    }
+
+    .btn-volver {
+      display: block;
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     @media (max-width: 600px) {
@@ -133,17 +142,22 @@
     <button type="submit">Confirmar pedido</button>
   </form>
 
+  <button class="btn-volver" onclick="cancelarPedido()">Cancelar pedido</button>
+
   <script>
     let rolls = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
     const resumen = document.getElementById("resumen-rolls");
+    const formulario = document.getElementById("formulario");
     const pagoSelect = document.getElementById("pago");
 
     function renderRolls() {
       if (rolls.length === 0) {
         resumen.innerHTML = "<p>No hay rolls cargados.</p>";
+        formulario.style.display = "none";
         return;
       }
 
+      formulario.style.display = "flex"; // por si se habían borrado todos y vuelven a agregar
       const total = rolls.reduce((sum, roll) => sum + roll.precio, 0);
 
       resumen.innerHTML = `
@@ -169,9 +183,15 @@
       renderRolls();
     }
 
+    function cancelarPedido() {
+      localStorage.removeItem("todosLosRolls");
+      localStorage.removeItem("pedido");
+      window.location.href = "index.html";
+    }
+
     renderRolls();
 
-    document.getElementById("formulario").addEventListener("submit", async function (e) {
+    formulario.addEventListener("submit", async function (e) {
       e.preventDefault();
 
       const nombre = document.getElementById("nombre").value.trim();
@@ -215,7 +235,6 @@
       localStorage.setItem("totalPedido", rolls.reduce((sum, roll) => sum + roll.precio, 0));
       localStorage.removeItem("pedido");
 
-      // Redirección
       window.location.href = "gracias.html";
     });
   </script>
