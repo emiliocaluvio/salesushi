@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <meta charset="UTF-8">
   <title>Menú - Sale Sushi</title>
   <style>
@@ -13,6 +12,11 @@
       margin: 0;
       padding: 2rem;
       text-align: center;
+    }
+
+    .fade-out {
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
 
     h1 {
@@ -71,7 +75,7 @@
   <img src="menu.png" alt="Menú" class="menu-img">
 
   <div>
-    <button class="btn" onclick="window.location.href='index.html'">
+    <button class="btn" onclick="irA('index.html')">
       Volver al inicio
     </button>
     <button class="btn" onclick="comenzarPedido()">
@@ -80,21 +84,28 @@
   </div>
 
   <script>
+    function irA(ruta) {
+      document.body.classList.add("fade-out");
+      setTimeout(() => {
+        window.location.href = ruta;
+      }, 300);
+    }
+
     async function comenzarPedido() {
       try {
         const res = await fetch('/estado-pedidos');
         const data = await res.json();
 
         if (data.activo) {
-          window.location.href = 'proteina.html';
+          irA('proteina.html');
         } else {
           alert("🚫 Los pedidos no están habilitados por el momento.");
-          window.location.href = 'index.html';
+          irA('index.html');
         }
       } catch (err) {
         console.error("Error consultando el estado:", err);
         alert("Error consultando el estado de los pedidos.");
-        window.location.href = 'index.html';
+        irA('index.html');
       }
     }
   </script>

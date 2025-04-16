@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
-<head> <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<head> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
-  <title>Resumen del Roll   </title>
+  <title>Resumen del Roll</title>
   <style>
     body {
       background-color: #fdf6ec;
@@ -12,10 +12,17 @@
       text-align: center;
       padding: 2rem;
     }
+
+    .fade-out {
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
     h1 {
       font-size: 2rem;
       margin-bottom: 1rem;
     }
+
     .resumen {
       background-color: #fdf6ec;
       border: 2px solid #ff6f61;
@@ -24,19 +31,23 @@
       max-width: 400px;
       margin: 0 auto 2rem auto;
     }
+
     .resumen p {
       margin: 0.5rem 0;
       font-size: 1.1rem;
     }
+
     .roll-img {
       width: 250px;
       margin-top: 1.5rem;
     }
+
     .botones {
       display: flex;
       justify-content: center;
       gap: 1rem;
     }
+
     .btn {
       padding: 1rem 2rem;
       border: 2px dashed #ff6f61;
@@ -46,6 +57,7 @@
       cursor: pointer;
       transition: all 0.3s ease;
     }
+
     .btn:hover {
       background-color: #ff6f61;
       color: #000;
@@ -78,13 +90,20 @@
       resumenDiv.innerHTML = "<p>No hay roll cargado.</p>";
     }
 
+    function irA(ruta) {
+      document.body.classList.add("fade-out");
+      setTimeout(() => {
+        window.location.href = ruta;
+      }, 300);
+    }
+
     function agregarOtro() {
       localStorage.removeItem("pedido");
-      window.location.href = "proteina.html";
+      irA("proteina.html");
     }
 
     function finalizar() {
-      window.location.href = "datos-cliente.html";
+      irA("datos-cliente.html");
     }
   </script>
 </body>

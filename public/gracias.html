@@ -6,12 +6,18 @@
   <title>¡Gracias por tu pedido!</title>
   <style>
     body {
-        background-color: #fdf6ec;
+      background-color: #fdf6ec;
       color: #ff6f61;
       font-family: sans-serif;
       text-align: center;
       padding: 2rem;
       margin: 0;
+      opacity: 1;
+      transition: opacity 0.4s ease;
+    }
+
+    body.fade-out {
+      opacity: 0;
     }
 
     img.logo {
@@ -59,6 +65,26 @@
       background-color: #ff6f61;
       color: #000;
     }
+
+    .whatsapp-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 55px;
+      height: 55px;
+      z-index: 1000;
+    }
+
+    .whatsapp-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: transform 0.2s ease;
+    }
+
+    .whatsapp-btn img:hover {
+      transform: scale(1.1);
+    }
   </style>
 </head>
 <body>
@@ -75,7 +101,12 @@
 
   <div class="total" id="total"></div>
 
-  <button class="btn-volver" onclick="window.location.href='index.html'">Volver al inicio</button>
+  <button class="btn-volver" onclick="volverInicio()">Volver al inicio</button>
+
+  <!-- Botón flotante de WhatsApp con ícono -->
+  <a id="whatsappBtn" target="_blank" class="whatsapp-btn" aria-label="Contactar por WhatsApp">
+    <img src="wpp.png" alt="WhatsApp">
+  </a>
 
   <script>
     const metodoPago = localStorage.getItem("metodoPago");
@@ -94,7 +125,19 @@
       `;
     }
 
-    // Limpiar datos de localStorage al salir
+    function volverInicio() {
+      document.body.classList.add("fade-out");
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 300);
+    }
+
+    const mensaje = `Hola, hice mi pedido en la web. El total fue de $${total}. ¡Muchas gracias! 🍣`;
+    const numero = "59891037582";
+    const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
+    document.getElementById("whatsappBtn").href = url;
+
+    // Limpieza de localStorage
     localStorage.removeItem("metodoPago");
     localStorage.removeItem("totalPedido");
   </script>

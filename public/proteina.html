@@ -16,6 +16,11 @@
       align-items: center;
     }
 
+    .fade-out {
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
     h1 {
       margin-bottom: 1.5rem;
       text-align: center;
@@ -148,6 +153,13 @@
       });
     }
 
+    function irA(ruta) {
+      document.body.classList.add("fade-out");
+      setTimeout(() => {
+        window.location.href = ruta;
+      }, 300);
+    }
+
     function siguiente() {
       if (!seleccion.proteina) {
         alert("Elegí una proteína antes de continuar.");
@@ -155,7 +167,7 @@
       }
 
       localStorage.setItem("pedido", JSON.stringify(seleccion));
-      window.location.href = "vegetal.html";
+      irA("vegetal.html");
     }
 
     cargarProteinas();

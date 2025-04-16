@@ -11,6 +11,11 @@
       font-family: sans-serif;
       padding: 2rem;
       margin: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .fade-out {
+      opacity: 0;
     }
 
     h1 {
@@ -130,7 +135,7 @@
   <form id="formulario">
     <input type="text" id="nombre" placeholder="Nombre" required>
     <input type="text" id="apellido" placeholder="Apellido" required>
-    <input type="text" id="celular" placeholder="Celular" required>
+    <input type="tel" id="celular" placeholder="Celular (09XXXXXXX)" pattern="09[0-9]{7}" maxlength="9" minlength="9" required>
 
     <select id="pago" required>
       <option value="">Forma de pago</option>
@@ -148,6 +153,10 @@
     const resumen = document.getElementById("resumen-rolls");
     const formulario = document.getElementById("formulario");
     const pagoSelect = document.getElementById("pago");
+
+    const celularInput = document.getElementById("celular");
+    const celularGuardado = localStorage.getItem("celular");
+    if (celularGuardado) celularInput.value = celularGuardado;
 
     function renderRolls() {
       if (rolls.length === 0) {
@@ -188,6 +197,13 @@
       window.location.href = "index.html";
     }
 
+    function irA(ruta) {
+      document.body.classList.add("fade-out");
+      setTimeout(() => {
+        window.location.href = ruta;
+      }, 300);
+    }
+
     renderRolls();
 
     formulario.addEventListener("submit", async function (e) {
@@ -195,13 +211,20 @@
 
       const nombre = document.getElementById("nombre").value.trim();
       const apellido = document.getElementById("apellido").value.trim();
-      const celular = document.getElementById("celular").value.trim();
+      const celular = celularInput.value.trim();
       const pago = pagoSelect.value;
 
       if (!nombre || !apellido || !celular || !pago) {
         alert("Por favor completá todos los campos.");
         return;
       }
+
+      if (!/^\d{9}$/.test(celular)) {
+        alert("El número de celular debe tener exactamente 9 dígitos.");
+        return;
+      }
+
+      localStorage.setItem("celular", celular);
 
       for (const roll of rolls) {
         const payload = {
@@ -234,7 +257,7 @@
       localStorage.setItem("totalPedido", rolls.reduce((sum, roll) => sum + roll.precio, 0));
       localStorage.removeItem("pedido");
 
-      window.location.href = "gracias.html";
+      irA("gracias.html");
     });
   </script>
 

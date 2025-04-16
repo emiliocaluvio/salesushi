@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <meta charset="UTF-8">
   <title>SALE SUSHI</title>
   <style>
@@ -14,6 +13,11 @@
       padding: 2rem;
       margin: 0;
       position: relative;
+    }
+
+    .fade-out {
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
 
     .logo {
@@ -47,10 +51,25 @@
       margin: 2rem auto;
     }
 
-    .admin-login {
+    .toggle-admin {
       position: absolute;
       top: 20px;
       right: 30px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #ff6f61;
+      background: none;
+      border: none;
+    }
+
+    .admin-login {
+      position: absolute;
+      top: 60px;
+      right: 30px;
+      display: none;
+      background-color: rgba(0, 0, 0, 0.1);
+      padding: 0.6rem;
+      border-radius: 8px;
     }
 
     .admin-login input {
@@ -80,8 +99,13 @@
         padding: 1rem;
       }
 
-      .admin-login {
+      .toggle-admin {
         top: 10px;
+        right: 10px;
+      }
+
+      .admin-login {
+        top: 50px;
         right: 10px;
       }
 
@@ -98,7 +122,12 @@
   </style>
 </head>
 <body>
-  <div class="admin-login">
+
+  <!-- Botón ícono para mostrar el login -->
+  <button class="toggle-admin" onclick="toggleAdmin()">🔒</button>
+
+  <!-- Formulario de login admin oculto -->
+  <div class="admin-login" id="adminLogin">
     <input type="text" id="usuario" placeholder="Usuario">
     <input type="password" id="clave" placeholder="Contraseña">
     <button onclick="accederAdmin()">Admin</button>
@@ -109,43 +138,60 @@
 
   <div class="linea"></div>
 
+  <!-- Mensaje de bienvenida -->
+  <p style="font-size: 1.1rem; margin-bottom: 1.5rem;">
+    ¡Bienvenido a <strong>Sale Sushi</strong> 🍣! Armá tu roll ideal en simples pasos.
+  </p>
+
   <button class="btn" onclick="verMenu()">Ver menú</button>
   <button class="btn" onclick="pedidoDirecto()">Hacer pedido</button>
 
   <script>
+    function toggleAdmin() {
+      const login = document.getElementById("adminLogin");
+      login.style.display = login.style.display === "none" || login.style.display === "" ? "block" : "none";
+    }
+
+    function irA(ruta) {
+      document.body.classList.add("fade-out");
+      setTimeout(() => {
+        window.location.href = ruta;
+      }, 300);
+    }
+
     function verMenu() {
       localStorage.removeItem("todosLosRolls");
       localStorage.removeItem("pedido");
-      window.location.href = "menu.html";
+      irA("menu.html");
     }
 
     async function pedidoDirecto() {
-    localStorage.removeItem("todosLosRolls");
-    localStorage.removeItem("pedido");
+      localStorage.removeItem("todosLosRolls");
+      localStorage.removeItem("pedido");
 
-    try {
-      const res = await fetch('/estado-pedidos');
-      const data = await res.json();
+      try {
+        const res = await fetch('/estado-pedidos');
+        const data = await res.json();
 
-      if (data.activo) {
-        window.location.href = 'proteina.html';
-      } else {
-        alert("🚫 Los pedidos no están habilitados por el momento.");
-        window.location.href = 'index.html';
+        if (data.activo) {
+          irA('proteina.html');
+        } else {
+          alert("🚫 Los pedidos no están habilitados por el momento.");
+          irA('index.html');
+        }
+      } catch (err) {
+        console.error("Error consultando el estado:", err);
+        alert("Error consultando el estado de los pedidos.");
+        irA('index.html');
       }
-    } catch (err) {
-      console.error("Error consultando el estado:", err);
-      alert("Error consultando el estado de los pedidos.");
-      window.location.href = 'index.html';
     }
-  }
 
     function accederAdmin() {
       const user = document.getElementById("usuario").value;
       const pass = document.getElementById("clave").value;
 
       if (user === "emi528" && pass === "47393929Emi") {
-        window.location.href = "admin.html";
+        irA("admin.html");
       } else {
         alert("Usuario o contraseña incorrectos.");
       }

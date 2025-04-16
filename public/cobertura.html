@@ -16,6 +16,11 @@
       align-items: center;
     }
 
+    .fade-out {
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
     h1 {
       margin-bottom: 1.5rem;
       text-align: center;
@@ -135,7 +140,6 @@
         imgVegetal.src = `vegetales/${vegetal}vegetal.png`;
       }
 
-      // Mostrar imágenes si existen
       imgProteina.style.display = imgProteina.src ? "block" : "none";
       imgVegetal.style.display = imgVegetal.src ? "block" : "none";
     }
@@ -160,6 +164,13 @@
 
         contenedor.appendChild(div);
       });
+    }
+
+    function irA(ruta) {
+      document.body.classList.add("fade-out");
+      setTimeout(() => {
+        window.location.href = ruta;
+      }, 300);
     }
 
     async function siguiente() {
@@ -190,9 +201,8 @@
 
         let lista = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
         const timestamp = Date.now();
-const imagenNombre = `roll_${timestamp}.png`;
-seleccion.imagen = `rolls/${imagenNombre}`;
-
+        const imagenNombre = `roll_${timestamp}.png`;
+        seleccion.imagen = `rolls/${imagenNombre}`;
 
         await fetch('/generar-imagen', {
           method: "POST",
@@ -209,7 +219,7 @@ seleccion.imagen = `rolls/${imagenNombre}`;
         lista.push(seleccion);
         localStorage.setItem("todosLosRolls", JSON.stringify(lista));
 
-        window.location.href = "confirmacion.html";
+        irA("confirmacion.html");
       } catch (error) {
         console.error("❌ ERROR:", error);
         alert("Hubo un error al procesar tu selección.");
