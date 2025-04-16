@@ -9,7 +9,8 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
+
 
 app.use(express.json());
 app.use(express.static('public'));
