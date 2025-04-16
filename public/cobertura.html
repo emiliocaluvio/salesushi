@@ -1,36 +1,29 @@
 <!DOCTYPE html>
 <html lang="es">
 <head> 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Elegí tu cobertura</title>
   <style>
     body {
       background-color: #000;
       color: #ff6f61;
       font-family: sans-serif;
-      padding: 2rem;
+      padding: 1.5rem;
       margin: 0;
     }
 
     h1 {
       text-align: center;
-      margin-bottom: 2rem;
-    }
-
-    .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2rem;
+      margin-bottom: 1rem;
     }
 
     .coberturas {
       display: flex;
       flex-direction: column;
+      align-items: center;
       gap: 0.8rem;
-      width: 90%;
-      max-width: 300px;
+      margin-bottom: 2rem;
     }
 
     .opcion {
@@ -41,6 +34,8 @@
       cursor: pointer;
       transition: 0.3s;
       font-size: 1rem;
+      width: 80%;
+      max-width: 300px;
     }
 
     .opcion:hover {
@@ -56,8 +51,8 @@
     .maqueta-roll {
       position: relative;
       width: 260px;
-      margin-top: 1rem;
-      margin-bottom: 2rem;
+      height: auto;
+      margin: 2rem auto;
     }
 
     .maqueta-roll img {
@@ -68,6 +63,7 @@
     }
 
     .btn-siguiente {
+      margin-top: 3rem;
       padding: 1rem 2rem;
       background-color: transparent;
       border: 2px dashed #ff6f61;
@@ -75,11 +71,30 @@
       font-size: 1rem;
       cursor: pointer;
       transition: all 0.3s ease;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .btn-siguiente:hover {
       background-color: #ff6f61;
       color: #000;
+    }
+
+    @media (max-width: 600px) {
+      .opcion {
+        font-size: 0.9rem;
+        width: 90%;
+      }
+
+      .maqueta-roll {
+        width: 220px;
+      }
+
+      .btn-siguiente {
+        font-size: 0.9rem;
+        padding: 0.8rem 1.5rem;
+      }
     }
   </style>
 </head>
@@ -87,18 +102,16 @@
 
   <h1>Paso 3: Elegí tu cobertura</h1>
 
-  <div class="container">
-    <div id="contenedor" class="coberturas"></div>
+  <div id="contenedor" class="coberturas"></div>
 
-    <div class="maqueta-roll">
-      <img src="maqueta.png">
-      <img id="imgProteina" src="">
-      <img id="imgVegetal" src="">
-      <img id="imgCobertura" src="">
-    </div>
-
-    <button class="btn-siguiente" onclick="siguiente()">Siguiente</button>
+  <div class="maqueta-roll">
+    <img src="maqueta.png">
+    <img id="imgProteina" src="">
+    <img id="imgVegetal" src="">
+    <img id="imgCobertura" src="">
   </div>
+
+  <button class="btn-siguiente" onclick="siguiente()">Siguiente</button>
 
   <script>
     const listaCoberturas = ["Sésamo", "Ciboulette", "Nori", "Panko", "Palta", "Salmón"];
@@ -119,15 +132,21 @@
       if (seleccion.proteina === "Vegetariano") {
         const vegetales = seleccion.vegetal?.split(", ");
         if (vegetales && vegetales.length === 2) {
-          imgProteina.src = `proteinas/${formatear(vegetales[0])}proteina.png`;
-          imgVegetal.src = `vegetales/${formatear(vegetales[1])}vegetal.png`;
+          const vegetal1 = formatear(vegetales[0]);
+          const vegetal2 = formatear(vegetales[1]);
+
+          imgProteina.src = `proteinas/${vegetal1}proteina.png`;
+          imgVegetal.src = `vegetales/${vegetal2}vegetal.png`;
         } else {
           imgProteina.src = "";
           imgVegetal.src = "";
         }
       } else {
-        imgProteina.src = `proteinas/${formatear(seleccion.proteina)}proteina.png`;
-        imgVegetal.src = `vegetales/${formatear(seleccion.vegetal)}vegetal.png`;
+        const proteina = formatear(seleccion.proteina);
+        const vegetal = formatear(seleccion.vegetal);
+
+        imgProteina.src = `proteinas/${proteina}proteina.png`;
+        imgVegetal.src = `vegetales/${vegetal}vegetal.png`;
       }
     }
 
@@ -143,7 +162,8 @@
           document.querySelectorAll(".opcion").forEach(el => el.classList.remove("seleccionada"));
           div.classList.add("seleccionada");
           seleccion.cobertura = c;
-          document.getElementById("imgCobertura").src = `coberturas/${formatear(c)}cobertura.png`;
+          const cobertura = formatear(c);
+          document.getElementById("imgCobertura").src = `coberturas/${cobertura}cobertura.png`;
         };
 
         contenedor.appendChild(div);
@@ -207,4 +227,3 @@
   </script>
 </body>
 </html>
-
