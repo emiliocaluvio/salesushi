@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <meta charset="UTF-8">
   <title>SALE SUSHI</title>
   <style>
@@ -10,11 +12,13 @@
       font-family: sans-serif;
       text-align: center;
       padding: 2rem;
+      margin: 0;
       position: relative;
     }
 
     .logo {
-      width: 500px;
+      width: 100%;
+      max-width: 300px;
       margin-bottom: 1rem;
     }
 
@@ -23,10 +27,12 @@
       border: 2px dashed #ff6f61;
       color: #ff6f61;
       padding: 1rem 2rem;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       cursor: pointer;
       transition: all 0.3s ease;
-      margin: 1rem;
+      margin: 0.8rem;
+      width: 90%;
+      max-width: 280px;
     }
 
     .btn:hover {
@@ -68,6 +74,27 @@
       background: #ff6f61;
       color: #000;
     }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 1rem;
+      }
+
+      .admin-login {
+        top: 10px;
+        right: 10px;
+      }
+
+      .admin-login input {
+        width: 80px;
+        font-size: 0.8rem;
+      }
+
+      .admin-login button {
+        padding: 0.3rem 0.8rem;
+        font-size: 0.8rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -83,12 +110,19 @@
   <div class="linea"></div>
 
   <button class="btn" onclick="verMenu()">Ver menú</button>
+  <button class="btn" onclick="pedidoDirecto()">Hacer pedido directo</button>
 
   <script>
     function verMenu() {
       localStorage.removeItem("todosLosRolls");
       localStorage.removeItem("pedido");
       window.location.href = "menu.html";
+    }
+
+    function pedidoDirecto() {
+      localStorage.removeItem("todosLosRolls");
+      localStorage.removeItem("pedido");
+      window.location.href = "proteina.html";
     }
 
     function accederAdmin() {

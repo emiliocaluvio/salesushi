@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <meta charset="UTF-8">
   <title>Menú - Sale Sushi</title>
   <style>
@@ -19,8 +21,8 @@
     }
 
     .menu-img {
-      width: 80%;
-      max-width: 600px;
+      width: 100%;
+      max-width: 500px;
       height: auto;
       border: 2px dashed #ff6f61;
       border-radius: 10px;
@@ -35,12 +37,31 @@
       color: #ff6f61;
       cursor: pointer;
       transition: all 0.3s ease;
-      margin-inline: 1rem;
+      margin-inline: 0.5rem;
+      width: 90%;
+      max-width: 250px;
     }
 
     .btn:hover {
       background-color: #ff6f61;
       color: #000;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 1rem;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .btn {
+        padding: 0.8rem 1rem;
+        font-size: 0.95rem;
+        margin-top: 1rem;
+      }
     }
   </style>
 </head>

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
   <title>Elegí tus vegetales</title>
   <style>
@@ -15,6 +16,7 @@
     h1 {
       text-align: center;
       margin-bottom: 2rem;
+      font-size: 2rem;
     }
 
     .container {
@@ -22,14 +24,16 @@
       justify-content: center;
       align-items: flex-start;
       gap: 4rem;
+      flex-wrap: wrap;
     }
 
     .vegetales {
       display: flex;
       flex-direction: column;
       gap: 0.8rem;
-      width: 35%;
-      margin-left: 5%;
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto;
     }
 
     .opcion {
@@ -39,7 +43,7 @@
       text-align: center;
       cursor: pointer;
       transition: 0.3s;
-      font-size: 0.95rem;
+      font-size: 1rem;
     }
 
     .opcion:hover {
@@ -55,8 +59,7 @@
     .maqueta-roll {
       position: relative;
       width: 260px;
-      height: auto;
-      margin-left: 15%;
+      margin: 2rem auto 0 auto;
     }
 
     .maqueta-roll img {
@@ -83,6 +86,21 @@
     .btn-siguiente:hover {
       background-color: #ff6f61;
       color: #000;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 1rem;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .btn-siguiente {
+        font-size: 0.95rem;
+        padding: 0.8rem 1.2rem;
+      }
     }
   </style>
 </head>
@@ -123,7 +141,6 @@
     function cargarVegetales() {
       const contenedor = document.getElementById("contenedor");
 
-      // Cargar imagen de proteína si no es vegetariano
       if (seleccion.proteina && seleccion.proteina !== "Vegetariano") {
         const nombreProteina = normalizarNombre(seleccion.proteina);
         document.getElementById("img-proteina").src = `proteinas/${nombreProteina}proteina.png`;
@@ -168,9 +185,7 @@
 
       if (seleccion.proteina === "Vegetariano") {
         if (seleccionados.length === 2) {
-          // Primera va desde "proteinas" con forma triangular
           img1.src = "proteinas/" + normalizarNombre(seleccionados[0]) + "proteina.png";
-          // Segunda desde carpeta vegetales
           img2.src = "vegetales/" + normalizarNombre(seleccionados[1]) + "vegetal.png";
         } else {
           img1.src = "";

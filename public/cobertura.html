@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
+<head> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
   <title>Elegí tu cobertura</title>
   <style>
@@ -22,6 +23,7 @@
       justify-content: center;
       align-items: flex-start;
       gap: 4rem;
+      flex-wrap: wrap;
     }
 
     .coberturas {
@@ -84,6 +86,34 @@
       background-color: #ff6f61;
       color: #000;
     }
+
+    /* ✅ Estilo responsive */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+      }
+
+      .coberturas {
+        width: 90%;
+        margin-left: 0;
+      }
+
+      .maqueta-roll {
+        width: 220px;
+        margin-left: 0;
+      }
+
+      .opcion {
+        font-size: 1.1rem;
+        padding: 0.8rem 1rem;
+      }
+
+      .btn-siguiente {
+        width: 80%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -109,7 +139,7 @@
 
     function formatear(nombre) {
       return nombre.toLowerCase()
-                   .replace(/mix de morr[oó]n/g, 'morron') // 🔧 clave para arreglar esto
+                   .replace(/mix de morr[oó]n/g, 'morron')
                    .normalize("NFD")
                    .replace(/\p{Diacritic}/gu, "")
                    .replace(/ /g, "");
