@@ -2,7 +2,6 @@
 <html lang="es">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <meta charset="UTF-8">
   <title>Finalizar Pedido</title>
   <style>
@@ -38,6 +37,8 @@
 
     .resumen {
       max-width: 600px;
+      width: 100%;
+      box-sizing: border-box;
       margin: 0 auto 2rem auto;
       border: 2px solid #ff6f61;
       border-radius: 10px;
@@ -47,6 +48,7 @@
     .roll {
       border-bottom: 1px dashed #ff6f61;
       padding: 0.5rem 0;
+      position: relative;
     }
 
     .roll-img {
@@ -55,6 +57,19 @@
       margin: 1rem auto;
       display: block;
       border-radius: 10px;
+    }
+
+    .eliminar-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background-color: #ff6f61;
+      border: none;
+      color: #000;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      cursor: pointer;
     }
 
     .total {
@@ -119,18 +134,23 @@
   </form>
 
   <script>
-    const rolls = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
+    let rolls = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
     const resumen = document.getElementById("resumen-rolls");
+    const pagoSelect = document.getElementById("pago");
 
-    if (rolls.length === 0) {
-      resumen.innerHTML = "<p>No hay rolls cargados.</p>";
-    } else {
+    function renderRolls() {
+      if (rolls.length === 0) {
+        resumen.innerHTML = "<p>No hay rolls cargados.</p>";
+        return;
+      }
+
       const total = rolls.reduce((sum, roll) => sum + roll.precio, 0);
 
       resumen.innerHTML = `
         <h3>Tu pedido:</h3>
         ${rolls.map((roll, index) => `
           <div class="roll">
+            <button class="eliminar-btn" onclick="eliminarRoll(${index})">Eliminar</button>
             <p><strong>Roll ${index + 1}</strong></p>
             <p>Proteína: ${roll.proteina}</p>
             <p>Vegetal: ${roll.vegetal}</p>
@@ -143,13 +163,21 @@
       `;
     }
 
+    function eliminarRoll(index) {
+      rolls.splice(index, 1);
+      localStorage.setItem("todosLosRolls", JSON.stringify(rolls));
+      renderRolls();
+    }
+
+    renderRolls();
+
     document.getElementById("formulario").addEventListener("submit", async function (e) {
       e.preventDefault();
 
       const nombre = document.getElementById("nombre").value.trim();
       const apellido = document.getElementById("apellido").value.trim();
       const celular = document.getElementById("celular").value.trim();
-      const pago = document.getElementById("pago").value;
+      const pago = pagoSelect.value;
 
       if (!nombre || !apellido || !celular || !pago) {
         alert("Por favor completá todos los campos.");
@@ -183,12 +211,12 @@
         }
       }
 
-      alert("¡Pedido confirmado! 🎉");
-      localStorage.removeItem("todosLosRolls");
+      localStorage.setItem("metodoPago", pago);
+      localStorage.setItem("totalPedido", rolls.reduce((sum, roll) => sum + roll.precio, 0));
       localStorage.removeItem("pedido");
-      setTimeout(() => {
-        window.location.href = "index.html";
-      }, 100);
+
+      // Redirección
+      window.location.href = "gracias.html";
     });
   </script>
 

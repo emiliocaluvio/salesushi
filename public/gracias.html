@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>¡Gracias por tu pedido!</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #ff6f61;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+      margin: 0;
+    }
+
+    img.logo {
+      max-width: 180px;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      margin-bottom: 1rem;
+    }
+
+    .mensaje {
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .info-transferencia {
+      background-color: #111;
+      padding: 1rem;
+      border: 2px dashed #ff6f61;
+      border-radius: 10px;
+      max-width: 400px;
+      margin: 1rem auto;
+    }
+
+    .total {
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin-top: 2rem;
+    }
+
+    .btn-volver {
+      margin-top: 2rem;
+      padding: 1rem 2rem;
+      border: 2px dashed #ff6f61;
+      background-color: transparent;
+      color: #ff6f61;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: 0.3s;
+    }
+
+    .btn-volver:hover {
+      background-color: #ff6f61;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+
+  <img src="logo.png" alt="Logo Sale Sushi" class="logo" />
+
+  <h1>¡Gracias por tu pedido!</h1>
+
+  <div class="mensaje">
+    Pronto estaremos en contacto para coordinar la entrega. ¡Esperamos que disfrutes tu sushi! 🍣
+  </div>
+
+  <div id="info"></div>
+
+  <div class="total" id="total"></div>
+
+  <button class="btn-volver" onclick="window.location.href='index.html'">Volver al inicio</button>
+
+  <script>
+    const metodoPago = localStorage.getItem("metodoPago");
+    const total = localStorage.getItem("totalPedido");
+
+    document.getElementById("total").textContent = `Total del pedido: $${total}`;
+
+    if (metodoPago === "Transferencia") {
+      document.getElementById("info").innerHTML = `
+        <div class="info-transferencia">
+          <h3>💳 Datos para transferencia:</h3>
+          <p><strong>Cuenta:</strong> 23768576</p>
+          <p><strong>Banco:</strong> BBVA</p>
+          <p><strong>Nombre:</strong> Emilio Castroman</p>
+        </div>
+      `;
+    }
+
+    // Limpiar datos de localStorage al salir
+    localStorage.removeItem("metodoPago");
+    localStorage.removeItem("totalPedido");
+  </script>
+</body>
+</html>
