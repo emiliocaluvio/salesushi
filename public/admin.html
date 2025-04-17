@@ -47,7 +47,7 @@
     const nombres = {
       'horario_19': 'Pedidos 19:00',
       'horario_20': 'Pedidos 20:00',
-      'horario_21': 'Pedidos 21:00',
+      'horario_21': 'Pedidos 21:00'
     };
 
     async function cargarTablasHorarias() {
@@ -116,7 +116,7 @@
 
     async function cargarHistorico() {
       const contenedor = document.getElementById("contenedor-tablas");
-      const res = await fetch(`/api/pedidos`);
+      const res = await fetch(`/pedidos`);
       const datos = await res.json();
       const subset = datos.slice(historicoOffset, historicoOffset + 20);
 
