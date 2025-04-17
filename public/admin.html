@@ -34,7 +34,7 @@
       background: transparent;
       color: #ff6f61;
       cursor: pointer;
-      margin-bottom: 1rem;
+      margin: 0.3rem;
     }
   </style>
 </head>
@@ -50,13 +50,22 @@
       'horario_21': 'Pedidos 21:00'
     };
 
+    async function fetchTabla(nombre) {
+      try {
+        const res = await fetch(`/api/tabla/${nombre}`);
+        return await res.json();
+      } catch (e) {
+        console.error(`Error cargando ${nombre}:`, e);
+        return [];
+      }
+    }
+
     async function cargarTablasHorarias() {
       const contenedor = document.getElementById("contenedor-tablas");
       contenedor.innerHTML = '';
 
       for (const tabla of horarios) {
-        const res = await fetch(`/api/tabla/${tabla}`);
-        const datos = await res.json();
+        const datos = await fetchTabla(tabla);
 
         const tablaHTML = document.createElement("div");
         const titulo = document.createElement("h2");
@@ -71,9 +80,6 @@
           alert(rta.message);
           cargarTablasHorarias();
         };
-
-        tablaHTML.appendChild(titulo);
-        tablaHTML.appendChild(boton);
 
         const table = document.createElement("table");
         table.innerHTML = `
@@ -105,25 +111,32 @@
           </tbody>
         `;
 
+        tablaHTML.appendChild(titulo);
+        tablaHTML.appendChild(boton);
         tablaHTML.appendChild(table);
         contenedor.appendChild(tablaHTML);
       }
 
-      cargarHistorico();
+      await cargarHistorico();
     }
 
     let historicoOffset = 0;
+    let historicoData = [];
+    let ordenActual = { campo: '', asc: true };
 
     async function cargarHistorico() {
       const contenedor = document.getElementById("contenedor-tablas");
-      const res = await fetch(`/pedidos`);
-      const datos = await res.json();
-      const subset = datos.slice(historicoOffset, historicoOffset + 20);
+
+      if (historicoData.length === 0) {
+        const res = await fetch(`/pedidos`);
+        historicoData = await res.json();
+      }
+
+      let datosAMostrar = historicoData.slice(historicoOffset, historicoOffset + 20);
 
       const tablaHTML = document.createElement("div");
       const titulo = document.createElement("h2");
-      titulo.textContent = `Histórico de Pedidos (${datos.length})`;
-
+      titulo.textContent = `Histórico de Pedidos (${historicoData.length})`;
       tablaHTML.appendChild(titulo);
 
       const table = document.createElement("table");
@@ -133,16 +146,16 @@
             <th>Cliente</th>
             <th>Teléfono</th>
             <th>Pago</th>
-            <th>Proteína</th>
+            <th onclick="ordenarHistorico('proteina')">Proteína 🔽</th>
             <th>Vegetal</th>
-            <th>Cobertura</th>
+            <th onclick="ordenarHistorico('cobertura')">Cobertura 🔽</th>
             <th>Precio</th>
             <th>Fecha</th>
             <th>Eliminar</th>
           </tr>
         </thead>
         <tbody>
-          ${subset.map(p => `
+          ${datosAMostrar.map(p => `
             <tr>
               <td>${p.nombre_cliente} ${p.apellido_cliente}</td>
               <td>${p.celular_cliente}</td>
@@ -160,7 +173,7 @@
 
       tablaHTML.appendChild(table);
 
-      if (datos.length > historicoOffset + 20) {
+      if (historicoOffset + 20 < historicoData.length) {
         const btn = document.createElement("button");
         btn.textContent = "⬇ Ver más";
         btn.onclick = () => {
@@ -173,9 +186,22 @@
       contenedor.appendChild(tablaHTML);
     }
 
+    function ordenarHistorico(campo) {
+      ordenActual.asc = ordenActual.campo === campo ? !ordenActual.asc : true;
+      ordenActual.campo = campo;
+      historicoData.sort((a, b) => {
+        if (a[campo] < b[campo]) return ordenActual.asc ? -1 : 1;
+        if (a[campo] > b[campo]) return ordenActual.asc ? 1 : -1;
+        return 0;
+      });
+      historicoOffset = 0;
+      cargarTablasHorarias();
+    }
+
     async function eliminarPedido(id) {
       if (!confirm("¿Eliminar este pedido?")) return;
       await fetch(`/eliminar-pedido/${id}`, { method: 'DELETE' });
+      historicoData = [];
       cargarTablasHorarias();
     }
 
