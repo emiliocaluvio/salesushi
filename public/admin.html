@@ -12,6 +12,51 @@
       padding: 2rem;
     }
 
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .switch-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .switch-label input[type="checkbox"] {
+      width: 40px;
+      height: 20px;
+      appearance: none;
+      background: #333;
+      border-radius: 20px;
+      position: relative;
+      outline: none;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .switch-label input[type="checkbox"]:checked {
+      background: #ff6f61;
+    }
+
+    .switch-label input[type="checkbox"]::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: #fff;
+      border-radius: 50%;
+      top: 1px;
+      left: 1px;
+      transition: 0.3s;
+    }
+
+    .switch-label input[type="checkbox"]:checked::before {
+      transform: translateX(20px);
+    }
+
     h2 {
       margin-top: 2rem;
     }
@@ -40,6 +85,15 @@
 </head>
 <body>
   <h1>Panel de Administración</h1>
+
+  <div class="top-bar">
+    <div></div>
+    <label class="switch-label">
+      <span>Pedidos habilitados</span>
+      <input type="checkbox" id="switchPedidos">
+    </label>
+  </div>
+
   <div id="contenedor-tablas"></div>
 
   <script>
@@ -57,6 +111,39 @@
       } catch (e) {
         console.error(`Error cargando ${nombre}:`, e);
         return [];
+      }
+    }
+
+    async function cargarEstadoSwitch() {
+      try {
+        const res = await fetch('/estado-pedidos');
+        const data = await res.json();
+        document.getElementById("switchPedidos").checked = data.activo;
+      } catch (e) {
+        console.error("Error al consultar estado del switch:", e);
+      }
+    }
+
+    document.getElementById("switchPedidos").addEventListener("change", async () => {
+      const activo = document.getElementById("switchPedidos").checked;
+      await fetch('/estado-pedidos', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ activo })
+      });
+    });
+
+    async function verificarYDesactivarSwitch() {
+      const res = await fetch('/api/disponibilidad');
+      const data = await res.json();
+      const todasLlenas = data.every(h => h.disponibles <= 0);
+      if (todasLlenas) {
+        document.getElementById("switchPedidos").checked = false;
+        await fetch('/estado-pedidos', {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ activo: false })
+        });
       }
     }
 
@@ -118,6 +205,7 @@
       }
 
       await cargarHistorico();
+      await verificarYDesactivarSwitch();
     }
 
     let historicoOffset = 0;
@@ -205,6 +293,7 @@
       cargarTablasHorarias();
     }
 
+    cargarEstadoSwitch();
     cargarTablasHorarias();
   </script>
 </body>
