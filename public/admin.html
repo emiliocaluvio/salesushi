@@ -73,13 +73,15 @@
       text-align: center;
     }
 
-    button {
+    button, a {
       padding: 0.4rem 1rem;
       border: 1px dashed #ff6f61;
       background: transparent;
       color: #ff6f61;
       cursor: pointer;
       margin: 0.3rem;
+      text-decoration: none;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -87,7 +89,7 @@
   <h1>Panel de Administración</h1>
 
   <div class="top-bar">
-    <div></div>
+    <a href="index.html">🏠 Volver al inicio</a>
     <label class="switch-label">
       <span>Pedidos habilitados</span>
       <input type="checkbox" id="switchPedidos">
