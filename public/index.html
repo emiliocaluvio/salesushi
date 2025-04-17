@@ -209,7 +209,7 @@
         cont.innerHTML = '<strong>🌟 Cupos disponibles hoy:</strong><br>';
         data.forEach(h => {
           const emoji = h.disponibles === 0 ? '❌' : '🟢';
-          cont.innerHTML += `🕒 ${h.hora} — ${h.disponibles} lugares ${emoji}<br>`;
+          cont.innerHTML += `🕒 ${h.hora} — ${h.disponibles} lugar${h.disponibles !== 1 ? 'es' : ''} ${emoji}<br>`;
         });
       })
       .catch(err => {

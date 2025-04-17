@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Finalizar Pedido</title>
   <style>
     body {
@@ -213,47 +213,41 @@
       rolls.splice(index, 1);
       localStorage.setItem("todosLosRolls", JSON.stringify(rolls));
       renderRolls();
-      cargarHorarios(); // actualiza la disponibilidad
+      cargarHorarios();
     }
 
     function cancelarPedido() {
-      localStorage.removeItem("todosLosRolls");
-      localStorage.removeItem("pedido");
+      localStorage.clear();
       window.location.href = "index.html";
     }
 
     function seleccionarHorario(hora) {
       horarioSeleccionado = hora;
-      document.querySelectorAll('.horario-box').forEach(el => {
-        el.classList.remove('selected');
-      });
+      document.querySelectorAll('.horario-box').forEach(el => el.classList.remove('selected'));
       document.getElementById(`hora-${hora}`).classList.add('selected');
     }
 
     async function cargarHorarios() {
       const res = await fetch('/api/disponibilidad');
       const data = await res.json();
-
       opcionesHorario.innerHTML = '';
-      data.forEach(h => {
-        const disponibles = h.disponibles;
-        const puedeElegir = disponibles >= rolls.length;
-        const clase = puedeElegir ? '' : 'disabled';
 
-        const div = document.createElement('div');
-        div.className = `horario-box ${clase}`;
-        div.id = `hora-${h.hora}`;
-        div.innerHTML = `
+      data.forEach(h => {
+        const clase = h.disponibles >= rolls.length ? '' : 'disabled';
+        const box = document.createElement('div');
+        box.className = `horario-box ${clase}`;
+        box.id = `hora-${h.hora}`;
+        box.innerHTML = `
           <input type="radio" name="hora" value="${h.hora}">
           <strong>${h.hora}</strong><br>
-          ${disponibles} disponibles
+          ${h.disponibles} disponibles
         `;
 
-        if (puedeElegir) {
-          div.onclick = () => seleccionarHorario(h.hora);
+        if (clase === '') {
+          box.onclick = () => seleccionarHorario(h.hora);
         }
 
-        opcionesHorario.appendChild(div);
+        opcionesHorario.appendChild(box);
       });
     }
 
@@ -273,15 +267,10 @@
         return;
       }
 
-      if (!/^\d{9}$/.test(celular)) {
-        alert("El número de celular debe tener exactamente 9 dígitos.");
+      if (!/^09\d{7}$/.test(celular)) {
+        alert("El número de celular debe empezar con 09 y tener 9 dígitos.");
         return;
       }
-
-      localStorage.setItem("celular", celular);
-      localStorage.setItem("metodoPago", pago);
-      localStorage.setItem("totalPedido", rolls.reduce((sum, roll) => sum + roll.precio, 0));
-      localStorage.removeItem("pedido");
 
       const payload = {
         nombre_cliente: nombre,
@@ -304,14 +293,13 @@
         return;
       }
 
+      localStorage.clear();
       irA("gracias.html");
     });
 
     function irA(ruta) {
       document.body.classList.add("fade-out");
-      setTimeout(() => {
-        window.location.href = ruta;
-      }, 300);
+      setTimeout(() => window.location.href = ruta, 300);
     }
   </script>
 </body>
