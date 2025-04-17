@@ -6,89 +6,20 @@
   <title>Administración de Pedidos</title>
   <style>
     body {
-      background-color: #fdf6ec;
+      background-color: #000;
       color: #ff6f61;
       font-family: sans-serif;
       padding: 2rem;
     }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      margin-bottom: 1rem;
-      gap: 1rem;
-    }
-
-    button {
-      padding: 0.5rem 1rem;
-      border: 2px dashed #ff6f61;
-      background: transparent;
-      color: #ff6f61;
-      cursor: pointer;
-      border-radius: 6px;
-    }
-
-    .switch-label {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .switch-label input[type="checkbox"] {
-      width: 40px;
-      height: 20px;
-      appearance: none;
-      background: #ccc;
-      border-radius: 20px;
-      position: relative;
-      outline: none;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    .switch-label input[type="checkbox"]:checked {
-      background: #ff6f61;
-    }
-
-    .switch-label input[type="checkbox"]::before {
-      content: '';
-      position: absolute;
-      width: 18px;
-      height: 18px;
-      background: #fff;
-      border-radius: 50%;
-      top: 1px;
-      left: 1px;
-      transition: 0.3s;
-    }
-
-    .switch-label input[type="checkbox"]:checked::before {
-      transform: translateX(20px);
-    }
-
-    input[type="date"] {
-      padding: 0.5rem;
-      background-color: transparent;
-      color: #ff6f61;
-      border: 2px solid #ff6f61;
-      border-radius: 6px;
-    }
-
-    .tabla-bloque {
-      margin-bottom: 3rem;
+    h2 {
+      margin-top: 2rem;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 1rem;
+      margin-bottom: 2rem;
     }
 
     th, td {
@@ -97,196 +28,158 @@
       text-align: center;
     }
 
-    th.sortable {
+    button {
+      padding: 0.4rem 1rem;
+      border: 1px dashed #ff6f61;
+      background: transparent;
+      color: #ff6f61;
       cursor: pointer;
-    }
-
-    .vacio {
-      text-align: center;
-      color: #999;
-      margin-top: 2rem;
-    }
-
-    @media (max-width: 768px) {
-      .top-bar {
-        flex-direction: column;
-      }
+      margin-bottom: 1rem;
     }
   </style>
 </head>
 <body>
-
-  <h1>Administración de Pedidos</h1>
-
-  <div class="top-bar">
-    <button onclick="window.location.href='index.html'">🔙 Volver</button>
-    <label class="switch-label">
-      <span>Pedidos habilitados</span>
-      <input type="checkbox" id="switchPedidos">
-    </label>
-  </div>
-
-  <div id="bloques-horarios"></div>
-
-  <h2 style="margin-top: 4rem; text-align: center;">Histórico de pedidos</h2>
-  <div class="top-bar">
-    <input type="date" id="fechaFiltro">
-    <button onclick="filtrarPorFecha()">Buscar</button>
-    <button onclick="cargarHistorico()">Ver todos</button>
-  </div>
-
-  <div id="historico-container" class="tabla-bloque"></div>
-  <div style="text-align: center;">
-    <button onclick="verMasHistorico()">Ver más</button>
-  </div>
+  <h1>Panel de Administración</h1>
+  <div id="contenedor-tablas"></div>
 
   <script>
-    const switchPedidos = document.getElementById("switchPedidos");
+    const horarios = ['horario_19', 'horario_20', 'horario_21'];
+    const nombres = {
+      'horario_19': 'Pedidos 19:00',
+      'horario_20': 'Pedidos 20:00',
+      'horario_21': 'Pedidos 21:00',
+    };
 
-    async function cargarEstado() {
-      const res = await fetch('/estado-pedidos');
-      const data = await res.json();
-      switchPedidos.checked = data.activo;
-    }
+    async function cargarTablasHorarias() {
+      const contenedor = document.getElementById("contenedor-tablas");
+      contenedor.innerHTML = '';
 
-    async function actualizarEstado() {
-      const activo = switchPedidos.checked;
-      await fetch('/estado-pedidos', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ activo })
-      });
-    }
+      for (const tabla of horarios) {
+        const res = await fetch(`/api/tabla/${tabla}`);
+        const datos = await res.json();
 
-    switchPedidos.addEventListener("change", actualizarEstado);
+        const tablaHTML = document.createElement("div");
+        const titulo = document.createElement("h2");
+        titulo.textContent = `${nombres[tabla]} (${datos.length})`;
 
-    async function cargarBloqueHorario(tabla, titulo) {
-      const res = await fetch(`/pedidos?tabla=${tabla}`);
-      const data = await res.json();
-      const container = document.getElementById("bloques-horarios");
+        const boton = document.createElement("button");
+        boton.textContent = `🗑 Limpiar ${nombres[tabla]}`;
+        boton.onclick = async () => {
+          if (!confirm("¿Seguro que querés limpiar la tabla?")) return;
+          const res = await fetch(`/api/limpiar_tabla/${tabla}`, { method: 'DELETE' });
+          const rta = await res.json();
+          alert(rta.message);
+          cargarTablasHorarias();
+        };
 
-      const bloque = document.createElement("div");
-      bloque.className = "tabla-bloque";
+        tablaHTML.appendChild(titulo);
+        tablaHTML.appendChild(boton);
 
-      const idTabla = `tabla-${tabla}`;
-      bloque.innerHTML = `
-        <h3>${titulo}</h3>
-        <button onclick="limpiarTabla('${tabla}')">Limpiar ${titulo}</button>
-        <table id="${idTabla}">
+        const table = document.createElement("table");
+        table.innerHTML = `
           <thead>
             <tr>
-              <th class="sortable" onclick="ordenarTabla('${idTabla}', 0)">Nombre</th>
-              <th class="sortable" onclick="ordenarTabla('${idTabla}', 1)">Proteína</th>
-              <th class="sortable" onclick="ordenarTabla('${idTabla}', 2)">Cobertura</th>
+              <th>Cliente</th>
+              <th>Teléfono</th>
+              <th>Pago</th>
+              <th>Proteína</th>
               <th>Vegetal</th>
+              <th>Cobertura</th>
               <th>Precio</th>
+              <th>Fecha</th>
             </tr>
           </thead>
           <tbody>
-            ${data.map(p => `<tr>
-              <td>${p.nombre_cliente} ${p.apellido_cliente}</td>
-              <td>${p.proteina}</td>
-              <td>${p.cobertura}</td>
-              <td>${p.vegetal}</td>
-              <td>$${p.precio}</td>
-            </tr>`).join('')}
+            ${datos.map(p => `
+              <tr>
+                <td>${p.nombre_cliente} ${p.apellido_cliente}</td>
+                <td>${p.celular_cliente}</td>
+                <td>${p.metodo_pago}</td>
+                <td>${p.proteina}</td>
+                <td>${p.vegetal}</td>
+                <td>${p.cobertura}</td>
+                <td>$${p.precio}</td>
+                <td>${p.fecha?.split('T')[0]}</td>
+              </tr>
+            `).join('')}
           </tbody>
-        </table>`;
+        `;
 
-      container.appendChild(bloque);
+        tablaHTML.appendChild(table);
+        contenedor.appendChild(tablaHTML);
+      }
+
+      cargarHistorico();
     }
 
-    function ordenarTabla(idTabla, columna) {
-      const tabla = document.getElementById(idTabla);
-      const filas = Array.from(tabla.querySelectorAll('tbody tr'));
-      const asc = tabla.dataset.orden !== `col${columna}_asc`;
-
-      filas.sort((a, b) => {
-        const aTexto = a.cells[columna].textContent.trim().toLowerCase();
-        const bTexto = b.cells[columna].textContent.trim().toLowerCase();
-        return asc ? aTexto.localeCompare(bTexto) : bTexto.localeCompare(aTexto);
-      });
-
-      const tbody = tabla.querySelector('tbody');
-      filas.forEach(f => tbody.appendChild(f));
-
-      tabla.dataset.orden = `col${columna}_${asc ? 'asc' : 'desc'}`;
-    }
-
-    async function limpiarTabla(tabla) {
-      if (!confirm("¿Seguro que querés limpiar toda la tabla " + tabla + "?")) return;
-      await fetch(`/api/limpiar_tabla/${tabla}`, { method: 'DELETE' });
-      location.reload();
-    }
-
-    let historicoTodos = [];
-    let historicoMostrados = 0;
+    let historicoOffset = 0;
 
     async function cargarHistorico() {
-      const res = await fetch('/pedidos');
-      const data = await res.json();
-      historicoTodos = agruparPorClienteYFecha(data);
-      historicoMostrados = 0;
-      document.getElementById("historico-container").innerHTML = "";
-      mostrarMasHistorico();
+      const contenedor = document.getElementById("contenedor-tablas");
+      const res = await fetch(`/api/pedidos`);
+      const datos = await res.json();
+      const subset = datos.slice(historicoOffset, historicoOffset + 20);
+
+      const tablaHTML = document.createElement("div");
+      const titulo = document.createElement("h2");
+      titulo.textContent = `Histórico de Pedidos (${datos.length})`;
+
+      tablaHTML.appendChild(titulo);
+
+      const table = document.createElement("table");
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Teléfono</th>
+            <th>Pago</th>
+            <th>Proteína</th>
+            <th>Vegetal</th>
+            <th>Cobertura</th>
+            <th>Precio</th>
+            <th>Fecha</th>
+            <th>Eliminar</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${subset.map(p => `
+            <tr>
+              <td>${p.nombre_cliente} ${p.apellido_cliente}</td>
+              <td>${p.celular_cliente}</td>
+              <td>${p.metodo_pago}</td>
+              <td>${p.proteina}</td>
+              <td>${p.vegetal}</td>
+              <td>${p.cobertura}</td>
+              <td>$${p.precio}</td>
+              <td>${p.fecha?.split('T')[0]}</td>
+              <td><button onclick="eliminarPedido(${p.id})">❌</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      `;
+
+      tablaHTML.appendChild(table);
+
+      if (datos.length > historicoOffset + 20) {
+        const btn = document.createElement("button");
+        btn.textContent = "⬇ Ver más";
+        btn.onclick = () => {
+          historicoOffset += 10;
+          cargarTablasHorarias();
+        };
+        tablaHTML.appendChild(btn);
+      }
+
+      contenedor.appendChild(tablaHTML);
     }
 
-    function agruparPorClienteYFecha(pedidos) {
-      const grupos = {};
-      pedidos.forEach(p => {
-        const key = `${p.nombre_cliente}_${p.apellido_cliente}_${p.fecha?.split("T")[0]}`;
-        if (!grupos[key]) grupos[key] = [];
-        grupos[key].push(p);
-      });
-      return Object.values(grupos);
+    async function eliminarPedido(id) {
+      if (!confirm("¿Eliminar este pedido?")) return;
+      await fetch(`/eliminar-pedido/${id}`, { method: 'DELETE' });
+      cargarTablasHorarias();
     }
 
-    function mostrarMasHistorico() {
-      const container = document.getElementById("historico-container");
-      const max = historicoMostrados + 10;
-      const mostrar = historicoTodos.slice(historicoMostrados, max);
-
-      mostrar.forEach(grupo => {
-        const div = document.createElement("div");
-        div.innerHTML = `
-          <h4>${grupo[0].nombre_cliente} ${grupo[0].apellido_cliente} (${grupo[0].fecha.split("T")[0]})</h4>
-          <ul>
-            ${grupo.map(r => `<li>${r.proteina} + ${r.vegetal} + ${r.cobertura} - $${r.precio}</li>`).join('')}
-          </ul>
-        `;
-        container.appendChild(div);
-      });
-
-      historicoMostrados += mostrar.length;
-    }
-
-    function verMasHistorico() {
-      mostrarMasHistorico();
-    }
-
-    function filtrarPorFecha() {
-      const fecha = document.getElementById("fechaFiltro").value;
-      if (!fecha) return cargarHistorico();
-      const filtrado = historicoTodos.filter(grupo => grupo[0].fecha.startsWith(fecha));
-      const container = document.getElementById("historico-container");
-      container.innerHTML = "";
-      filtrado.forEach(grupo => {
-        const div = document.createElement("div");
-        div.innerHTML = `
-          <h4>${grupo[0].nombre_cliente} ${grupo[0].apellido_cliente} (${grupo[0].fecha.split("T")[0]})</h4>
-          <ul>
-            ${grupo.map(r => `<li>${r.proteina} + ${r.vegetal} + ${r.cobertura} - $${r.precio}</li>`).join('')}
-          </ul>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    cargarEstado();
-    cargarBloqueHorario("horario_19", "Pedidos 19:00");
-    cargarBloqueHorario("horario_20", "Pedidos 20:00");
-    cargarBloqueHorario("horario_21", "Pedidos 21:00");
-    cargarHistorico();
+    cargarTablasHorarias();
   </script>
 </body>
 </html>
