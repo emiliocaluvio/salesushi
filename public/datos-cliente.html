@@ -48,6 +48,7 @@
       display: flex;
       justify-content: center;
       gap: 1rem;
+      flex-wrap: wrap;
     }
 
     .horario-box {
@@ -128,7 +129,12 @@
       margin-top: 1rem;
     }
 
-    button:hover, .btn-volver:hover {
+    button[disabled] {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    button:hover:enabled, .btn-volver:hover {
       background-color: #ff6f61;
       color: #000;
     }
@@ -169,7 +175,7 @@
     <h3 style="text-align:center;">Seleccioná horario de entrega</h3>
     <div class="horarios" id="opcionesHorario"></div>
 
-    <button type="submit">Confirmar pedido</button>
+    <button type="submit" id="btnConfirmar" disabled>Confirmar pedido</button>
   </form>
 
   <button class="btn-volver" onclick="cancelarPedido()">Cancelar pedido</button>
@@ -181,6 +187,7 @@
     const resumen = document.getElementById("resumen-rolls");
     const formulario = document.getElementById("formulario");
     const opcionesHorario = document.getElementById("opcionesHorario");
+    const btnConfirmar = document.getElementById("btnConfirmar");
 
     function renderRolls() {
       if (rolls.length === 0) {
@@ -225,6 +232,7 @@
       horarioSeleccionado = hora;
       document.querySelectorAll('.horario-box').forEach(el => el.classList.remove('selected'));
       document.getElementById(`hora-${hora}`).classList.add('selected');
+      btnConfirmar.disabled = false;
     }
 
     async function cargarHorarios() {
@@ -249,10 +257,9 @@
 
         opcionesHorario.appendChild(box);
       });
-    }
 
-    renderRolls();
-    cargarHorarios();
+      btnConfirmar.disabled = true;
+    }
 
     document.getElementById("formulario").addEventListener("submit", async function (e) {
       e.preventDefault();
@@ -301,6 +308,9 @@
       document.body.classList.add("fade-out");
       setTimeout(() => window.location.href = ruta, 300);
     }
+
+    renderRolls();
+    cargarHorarios();
   </script>
 </body>
 </html>
