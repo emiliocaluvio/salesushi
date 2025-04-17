@@ -14,37 +14,71 @@
       transition: opacity 0.3s ease;
     }
 
-    .fade-out {
-      opacity: 0;
-    }
-
     h1 {
       text-align: center;
       margin-bottom: 1.5rem;
     }
 
     form {
-      max-width: 500px;
-      margin: 0 auto 2rem auto;
+      max-width: 900px;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
       gap: 1rem;
     }
 
     input, select {
+      flex: 1;
       padding: 0.8rem;
       border: 2px solid #ff6f61;
       border-radius: 8px;
       background-color: transparent;
       color: #ff6f61;
       font-size: 1rem;
+      min-width: 120px;
+    }
+
+    .horarios {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .horario-box {
+      border: 2px dashed #ff6f61;
+      padding: 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: center;
+      flex: 1;
+      max-width: 150px;
+      position: relative;
+    }
+
+    .horario-box input {
+      display: none;
+    }
+
+    .horario-box.selected {
+      background-color: #ff6f61;
+      color: #000;
+      border-style: solid;
+    }
+
+    .horario-box.disabled {
+      opacity: 0.5;
+      pointer-events: none;
     }
 
     .resumen {
       max-width: 600px;
-      width: 100%;
-      box-sizing: border-box;
-      margin: 0 auto 2rem auto;
+      margin: 2rem auto;
       border: 2px solid #ff6f61;
       border-radius: 10px;
       padding: 1rem;
@@ -99,49 +133,41 @@
       color: #000;
     }
 
-    .btn-volver {
-      display: block;
-      width: fit-content;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    @media (max-width: 600px) {
-      body {
-        padding: 1rem;
+    @media (max-width: 700px) {
+      .form-row {
+        flex-direction: column;
       }
 
-      .resumen, form {
-        width: 100%;
+      .horarios {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .horario-box {
         max-width: 100%;
-      }
-
-      .roll-img {
-        max-width: 100%;
-      }
-
-      input, select {
-        font-size: 1rem;
       }
     }
   </style>
 </head>
 <body>
-
   <h1>Finalizar Pedido</h1>
 
   <div class="resumen" id="resumen-rolls"></div>
 
   <form id="formulario">
-    <input type="text" id="nombre" placeholder="Nombre" required>
-    <input type="text" id="apellido" placeholder="Apellido" required>
-    <input type="tel" id="celular" placeholder="Celular (09XXXXXXX)" pattern="09[0-9]{7}" maxlength="9" minlength="9" required>
+    <div class="form-row">
+      <input type="text" id="nombre" placeholder="Nombre" required>
+      <input type="text" id="apellido" placeholder="Apellido" required>
+      <input type="tel" id="celular" placeholder="Celular (09XXXXXXX)" pattern="09[0-9]{7}" maxlength="9" minlength="9" required>
+      <select id="pago" required>
+        <option value="">Forma de pago</option>
+        <option value="Transferencia">Transferencia</option>
+        <option value="Efectivo">Efectivo</option>
+      </select>
+    </div>
 
-    <select id="pago" required>
-      <option value="">Forma de pago</option>
-      <option value="Transferencia">Transferencia</option>
-      <option value="Efectivo">Efectivo</option>
-    </select>
+    <h3 style="text-align:center;">Seleccioná horario de entrega</h3>
+    <div class="horarios" id="opcionesHorario"></div>
 
     <button type="submit">Confirmar pedido</button>
   </form>
@@ -150,13 +176,11 @@
 
   <script>
     let rolls = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
+    let horarioSeleccionado = null;
+
     const resumen = document.getElementById("resumen-rolls");
     const formulario = document.getElementById("formulario");
-    const pagoSelect = document.getElementById("pago");
-
-    const celularInput = document.getElementById("celular");
-    const celularGuardado = localStorage.getItem("celular");
-    if (celularGuardado) celularInput.value = celularGuardado;
+    const opcionesHorario = document.getElementById("opcionesHorario");
 
     function renderRolls() {
       if (rolls.length === 0) {
@@ -189,6 +213,7 @@
       rolls.splice(index, 1);
       localStorage.setItem("todosLosRolls", JSON.stringify(rolls));
       renderRolls();
+      cargarHorarios(); // actualiza la disponibilidad
     }
 
     function cancelarPedido() {
@@ -197,25 +222,54 @@
       window.location.href = "index.html";
     }
 
-    function irA(ruta) {
-      document.body.classList.add("fade-out");
-      setTimeout(() => {
-        window.location.href = ruta;
-      }, 300);
+    function seleccionarHorario(hora) {
+      horarioSeleccionado = hora;
+      document.querySelectorAll('.horario-box').forEach(el => {
+        el.classList.remove('selected');
+      });
+      document.getElementById(`hora-${hora}`).classList.add('selected');
+    }
+
+    async function cargarHorarios() {
+      const res = await fetch('/api/disponibilidad');
+      const data = await res.json();
+
+      opcionesHorario.innerHTML = '';
+      data.forEach(h => {
+        const disponibles = h.disponibles;
+        const puedeElegir = disponibles >= rolls.length;
+        const clase = puedeElegir ? '' : 'disabled';
+
+        const div = document.createElement('div');
+        div.className = `horario-box ${clase}`;
+        div.id = `hora-${h.hora}`;
+        div.innerHTML = `
+          <input type="radio" name="hora" value="${h.hora}">
+          <strong>${h.hora}</strong><br>
+          ${disponibles} disponibles
+        `;
+
+        if (puedeElegir) {
+          div.onclick = () => seleccionarHorario(h.hora);
+        }
+
+        opcionesHorario.appendChild(div);
+      });
     }
 
     renderRolls();
+    cargarHorarios();
 
-    formulario.addEventListener("submit", async function (e) {
+    document.getElementById("formulario").addEventListener("submit", async function (e) {
       e.preventDefault();
 
       const nombre = document.getElementById("nombre").value.trim();
       const apellido = document.getElementById("apellido").value.trim();
-      const celular = celularInput.value.trim();
-      const pago = pagoSelect.value;
+      const celular = document.getElementById("celular").value.trim();
+      const pago = document.getElementById("pago").value;
 
-      if (!nombre || !apellido || !celular || !pago) {
-        alert("Por favor completá todos los campos.");
+      if (!nombre || !apellido || !celular || !pago || !horarioSeleccionado) {
+        alert("Por favor completá todos los campos y seleccioná un horario.");
         return;
       }
 
@@ -225,41 +279,40 @@
       }
 
       localStorage.setItem("celular", celular);
-
-      for (const roll of rolls) {
-        const payload = {
-          nombre_cliente: nombre,
-          apellido_cliente: apellido,
-          celular_cliente: celular,
-          metodo_pago: pago,
-          proteina: roll.proteina,
-          cobertura: roll.cobertura,
-          vegetal: roll.vegetal,
-          precio: roll.precio
-        };
-
-        const res = await fetch('/guardar-pedido', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          console.error("Error al guardar:", data.error);
-          alert("Hubo un error al guardar el pedido.");
-          return;
-        }
-      }
-
       localStorage.setItem("metodoPago", pago);
       localStorage.setItem("totalPedido", rolls.reduce((sum, roll) => sum + roll.precio, 0));
       localStorage.removeItem("pedido");
 
+      const payload = {
+        nombre_cliente: nombre,
+        apellido_cliente: apellido,
+        celular_cliente: celular,
+        metodo_pago: pago,
+        horario: horarioSeleccionado,
+        rolls
+      };
+
+      const res = await fetch('/guardar-pedido-horario', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.error || "Hubo un error al guardar el pedido.");
+        return;
+      }
+
       irA("gracias.html");
     });
-  </script>
 
+    function irA(ruta) {
+      document.body.classList.add("fade-out");
+      setTimeout(() => {
+        window.location.href = ruta;
+      }, 300);
+    }
+  </script>
 </body>
 </html>

@@ -143,6 +143,10 @@
     ¡Bienvenido a <strong>Sale Sushi</strong> 🍣! Armá tu roll ideal en simples pasos.
   </p>
 
+  <!-- Cupos disponibles -->
+  <div id="cupos" style="margin-bottom: 1.5rem; font-size: 1rem;"></div>
+
+  <!-- Botones -->
   <button class="btn" onclick="verMenu()">Ver menú</button>
   <button class="btn" onclick="pedidoDirecto()">Hacer pedido</button>
 
@@ -196,6 +200,22 @@
         alert("Usuario o contraseña incorrectos.");
       }
     }
+
+    // Mostrar disponibilidad de horarios
+    fetch('/api/disponibilidad')
+      .then(res => res.json())
+      .then(data => {
+        const cont = document.getElementById('cupos');
+        cont.innerHTML = '<strong>🌟 Cupos disponibles hoy:</strong><br>';
+        data.forEach(h => {
+          const emoji = h.disponibles === 0 ? '❌' : '🟢';
+          cont.innerHTML += `🕒 ${h.hora} — ${h.disponibles} lugares ${emoji}<br>`;
+        });
+      })
+      .catch(err => {
+        console.error('Error al cargar disponibilidad:', err);
+        document.getElementById('cupos').innerText = 'Error al cargar disponibilidad de horarios.';
+      });
   </script>
 </body>
 </html>
