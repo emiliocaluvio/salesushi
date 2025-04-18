@@ -138,11 +138,10 @@
     <button onclick="accederAdmin()">Admin</button>
   </div>
 
-  <!-- Logo -->
+  <!-- Logo con link a Instagram -->
   <a href="https://instagram.com/salesushi.uy" target="_blank" rel="noopener noreferrer">
     <img src="logo.png" alt="Logo Sale Sushi" class="logo" />
   </a>
-  
 
   <div class="linea"></div>
 
@@ -226,7 +225,7 @@
         cont.innerHTML = '<strong>🌟 Rolls disponibles hoy:</strong><br>';
         data.forEach(h => {
           const emoji = h.disponibles === 0 ? '❌' : '🟢';
-          cont.innerHTML += `🕒 ${h.hora} — ${h.disponibles} lugar${h.disponibles !== 1 ? 'es' : ''} ${emoji}<br>`;
+          cont.innerHTML += `🕒 ${h.hora} — ${h.disponibles} roll${h.disponibles !== 1 ? 's' : ''} disponibles ${emoji}<br>`;
         });
 
         btnPedido.disabled = false;
