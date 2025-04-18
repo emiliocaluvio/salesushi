@@ -97,6 +97,14 @@
     .detalle-roll p {
       margin: 0.3rem 0;
     }
+
+    .botones-final {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: center;
+      margin-top: 2rem;
+    }
   </style>
 </head>
 <body>
@@ -111,8 +119,10 @@
   <div id="info"></div>
   <div class="total" id="total"></div>
 
-  <button class="btn-volver" id="btn-volver" onclick="volverInicio()">Volver al inicio</button>
-  <button class="btn-volver" id="btn-info" onclick="mostrarResumen()">📋 Ver info de mi pedido</button>
+  <div class="botones-final" id="botones">
+    <button class="btn-volver" id="btn-info" onclick="mostrarResumen()">📋 Ver info de mi pedido</button>
+    <button class="btn-volver" id="btn-volver" onclick="volverInicio()">Volver al inicio</button>
+  </div>
 
   <div id="detalle-pedido" class="detalle-rolls" style="display: none;"></div>
 

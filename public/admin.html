@@ -222,6 +222,16 @@
       titulo.textContent = `Histórico de Pedidos (${historicoData.length})`;
       div.appendChild(titulo);
 
+      const botonBorrarTodo = document.createElement("button");
+      botonBorrarTodo.textContent = "🗑 Limpiar histórico completo";
+      botonBorrarTodo.onclick = async () => {
+        if (!confirm("¿Seguro que querés borrar todo el histórico?")) return;
+        await fetch('/api/limpiar_tabla/historico', { method: 'DELETE' });
+        historicoData = [];
+        cargarTablasHorarias();
+      };
+      div.appendChild(botonBorrarTodo);
+
       const table = document.createElement("table");
       table.innerHTML = `
         <thead>
@@ -239,7 +249,7 @@
         </thead>
         <tbody>
           ${datosAMostrar.map(p => `
-            <tr>
+            <tr id="pedido-${p.id}">
               <td>${p.nombre_cliente} ${p.apellido_cliente}</td>
               <td>${p.celular_cliente}</td>
               <td>${p.metodo_pago}</td>
@@ -284,8 +294,9 @@
     async function eliminarPedido(id) {
       if (!confirm("¿Eliminar este pedido?")) return;
       await fetch(`/eliminar-pedido/${id}`, { method: 'DELETE' });
-      historicoData = [];
-      cargarTablasHorarias();
+      const fila = document.getElementById(`pedido-${id}`);
+      if (fila) fila.remove();
+      historicoData = historicoData.filter(p => p.id !== id);
     }
 
     cargarEstadoSwitch();

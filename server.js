@@ -173,7 +173,21 @@
     if (error) return res.status(500).json({ error: error.message });
     res.status(200).json({ message: "Pedido eliminado" });
   });
-
+  app.delete('/api/limpiar_tabla/historico', async (req, res) => {
+    try {
+      const { error } = await supabase
+        .from('pedidos')
+        .delete()
+        .neq('id', 0); // Esto borra todos los registros
+  
+      if (error) throw error;
+      res.json({ message: 'Histórico eliminado correctamente' });
+    } catch (err) {
+      console.error('Error al limpiar histórico:', err.message);
+      res.status(500).json({ error: 'Error al limpiar el histórico' });
+    }
+  });
+  
   // Generador de imágenes
   app.post('/generar-imagen', async (req, res) => {
     try {

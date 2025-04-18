@@ -220,7 +220,7 @@
         const res = await fetch('/api/disponibilidad');
         const data = await res.json();
 
-        cont.innerHTML = '<strong>🌟 Cupos disponibles hoy:</strong><br>';
+        cont.innerHTML = '<strong>🌟 Rolls disponibles hoy:</strong><br>';
         data.forEach(h => {
           const emoji = h.disponibles === 0 ? '❌' : '🟢';
           cont.innerHTML += `🕒 ${h.hora} — ${h.disponibles} lugar${h.disponibles !== 1 ? 'es' : ''} ${emoji}<br>`;
