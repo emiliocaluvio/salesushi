@@ -35,7 +35,7 @@
     }
 
     .info-transferencia {
-      background-color: #111;
+      background-color: #fdf6ec;
       padding: 1rem;
       border: 2px dashed #ff6f61;
       border-radius: 10px;
@@ -85,6 +85,23 @@
     .whatsapp-btn img:hover {
       transform: scale(1.1);
     }
+
+    .detalle-rolls {
+      margin-top: 2rem;
+      text-align: left;
+      max-width: 400px;
+      margin-inline: auto;
+    }
+
+    .detalle-rolls p {
+      margin: 0.3rem 0;
+    }
+
+    .detalle-roll {
+      border-bottom: 1px dashed #ff6f61;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -102,6 +119,9 @@
   <div class="total" id="total"></div>
 
   <button class="btn-volver" onclick="volverInicio()">Volver al inicio</button>
+  <button class="btn-volver" onclick="mostrarResumen()">📋 Ver info de mi pedido</button>
+
+  <div id="detalle-pedido" class="detalle-rolls" style="display: none;"></div>
 
   <a id="whatsappBtn" target="_blank" class="whatsapp-btn" aria-label="Contactar por WhatsApp">
     <img src="wpp.png" alt="WhatsApp">
@@ -130,6 +150,45 @@
       setTimeout(() => {
         window.location.href = "index.html";
       }, 300);
+    }
+
+    function mostrarResumen() {
+      const rolls = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
+      const resumenDiv = document.getElementById("detalle-pedido");
+
+      if (rolls.length === 0) {
+        resumenDiv.innerHTML = "<p>No hay rolls cargados.</p>";
+      } else {
+        let html = "<h3>📦 Tu pedido:</h3>";
+        rolls.forEach((roll, index) => {
+          html += `
+            <div class="detalle-roll">
+              <p><strong>Roll ${index + 1}</strong></p>
+              <p>🥢 Proteína: ${roll.proteina}</p>
+              <p>🥬 Vegetal: ${roll.vegetal}</p>
+              <p>🍘 Cobertura: ${roll.cobertura}</p>
+              <p>💵 Precio: $${roll.precio}</p>
+            </div>
+          `;
+        });
+
+        html += `<p class="total">💰 Total del pedido: $${total}</p>`;
+
+        if (metodoPago === "Transferencia") {
+          html += `
+            <div class="info-transferencia" style="margin-top: 1rem;">
+              <h3>💳 Datos para transferencia:</h3>
+              <p><strong>Cuenta:</strong> 23768576</p>
+              <p><strong>Banco:</strong> BBVA</p>
+              <p><strong>Nombre:</strong> Emilio Castroman</p>
+            </div>
+          `;
+        }
+
+        resumenDiv.innerHTML = html;
+      }
+
+      resumenDiv.style.display = "block";
     }
 
     const mensaje = total
