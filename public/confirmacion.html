@@ -44,19 +44,23 @@
 
     .botones {
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
       gap: 1rem;
+      max-width: 400px;
+      margin: 0 auto;
       flex-wrap: wrap;
     }
 
     .btn {
-      padding: 1rem 2rem;
+      flex: 1;
+      padding: 1rem;
       border: 2px dashed #ff6f61;
       background-color: transparent;
       color: #ff6f61;
       font-size: 1rem;
       cursor: pointer;
       transition: all 0.3s ease;
+      border-radius: 10px;
     }
 
     .btn:hover {
@@ -75,6 +79,16 @@
       color: #a33;
       font-weight: bold;
     }
+
+    @media (max-width: 600px) {
+      .botones {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -85,8 +99,9 @@
   <div id="mensaje-aviso" class="mensaje-aviso"></div>
 
   <div class="botones">
+    <button class="btn" onclick="volver()">⬅ Volver</button>
     <button id="btnAgregar" class="btn" onclick="agregarOtro()">Agregar otro roll</button>
-    <button class="btn" onclick="finalizar()">Finalizar pedido</button>
+    <button class="btn" onclick="finalizar()">Finalizar pedido ➡</button>
   </div>
 
   <script>
@@ -130,6 +145,10 @@
       setTimeout(() => {
         window.location.href = ruta;
       }, 300);
+    }
+
+    function volver() {
+      irA("cobertura.html");
     }
 
     function agregarOtro() {

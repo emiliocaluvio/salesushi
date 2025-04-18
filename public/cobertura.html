@@ -71,21 +71,40 @@
       display: block;
     }
 
-    .btn-siguiente {
-      padding: 1rem 2rem;
-      background-color: transparent;
+    .navegacion {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 400px;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-nav {
+      flex: 1;
+      padding: 1rem;
       border: 2px dashed #ff6f61;
+      background-color: transparent;
       color: #ff6f61;
       font-size: 1rem;
       cursor: pointer;
+      border-radius: 10px;
       transition: all 0.3s ease;
-      display: block;
-      margin-top: 2rem;
     }
 
-    .btn-siguiente:hover {
+    .btn-nav:hover {
       background-color: #ff6f61;
       color: #000;
+    }
+
+    @media (max-width: 600px) {
+      .navegacion {
+        flex-direction: column;
+      }
+
+      .btn-nav {
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -102,7 +121,10 @@
     <img id="imgCobertura" src="" alt="" style="display: none;">
   </div>
 
-  <button class="btn-siguiente" onclick="siguiente()">Siguiente</button>
+  <div class="navegacion">
+    <button class="btn-nav" onclick="irA('vegetal.html')">⬅ Volver</button>
+    <button class="btn-nav" onclick="siguiente()">Siguiente ➡</button>
+  </div>
 
   <script>
     const listaCoberturas = ["Sésamo", "Ciboulette", "Nori", "Panko", "Palta", "Salmón"];
