@@ -218,6 +218,7 @@
       let datosAMostrar = historicoData.slice(historicoOffset, historicoOffset + 20);
 
       const div = document.createElement("div");
+      div.id = "bloque-historico";
       const titulo = document.createElement("h2");
       titulo.textContent = `Histórico de Pedidos (${historicoData.length})`;
       div.appendChild(titulo);
@@ -226,9 +227,13 @@
       botonBorrarTodo.textContent = "🗑 Limpiar histórico completo";
       botonBorrarTodo.onclick = async () => {
         if (!confirm("¿Seguro que querés borrar todo el histórico?")) return;
-        await fetch('/api/limpiar_tabla/historico', { method: 'DELETE' });
+        const res = await fetch('/api/limpiar_tabla/historico', { method: 'DELETE' });
+        const rta = await res.json();
+        alert(rta.message);
         historicoData = [];
-        cargarTablasHorarias();
+        historicoOffset = 0;
+        const bloque = document.getElementById("bloque-historico");
+        if (bloque) bloque.remove();
       };
       div.appendChild(botonBorrarTodo);
 
