@@ -200,8 +200,10 @@
       const pass = document.getElementById("clave").value;
 
       if (user === "emi528" && pass === "47393929Emi") {
-        irA("admin.html");
-      } else {
+  localStorage.setItem("adminAutenticado", "true");
+  irA("admin.html");
+}
+ else {
         alert("Usuario o contraseña incorrectos.");
       }
     }
