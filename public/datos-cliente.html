@@ -15,6 +15,7 @@
     }
 
     h1 { text-align: center; margin-bottom: 1.5rem; }
+
     form {
       max-width: 900px;
       margin: 0 auto;
@@ -281,6 +282,7 @@
 
       const total = rolls.reduce((sum, roll) => sum + roll.precio, 0);
       localStorage.setItem("totalPedido", total);
+      localStorage.setItem("metodoPago", pago); // 👈 ESTA LÍNEA FALTABA
 
       const payload = {
         nombre_cliente: nombre,
