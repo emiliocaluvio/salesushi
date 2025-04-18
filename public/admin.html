@@ -90,6 +90,12 @@
       font-weight: bold;
     }
 
+    .logout-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+    }
+
     @media (max-width: 600px) {
       .top-bar {
         flex-direction: column;
@@ -103,6 +109,16 @@
   </style>
 </head>
 <body>
+  <script>
+    const acceso = localStorage.getItem("adminAutenticado");
+    if (acceso !== "true") {
+      alert("Acceso denegado. Redirigiendo al inicio.");
+      window.location.href = "index.html";
+    }
+  </script>
+
+  <button class="logout-btn" onclick="cerrarSesion()">🚪 Cerrar sesión</button>
+
   <h1>Panel de Administración</h1>
 
   <div class="top-bar">
@@ -288,6 +304,11 @@
       const fila = document.getElementById(`pedido-${id}`);
       if (fila) fila.remove();
       historicoData = historicoData.filter(p => p.id !== id);
+    }
+
+    function cerrarSesion() {
+      localStorage.removeItem("adminAutenticado");
+      window.location.href = "index.html";
     }
 
     cargarEstadoSwitch();
