@@ -46,6 +46,7 @@
       display: flex;
       justify-content: center;
       gap: 1rem;
+      flex-wrap: wrap;
     }
 
     .btn {
@@ -62,6 +63,18 @@
       background-color: #ff6f61;
       color: #000;
     }
+
+    .btn[disabled] {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .mensaje-aviso {
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+      color: #a33;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -69,14 +82,20 @@
 
   <div id="resumen" class="resumen"></div>
 
+  <div id="mensaje-aviso" class="mensaje-aviso"></div>
+
   <div class="botones">
-    <button class="btn" onclick="agregarOtro()">Agregar otro roll</button>
+    <button id="btnAgregar" class="btn" onclick="agregarOtro()">Agregar otro roll</button>
     <button class="btn" onclick="finalizar()">Finalizar pedido</button>
   </div>
 
   <script>
     const roll = JSON.parse(localStorage.getItem("pedido"));
     const resumenDiv = document.getElementById("resumen");
+    const mensaje = document.getElementById("mensaje-aviso");
+    const btnAgregar = document.getElementById("btnAgregar");
+    const rollsPrevios = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
+    const totalRolls = rollsPrevios.length + 1;
 
     if (roll) {
       resumenDiv.innerHTML = `
@@ -88,6 +107,22 @@
       `;
     } else {
       resumenDiv.innerHTML = "<p>No hay roll cargado.</p>";
+    }
+
+    async function verificarCupos() {
+      try {
+        const res = await fetch('/api/disponibilidad');
+        const data = await res.json();
+        const puedeAgregar = data.some(h => h.disponibles >= totalRolls);
+        if (!puedeAgregar) {
+          btnAgregar.disabled = true;
+          mensaje.textContent = "🚫 Ya no hay cupos disponibles para agregar más rolls en ninguna franja horaria.";
+        }
+      } catch (err) {
+        console.error("Error verificando cupos:", err);
+        mensaje.textContent = "Error al verificar disponibilidad de horarios.";
+        btnAgregar.disabled = true;
+      }
     }
 
     function irA(ruta) {
@@ -105,6 +140,8 @@
     function finalizar() {
       irA("datos-cliente.html");
     }
+
+    verificarCupos();
   </script>
 </body>
 </html>

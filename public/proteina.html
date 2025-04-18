@@ -118,6 +118,21 @@
 
     let seleccion = {};
 
+    async function verificarEstadoPedidos() {
+      try {
+        const res = await fetch('/estado-pedidos');
+        const data = await res.json();
+        if (!data.activo) {
+          alert("🚫 Actualmente no estamos tomando pedidos.");
+          window.location.href = "index.html";
+        }
+      } catch (e) {
+        console.error("Error al verificar el estado:", e);
+        alert("No se pudo verificar el estado del sistema.");
+        window.location.href = "index.html";
+      }
+    }
+
     function normalizarNombre(nombre) {
       return nombre
         .toLowerCase()
@@ -170,6 +185,7 @@
       irA("vegetal.html");
     }
 
+    verificarEstadoPedidos();
     cargarProteinas();
   </script>
 </body>

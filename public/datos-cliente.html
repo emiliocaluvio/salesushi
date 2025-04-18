@@ -14,11 +14,7 @@
       transition: opacity 0.3s ease;
     }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 1.5rem;
-    }
-
+    h1 { text-align: center; margin-bottom: 1.5rem; }
     form {
       max-width: 900px;
       margin: 0 auto;
@@ -62,9 +58,7 @@
       position: relative;
     }
 
-    .horario-box input {
-      display: none;
-    }
+    .horario-box input { display: none; }
 
     .horario-box.selected {
       background-color: #ff6f61;
@@ -140,18 +134,9 @@
     }
 
     @media (max-width: 700px) {
-      .form-row {
-        flex-direction: column;
-      }
-
-      .horarios {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .horario-box {
-        max-width: 100%;
-      }
+      .form-row { flex-direction: column; }
+      .horarios { flex-direction: column; align-items: center; }
+      .horario-box { max-width: 100%; }
     }
   </style>
 </head>
@@ -188,6 +173,21 @@
     const formulario = document.getElementById("formulario");
     const opcionesHorario = document.getElementById("opcionesHorario");
     const btnConfirmar = document.getElementById("btnConfirmar");
+
+    async function verificarEstadoPedidos() {
+      try {
+        const res = await fetch('/estado-pedidos');
+        const data = await res.json();
+        if (!data.activo) {
+          alert("🚫 Actualmente no estamos tomando pedidos.");
+          window.location.href = "index.html";
+        }
+      } catch (e) {
+        console.error("Error al verificar el estado del sistema:", e);
+        alert("No se pudo verificar el estado del sistema.");
+        window.location.href = "index.html";
+      }
+    }
 
     function renderRolls() {
       if (rolls.length === 0) {
@@ -279,6 +279,9 @@
         return;
       }
 
+      const total = rolls.reduce((sum, roll) => sum + roll.precio, 0);
+      localStorage.setItem("totalPedido", total);
+
       const payload = {
         nombre_cliente: nombre,
         apellido_cliente: apellido,
@@ -300,8 +303,8 @@
         return;
       }
 
-      localStorage.clear();
       irA("gracias.html");
+      localStorage.removeItem("todosLosRolls");
     });
 
     function irA(ruta) {
@@ -309,6 +312,7 @@
       setTimeout(() => window.location.href = ruta, 300);
     }
 
+    verificarEstadoPedidos();
     renderRolls();
     cargarHorarios();
   </script>

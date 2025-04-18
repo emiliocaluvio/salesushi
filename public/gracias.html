@@ -103,7 +103,6 @@
 
   <button class="btn-volver" onclick="volverInicio()">Volver al inicio</button>
 
-  <!-- Botón flotante de WhatsApp con ícono -->
   <a id="whatsappBtn" target="_blank" class="whatsapp-btn" aria-label="Contactar por WhatsApp">
     <img src="wpp.png" alt="WhatsApp">
   </a>
@@ -111,8 +110,9 @@
   <script>
     const metodoPago = localStorage.getItem("metodoPago");
     const total = localStorage.getItem("totalPedido");
+    const totalTexto = total ? `$${total}` : "no disponible";
 
-    document.getElementById("total").textContent = `Total del pedido: $${total}`;
+    document.getElementById("total").textContent = `Total del pedido: ${totalTexto}`;
 
     if (metodoPago === "Transferencia") {
       document.getElementById("info").innerHTML = `
@@ -132,12 +132,14 @@
       }, 300);
     }
 
-    const mensaje = `Hola, hice mi pedido en la web. El total fue de $${total}. ¡Muchas gracias! 🍣`;
+    const mensaje = total
+      ? `Hola, hice mi pedido en la web. El total fue de $${total}. ¡Muchas gracias! 🍣`
+      : `Hola, hice mi pedido en la web. ¡Muchas gracias! 🍣`;
+
     const numero = "59891037582";
     const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
     document.getElementById("whatsappBtn").href = url;
 
-    // Limpieza de localStorage
     localStorage.removeItem("metodoPago");
     localStorage.removeItem("totalPedido");
   </script>

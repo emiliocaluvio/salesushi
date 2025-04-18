@@ -39,9 +39,14 @@
       max-width: 280px;
     }
 
-    .btn:hover {
+    .btn:hover:enabled {
       background-color: #ff6f61;
       color: #000;
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
     }
 
     .linea {
@@ -148,7 +153,7 @@
 
   <!-- Botones -->
   <button class="btn" onclick="verMenu()">Ver menú</button>
-  <button class="btn" onclick="pedidoDirecto()">Hacer pedido</button>
+  <button class="btn" id="btnPedido" onclick="pedidoDirecto()">Hacer pedido</button>
 
   <script>
     function toggleAdmin() {
@@ -180,13 +185,11 @@
         if (data.activo) {
           irA('proteina.html');
         } else {
-          alert("🚫 Los pedidos no están habilitados por el momento.");
-          irA('index.html');
+          alert("🚫 Actualmente no estamos tomando pedidos");
         }
       } catch (err) {
         console.error("Error consultando el estado:", err);
         alert("Error consultando el estado de los pedidos.");
-        irA('index.html');
       }
     }
 
@@ -201,21 +204,36 @@
       }
     }
 
-    // Mostrar disponibilidad de horarios
-    fetch('/api/disponibilidad')
-      .then(res => res.json())
-      .then(data => {
+    async function mostrarCupos() {
+      try {
+        const estadoRes = await fetch('/estado-pedidos');
+        const estado = await estadoRes.json();
         const cont = document.getElementById('cupos');
+        const btnPedido = document.getElementById('btnPedido');
+
+        if (!estado.activo) {
+          cont.innerHTML = '🚫 Actualmente no estamos tomando pedidos';
+          btnPedido.disabled = true;
+          return;
+        }
+
+        const res = await fetch('/api/disponibilidad');
+        const data = await res.json();
+
         cont.innerHTML = '<strong>🌟 Cupos disponibles hoy:</strong><br>';
         data.forEach(h => {
           const emoji = h.disponibles === 0 ? '❌' : '🟢';
           cont.innerHTML += `🕒 ${h.hora} — ${h.disponibles} lugar${h.disponibles !== 1 ? 'es' : ''} ${emoji}<br>`;
         });
-      })
-      .catch(err => {
+
+        btnPedido.disabled = false;
+      } catch (err) {
         console.error('Error al cargar disponibilidad:', err);
         document.getElementById('cupos').innerText = 'Error al cargar disponibilidad de horarios.';
-      });
+      }
+    }
+
+    mostrarCupos();
   </script>
 </body>
 </html>

@@ -46,9 +46,14 @@
       max-width: 250px;
     }
 
-    .btn:hover {
+    .btn:hover:enabled {
       background-color: #ff6f61;
       color: #000;
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
     }
 
     @media (max-width: 600px) {
@@ -75,12 +80,8 @@
   <img src="menu.png" alt="Menú" class="menu-img">
 
   <div>
-    <button class="btn" onclick="irA('index.html')">
-      Volver al inicio
-    </button>
-    <button class="btn" onclick="comenzarPedido()">
-      Comenzar pedido
-    </button>
+    <button class="btn" onclick="irA('index.html')">Volver al inicio</button>
+    <button class="btn" id="btnPedido" onclick="comenzarPedido()">Comenzar pedido</button>
   </div>
 
   <script>
@@ -92,6 +93,8 @@
     }
 
     async function comenzarPedido() {
+      const btn = document.getElementById('btnPedido');
+
       try {
         const res = await fetch('/estado-pedidos');
         const data = await res.json();
@@ -108,6 +111,20 @@
         irA('index.html');
       }
     }
+
+    async function verificarEstado() {
+      const btn = document.getElementById('btnPedido');
+      try {
+        const res = await fetch('/estado-pedidos');
+        const data = await res.json();
+        btn.disabled = !data.activo;
+      } catch (err) {
+        console.error("Error al verificar el estado:", err);
+        btn.disabled = true;
+      }
+    }
+
+    verificarEstado();
   </script>
 </body>
 </html>
