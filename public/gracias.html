@@ -123,7 +123,7 @@
   <script>
     const metodoPago = localStorage.getItem("metodoPago");
     const total = localStorage.getItem("totalPedido");
-    const rolls = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
+    const rolls = JSON.parse(localStorage.getItem("todosLosRollsResumen")) || [];
 
     const totalTexto = total ? `$${total}` : "no disponible";
     document.getElementById("total").textContent = `Total del pedido: ${totalTexto}`;
@@ -142,7 +142,7 @@
     function volverInicio() {
       localStorage.removeItem("metodoPago");
       localStorage.removeItem("totalPedido");
-      localStorage.removeItem("todosLosRolls");
+      localStorage.removeItem("todosLosRollsResumen");
       document.body.classList.add("fade-out");
       setTimeout(() => {
         window.location.href = "index.html";

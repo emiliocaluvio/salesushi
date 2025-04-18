@@ -282,7 +282,8 @@
 
       const total = rolls.reduce((sum, roll) => sum + roll.precio, 0);
       localStorage.setItem("totalPedido", total);
-      localStorage.setItem("metodoPago", pago); // 👈 ESTA LÍNEA FALTABA
+      localStorage.setItem("metodoPago", pago);
+      localStorage.setItem("todosLosRollsResumen", JSON.stringify(rolls));
 
       const payload = {
         nombre_cliente: nombre,
