@@ -12,22 +12,17 @@
       text-align: center;
       padding: 2rem;
       margin: 0;
-      opacity: 1;
       transition: opacity 0.4s ease;
     }
 
-    body.fade-out {
-      opacity: 0;
-    }
+    body.fade-out { opacity: 0; }
 
     img.logo {
       max-width: 180px;
       margin-bottom: 2rem;
     }
 
-    h1 {
-      margin-bottom: 1rem;
-    }
+    h1 { margin-bottom: 1rem; }
 
     .mensaje {
       font-size: 1.2rem;
@@ -46,7 +41,7 @@
     .total {
       font-size: 1.4rem;
       font-weight: bold;
-      margin-top: 2rem;
+      margin: 2rem 0 0.5rem;
     }
 
     .btn-volver {
@@ -88,38 +83,36 @@
 
     .detalle-rolls {
       margin-top: 2rem;
-      text-align: left;
-      max-width: 400px;
+      max-width: 500px;
       margin-inline: auto;
-    }
-
-    .detalle-rolls p {
-      margin: 0.3rem 0;
+      text-align: left;
     }
 
     .detalle-roll {
       border-bottom: 1px dashed #ff6f61;
       margin-bottom: 1rem;
-      padding-bottom: 1rem;
+      padding-bottom: 0.5rem;
+    }
+
+    .detalle-roll p {
+      margin: 0.3rem 0;
     }
   </style>
 </head>
 <body>
 
   <img src="logo.png" alt="Logo Sale Sushi" class="logo" />
+  <h1 id="titulo">¡Gracias por tu pedido!</h1>
 
-  <h1>¡Gracias por tu pedido!</h1>
-
-  <div class="mensaje">
+  <div class="mensaje" id="mensaje-principal">
     Pronto estaremos en contacto para coordinar la entrega. ¡Esperamos que disfrutes tu sushi! 🍣
   </div>
 
   <div id="info"></div>
-
   <div class="total" id="total"></div>
 
-  <button class="btn-volver" onclick="volverInicio()">Volver al inicio</button>
-  <button class="btn-volver" onclick="mostrarResumen()">📋 Ver info de mi pedido</button>
+  <button class="btn-volver" id="btn-volver" onclick="volverInicio()">Volver al inicio</button>
+  <button class="btn-volver" id="btn-info" onclick="mostrarResumen()">📋 Ver info de mi pedido</button>
 
   <div id="detalle-pedido" class="detalle-rolls" style="display: none;"></div>
 
@@ -130,8 +123,9 @@
   <script>
     const metodoPago = localStorage.getItem("metodoPago");
     const total = localStorage.getItem("totalPedido");
-    const totalTexto = total ? `$${total}` : "no disponible";
+    const rolls = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
 
+    const totalTexto = total ? `$${total}` : "no disponible";
     document.getElementById("total").textContent = `Total del pedido: ${totalTexto}`;
 
     if (metodoPago === "Transferencia") {
@@ -146,6 +140,9 @@
     }
 
     function volverInicio() {
+      localStorage.removeItem("metodoPago");
+      localStorage.removeItem("totalPedido");
+      localStorage.removeItem("todosLosRolls");
       document.body.classList.add("fade-out");
       setTimeout(() => {
         window.location.href = "index.html";
@@ -153,7 +150,12 @@
     }
 
     function mostrarResumen() {
-      const rolls = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
+      document.getElementById("titulo").style.display = "none";
+      document.getElementById("mensaje-principal").style.display = "none";
+      document.getElementById("btn-info").style.display = "none";
+      document.getElementById("info").style.display = "none";
+      document.getElementById("total").style.display = "none";
+
       const resumenDiv = document.getElementById("detalle-pedido");
 
       if (rolls.length === 0) {
@@ -198,9 +200,6 @@
     const numero = "59891037582";
     const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
     document.getElementById("whatsappBtn").href = url;
-
-    localStorage.removeItem("metodoPago");
-    localStorage.removeItem("totalPedido");
   </script>
 </body>
 </html>
