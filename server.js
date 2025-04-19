@@ -222,6 +222,18 @@
       res.status(500).json({ error: 'Error al generar la imagen' });
     }
   });
+  app.delete('/eliminar-pedido-horario/:tabla/:id', async (req, res) => {
+    const { tabla, id } = req.params;
+    if (!['horario_19', 'horario_20', 'horario_21'].includes(tabla)) {
+      return res.status(400).json({ error: 'Tabla no válida' });
+    }
+  
+    const { error } = await supabase.from(tabla).delete().eq('id', id);
+    if (error) return res.status(500).json({ error: error.message });
+  
+    res.status(200).json({ message: "Pedido eliminado" });
+  });
+  
 
   app.listen(port, () => {
     console.log(`✅ Servidor escuchando en http://localhost:${port}`);

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Administración de Pedidos</title>
   <style>
     body {
@@ -172,6 +172,7 @@
 
         const div = document.createElement("div");
         const titulo = document.createElement("h2");
+        titulo.id = `titulo-${tabla}`;
         titulo.textContent = `${nombres[tabla]} (${datos.length})`;
 
         const boton = document.createElement("button");
@@ -196,11 +197,12 @@
               <th>Cobertura</th>
               <th>Precio</th>
               <th>Fecha</th>
+              <th>Eliminar</th>
             </tr>
           </thead>
           <tbody>
             ${datos.map(p => `
-              <tr>
+              <tr id="pedido-${p.id}">
                 <td>${p.nombre_cliente} ${p.apellido_cliente}</td>
                 <td>${p.celular_cliente}</td>
                 <td>${p.metodo_pago}</td>
@@ -209,6 +211,7 @@
                 <td>${p.cobertura}</td>
                 <td>$${p.precio}</td>
                 <td>${p.fecha?.split('T')[0]}</td>
+                <td><button onclick="eliminarPedido(${p.id}, '${tabla}')">❌</button></td>
               </tr>
             `).join('')}
           </tbody>
@@ -286,6 +289,24 @@
       contenedor.appendChild(div);
     }
 
+    async function eliminarPedido(id, tabla = null) {
+      if (!confirm("¿Eliminar este pedido?")) return;
+      await fetch(`/eliminar-pedido/${id}`, { method: 'DELETE' });
+      const fila = document.getElementById(`pedido-${id}`);
+      if (fila) fila.remove();
+
+      if (tabla) {
+        const titulo = document.getElementById(`titulo-${tabla}`);
+        const match = titulo.textContent.match(/\((\d+)\)/);
+        if (match) {
+          const nuevoValor = Math.max(0, parseInt(match[1]) - 1);
+          titulo.textContent = `${nombres[tabla]} (${nuevoValor})`;
+        }
+      } else {
+        historicoData = historicoData.filter(p => p.id !== id);
+      }
+    }
+
     function ordenarHistorico(campo) {
       ordenActual.asc = ordenActual.campo === campo ? !ordenActual.asc : true;
       ordenActual.campo = campo;
@@ -296,14 +317,6 @@
       });
       historicoOffset = 0;
       cargarTablasHorarias();
-    }
-
-    async function eliminarPedido(id) {
-      if (!confirm("¿Eliminar este pedido?")) return;
-      await fetch(`/eliminar-pedido/${id}`, { method: 'DELETE' });
-      const fila = document.getElementById(`pedido-${id}`);
-      if (fila) fila.remove();
-      historicoData = historicoData.filter(p => p.id !== id);
     }
 
     function cerrarSesion() {
