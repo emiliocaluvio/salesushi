@@ -6,7 +6,7 @@
   <title>Administración de Pedidos</title>
   <style>
     body {
-      background-color: #000;
+      background-color: #fdf6ec;
       color: #ff6f61;
       font-family: sans-serif;
       padding: 1rem;
@@ -211,7 +211,7 @@
                 <td>${p.cobertura}</td>
                 <td>$${p.precio}</td>
                 <td>${p.fecha?.split('T')[0]}</td>
-                <td><button onclick="eliminarPedido(${p.id}, '${tabla}')">❌</button></td>
+                <td><button onclick="eliminarPedidoHorario(${p.id}, '${tabla}')">❌</button></td>
               </tr>
             `).join('')}
           </tbody>
@@ -224,6 +224,22 @@
       }
 
       await cargarHistorico();
+    }
+
+    async function eliminarPedidoHorario(id, tabla) {
+      if (!confirm("¿Eliminar este pedido?")) return;
+
+      await fetch(`/eliminar-pedido-horario/${tabla}/${id}`, { method: 'DELETE' });
+
+      const fila = document.getElementById(`pedido-${id}`);
+      if (fila) fila.remove();
+
+      const titulo = document.getElementById(`titulo-${tabla}`);
+      const match = titulo.textContent.match(/\((\d+)\)/);
+      if (match) {
+        const nuevoValor = Math.max(0, parseInt(match[1]) - 1);
+        titulo.textContent = `${nombres[tabla]} (${nuevoValor})`;
+      }
     }
 
     async function cargarHistorico() {
@@ -289,22 +305,12 @@
       contenedor.appendChild(div);
     }
 
-    async function eliminarPedido(id, tabla = null) {
+    async function eliminarPedido(id) {
       if (!confirm("¿Eliminar este pedido?")) return;
       await fetch(`/eliminar-pedido/${id}`, { method: 'DELETE' });
       const fila = document.getElementById(`pedido-${id}`);
       if (fila) fila.remove();
-
-      if (tabla) {
-        const titulo = document.getElementById(`titulo-${tabla}`);
-        const match = titulo.textContent.match(/\((\d+)\)/);
-        if (match) {
-          const nuevoValor = Math.max(0, parseInt(match[1]) - 1);
-          titulo.textContent = `${nombres[tabla]} (${nuevoValor})`;
-        }
-      } else {
-        historicoData = historicoData.filter(p => p.id !== id);
-      }
+      historicoData = historicoData.filter(p => p.id !== id);
     }
 
     function ordenarHistorico(campo) {
