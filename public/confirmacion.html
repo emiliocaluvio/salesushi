@@ -67,12 +67,20 @@
       font-weight: bold;
     }
 
-    .botones-acciones {
+    .botonera-doble {
       display: flex;
       justify-content: center;
       gap: 1rem;
-      max-width: 420px;
+      max-width: 400px;
       width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    .botonera-simple {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      max-width: 400px;
       margin-bottom: 1rem;
     }
 
@@ -114,7 +122,7 @@
     }
 
     @media (max-width: 600px) {
-      .botones-acciones {
+      .botonera-doble {
         flex-direction: column;
         gap: 0.5rem;
       }
@@ -139,12 +147,12 @@
 
   <div id="mensaje-aviso" class="mensaje-aviso"></div>
 
-  <div class="botones-acciones">
+  <div class="botonera-doble">
     <button class="btn" onclick="volver()">⬅ Volver</button>
     <button class="btn" onclick="finalizar()">Finalizar pedido ➡</button>
   </div>
 
-  <div class="botones-acciones">
+  <div class="botonera-simple">
     <button class="btn" onclick="cancelarPedido()">Cancelar pedido</button>
   </div>
 
@@ -188,9 +196,7 @@
           const res = await fetch(`/horario/${h}`);
           const datos = await res.json();
           const cupo = 10 - datos.length;
-          if (cupo > totalDisponible) {
-            totalDisponible = cupo;
-          }
+          if (cupo > totalDisponible) totalDisponible = cupo;
         }
 
         cuposMaximos = totalDisponible;
