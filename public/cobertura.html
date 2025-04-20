@@ -93,11 +93,12 @@
 
     .botonera {
       display: flex;
+      flex-wrap: wrap;
       justify-content: center;
       gap: 1rem;
       width: 100%;
       max-width: 400px;
-      margin-bottom: 0.8rem;
+      margin-bottom: 1rem;
     }
 
     .btn {
@@ -110,6 +111,8 @@
       border-radius: 10px;
       cursor: pointer;
       transition: 0.3s;
+      min-width: 120px;
+      text-align: center;
     }
 
     .btn:hover {
@@ -117,27 +120,8 @@
       color: #000;
     }
 
-    .cancelar {
-      width: 90%;
-      max-width: 400px;
-      padding: 1rem;
-      margin-top: 0.3rem;
-      border: 2px dashed #ff6f61;
-      background: transparent;
-      color: #ff6f61;
-      font-size: 1rem;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .cancelar:hover {
-      background-color: #ff6f61;
-      color: #000;
-    }
-
     .logo-footer {
-      margin-top: 1.2rem;
+      margin-top: auto;
       margin-bottom: 1rem;
       width: 60px;
       opacity: 0.6;
@@ -147,10 +131,7 @@
       .btn {
         font-size: 0.95rem;
         padding: 0.8rem;
-      }
-
-      .cancelar {
-        font-size: 0.95rem;
+        width: 100%;
       }
 
       .opcion {
@@ -181,9 +162,8 @@
   <div class="botonera">
     <button class="btn" onclick="irA('vegetal.html')">⬅ Volver</button>
     <button class="btn" onclick="siguiente()">Finalizar pedido ➡</button>
+    <button class="btn" onclick="irA('index.html')">Cancelar pedido</button>
   </div>
-
-  <button class="cancelar" onclick="irA('index.html')">Cancelar pedido</button>
 
   <img src="logo.png" class="logo-footer" alt="Logo Sale Sushi" />
 
@@ -230,9 +210,8 @@
           div.classList.add("disabled");
         }
 
-        if (listaCoberturas.length % 2 !== 0 && index === listaCoberturas.length - 1) {
-          div.classList.add("impar");
-        }
+        const esImpar = listaCoberturas.length % 2 !== 0 && index === listaCoberturas.length - 1;
+        if (esImpar) div.classList.add("impar");
 
         div.onclick = () => {
           if (div.classList.contains("disabled")) return;
