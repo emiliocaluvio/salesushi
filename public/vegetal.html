@@ -49,21 +49,21 @@
 
     .opcion {
       border: 2px solid #ff6f61;
-      padding: 0.8rem 0.5rem;
+      padding: 0.6rem 1rem;
       border-radius: 10px;
       text-align: center;
       cursor: pointer;
       transition: 0.3s;
       font-size: 0.95rem;
-      width: 45%;
+      min-width: 140px;
+      flex: 1 1 calc(50% - 1rem);
       box-sizing: border-box;
     }
 
-    .opcion.impar {
-      width: 100%;
-      max-width: 45%;
-      margin-left: auto;
-      margin-right: auto;
+    .opcion:nth-child(7) {
+      flex: 0 0 100%;
+      max-width: 140px;
+      margin: 0 auto;
     }
 
     .opcion:hover,
@@ -74,8 +74,8 @@
 
     .contenedor-roll {
       position: relative;
-      width: 140px;
-      height: 140px;
+      width: 150px;
+      height: 150px;
       margin: 1.2rem auto;
       flex-shrink: 0;
     }
@@ -93,20 +93,20 @@
       justify-content: center;
       gap: 1rem;
       width: 100%;
-      max-width: 400px;
-      margin-bottom: 0.8rem;
+      max-width: 420px;
+      margin-top: auto;
     }
 
     .btn {
       flex: 1;
-      padding: 1rem 0;
+      padding: 0.8rem 0;
+      background-color: transparent;
       border: 2px dashed #ff6f61;
-      background: transparent;
       color: #ff6f61;
       font-size: 1rem;
-      border-radius: 10px;
       cursor: pointer;
-      transition: 0.3s;
+      transition: all 0.3s ease;
+      border-radius: 8px;
     }
 
     .btn:hover {
@@ -114,9 +114,15 @@
       color: #000;
     }
 
-    .cancelar {
+    .cancelar-container {
+      width: 100%;
+      max-width: 420px;
       margin-top: 0.8rem;
-      padding: 0.8rem 1.5rem;
+    }
+
+    .cancelar {
+      width: 100%;
+      padding: 0.8rem 0;
       border: 2px dashed #ff6f61;
       background: transparent;
       color: #ff6f61;
@@ -139,22 +145,19 @@
     }
 
     @media (max-width: 600px) {
-      .opcion {
-        width: 45%;
+      .btn, .cancelar {
+        font-size: 0.95rem;
+        width: 100%;
       }
 
-      .opcion.impar {
-        width: 100%;
-        max-width: 45%;
+      .botonera {
+        flex-direction: column;
+        gap: 0.5rem;
       }
 
       .contenedor-roll {
         width: 130px;
         height: 130px;
-      }
-
-      .btn, .cancelar {
-        font-size: 0.95rem;
       }
     }
   </style>
@@ -177,7 +180,9 @@
     <button class="btn" onclick="siguiente()">Siguiente ➡</button>
   </div>
 
-  <button class="cancelar" onclick="irA('index.html')">Cancelar pedido</button>
+  <div class="cancelar-container">
+    <button class="cancelar" onclick="irA('index.html')">Cancelar pedido</button>
+  </div>
 
   <img src="logo.png" class="logo-footer" alt="Logo Sale Sushi" />
 
@@ -277,10 +282,7 @@
     }
 
     function irA(ruta) {
-      document.body.classList.add("fade-out");
-      setTimeout(() => {
-        window.location.href = ruta;
-      }, 300);
+      window.location.href = ruta;
     }
 
     function siguiente() {
