@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
+<head> 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Resumen del Roll</title>
@@ -116,6 +116,11 @@
     @media (max-width: 600px) {
       .botones-acciones {
         flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .btn {
+        width: 100%;
       }
     }
   </style>
@@ -154,6 +159,7 @@
     const roll = JSON.parse(localStorage.getItem("pedido"));
     let lista = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
     let cantidadActual = 1;
+    let cuposMaximos = 100;
 
     if (roll) {
       resumenDiv.innerHTML = `
@@ -162,37 +168,54 @@
         <p><strong>Cobertura:</strong> ${roll.cobertura}</p>
         <p><strong>Precio:</strong> $${roll.precio}</p>
       `;
+
       if (roll.imagen) {
         imagenRoll.src = roll.imagen;
         imagenRoll.style.display = "block";
+      } else {
+        console.warn("⚠ No se encontró la imagen del roll.");
       }
+    } else {
+      resumenDiv.innerHTML = "<p>No hay roll cargado.</p>";
     }
 
     async function verificarCupos() {
       try {
-        const tablas = ["pedidos19", "pedidos20", "pedidos21"];
-        const totales = await Promise.all(tablas.map(async (tabla) => {
-          const res = await fetch(`/api/${tabla}`);
-          const data = await res.json();
-          return data.length;
-        }));
-        const maximo = Math.max(...totales);
-        const puede = lista.length + cantidadActual <= maximo;
-        mensaje.textContent = puede ? "" : "🚫 No hay más cupos disponibles.";
-        return puede;
+        const horarios = [19, 20, 21];
+        let totalDisponible = 0;
+
+        for (let h of horarios) {
+          const res = await fetch(`/horario/${h}`);
+          const datos = await res.json();
+          const cupo = 10 - datos.length;
+          if (cupo > totalDisponible) {
+            totalDisponible = cupo;
+          }
+        }
+
+        cuposMaximos = totalDisponible;
+
+        if (cantidadActual >= cuposMaximos) {
+          mensaje.textContent = "🚫 No hay más cupos disponibles para agregar rolls.";
+          return false;
+        } else {
+          mensaje.textContent = "";
+          return true;
+        }
       } catch (err) {
-        console.error("Error verificando cupos:", err);
+        console.error("Error verificando disponibilidad:", err);
         mensaje.textContent = "Error al verificar disponibilidad.";
         return false;
       }
     }
 
     async function agregarOtro() {
-      const puede = await verificarCupos();
-      if (!puede) return;
-      cantidadActual++;
-      lista.push({ ...roll });
-      contador.textContent = cantidadActual;
+      const puedeAgregar = await verificarCupos();
+      if (puedeAgregar && cantidadActual < cuposMaximos) {
+        cantidadActual++;
+        lista.push({ ...roll });
+        contador.textContent = cantidadActual;
+      }
     }
 
     function restarCantidad() {
@@ -222,7 +245,10 @@
     }
 
     function irA(ruta) {
-      window.location.href = ruta;
+      document.body.classList.add("fade-out");
+      setTimeout(() => {
+        window.location.href = ruta;
+      }, 300);
     }
 
     verificarCupos();
