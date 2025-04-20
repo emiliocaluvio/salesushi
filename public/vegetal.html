@@ -1,48 +1,45 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Elegí tus vegetales</title>
   <style>
-    body {
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
       background-color: #fdf6ec;
       color: #ff6f61;
       font-family: sans-serif;
-      margin: 0;
-      padding: 1.5rem;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
-    .fade-out {
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
     h1 {
-      margin-bottom: 1.5rem;
+      font-size: 1.4rem;
+      margin: 1.2rem 0;
       text-align: center;
     }
 
     .vegetales {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       gap: 0.8rem;
       width: 90%;
       max-width: 400px;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
 
     .opcion {
       border: 2px solid #ff6f61;
-      padding: 0.8rem 1rem;
+      padding: 0.8rem 0.5rem;
       border-radius: 10px;
       text-align: center;
       cursor: pointer;
       transition: 0.3s;
-      font-size: 1rem;
+      font-size: 0.95rem;
     }
 
     .opcion:hover {
@@ -57,9 +54,9 @@
 
     .contenedor-roll {
       position: relative;
-      width: 260px;
-      height: 260px;
-      margin-bottom: 2rem;
+      width: 220px;
+      height: 220px;
+      margin-bottom: 1rem;
     }
 
     .contenedor-roll img {
@@ -67,62 +64,89 @@
       top: 0;
       left: 0;
       width: 100%;
+      height: auto;
     }
 
-    .navegacion {
+    .botonera {
       display: flex;
       justify-content: space-between;
-      width: 100%;
-      max-width: 400px;
       gap: 1rem;
-      flex-wrap: wrap;
+      width: 90%;
+      max-width: 400px;
+      margin-bottom: 1rem;
     }
 
-    .btn-nav {
+    .btn {
       flex: 1;
       padding: 1rem;
       border: 2px dashed #ff6f61;
-      background-color: transparent;
+      background: transparent;
       color: #ff6f61;
       font-size: 1rem;
-      cursor: pointer;
       border-radius: 10px;
-      transition: all 0.3s ease;
+      cursor: pointer;
+      transition: 0.3s;
     }
 
-    .btn-nav:hover {
+    .btn:hover {
       background-color: #ff6f61;
       color: #000;
     }
 
+    .cancelar {
+      margin-top: 0.5rem;
+      border: none;
+      background: none;
+      color: #ff6f61;
+      text-decoration: underline;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    .logo-footer {
+      margin-top: auto;
+      margin-bottom: 1rem;
+      width: 60px;
+      opacity: 0.6;
+    }
+
     @media (max-width: 600px) {
-      .navegacion {
-        flex-direction: column;
+      h1 {
+        font-size: 1.2rem;
+        margin-top: 1rem;
       }
 
-      .btn-nav {
-        width: 100%;
+      .btn {
+        font-size: 0.95rem;
+        padding: 0.8rem;
+      }
+
+      .cancelar {
+        font-size: 0.9rem;
       }
     }
   </style>
 </head>
 <body>
-
-  <h1>Paso 2: Elegí tus vegetales</h1>
+  <h1>Paso 2: Elegí tus vegetales (2/3)</h1>
 
   <div id="contenedor" class="vegetales"></div>
 
   <div class="contenedor-roll">
-    <img src="maqueta.png" alt="">
+    <img src="maqueta.png" alt="Maqueta">
     <img id="img-proteina" src="" alt="" style="display:none;">
     <img id="img-vegetal1" src="" alt="" style="display:none;">
     <img id="img-vegetal2" src="" alt="" style="display:none;">
   </div>
 
-  <div class="navegacion">
-    <button class="btn-nav" onclick="irA('proteina.html')">⬅ Volver</button>
-    <button class="btn-nav" onclick="siguiente()">Siguiente ➡</button>
+  <div class="botonera">
+    <button class="btn" onclick="irA('proteina.html')">⬅ Volver</button>
+    <button class="btn" onclick="siguiente()">Siguiente ➡</button>
   </div>
+
+  <button class="cancelar" onclick="irA('index.html')">Cancelar pedido</button>
+
+  <img src="logo.png" class="logo-footer" alt="Logo Sale Sushi" />
 
   <script>
     const vegetalesDisponibles = [
@@ -150,9 +174,6 @@
         const nombreProteina = normalizarNombre(seleccion.proteina);
         imgProteina.src = `proteinas/${nombreProteina}proteina.png`;
         imgProteina.style.display = "block";
-      } else {
-        imgProteina.src = "";
-        imgProteina.style.display = "none";
       }
 
       vegetalesDisponibles.forEach(v => {
@@ -193,12 +214,10 @@
       if (seleccion.proteina === "Vegetariano") {
         if (seleccionados.length === 2) {
           img1.src = "proteinas/" + normalizarNombre(seleccionados[0]) + "proteina.png";
-          img1.style.display = "block";
           img2.src = "vegetales/" + normalizarNombre(seleccionados[1]) + "vegetal.png";
+          img1.style.display = "block";
           img2.style.display = "block";
         } else {
-          img1.src = "";
-          img2.src = "";
           img1.style.display = "none";
           img2.style.display = "none";
         }
@@ -206,14 +225,10 @@
         if (seleccionados.length === 1) {
           img1.src = "vegetales/" + normalizarNombre(seleccionados[0]) + "vegetal.png";
           img1.style.display = "block";
-          img2.src = "";
-          img2.style.display = "none";
         } else {
-          img1.src = "";
-          img2.src = "";
           img1.style.display = "none";
-          img2.style.display = "none";
         }
+        img2.style.display = "none";
       }
     }
 
@@ -227,7 +242,7 @@
     function siguiente() {
       if (seleccion.proteina === "Vegetariano") {
         if (seleccionados.length !== 2) {
-          alert("Debés elegir exactamente 2 vegetales para el roll vegetariano.");
+          alert("Debés elegir exactamente 2 vegetales.");
           return;
         }
       } else {

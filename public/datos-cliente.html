@@ -12,6 +12,10 @@
       padding: 2rem;
       margin: 0;
       transition: opacity 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      justify-content: space-between;
     }
 
     h1 { text-align: center; margin-bottom: 1.5rem; }
@@ -45,7 +49,6 @@
       display: flex;
       justify-content: center;
       gap: 1rem;
-      flex-wrap: wrap;
     }
 
     .horario-box {
@@ -73,35 +76,44 @@
     }
 
     .resumen {
-      max-width: 600px;
-      margin: 2rem auto;
-      border: 2px solid #ff6f61;
-      border-radius: 10px;
+      max-width: 900px;
+      margin: 2rem auto 1rem;
       padding: 1rem;
     }
 
+    .rolls-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+    }
+
     .roll {
-      border-bottom: 1px dashed #ff6f61;
-      padding: 0.5rem 0;
+      border: 1px dashed #ff6f61;
+      border-radius: 8px;
+      padding: 0.5rem;
+      width: calc(50% - 1rem);
+      box-sizing: border-box;
+      text-align: center;
       position: relative;
     }
 
     .roll-img {
       width: 100%;
-      max-width: 250px;
-      margin: 1rem auto;
+      max-width: 160px;
+      margin: 0.5rem auto;
       display: block;
-      border-radius: 10px;
+      border-radius: 8px;
     }
 
     .eliminar-btn {
       position: absolute;
-      top: 0.5rem;
-      right: 0.5rem;
+      top: 0.3rem;
+      right: 0.3rem;
       background-color: #ff6f61;
       border: none;
       color: #000;
-      padding: 0.3rem 0.6rem;
+      padding: 0.2rem 0.6rem;
       border-radius: 6px;
       font-size: 0.9rem;
       cursor: pointer;
@@ -111,6 +123,7 @@
       margin-top: 1rem;
       font-size: 1.3rem;
       font-weight: bold;
+      text-align: center;
     }
 
     button, .btn-volver {
@@ -122,6 +135,9 @@
       cursor: pointer;
       transition: 0.3s;
       margin-top: 1rem;
+      width: 100%;
+      max-width: 300px;
+      align-self: center;
     }
 
     button[disabled] {
@@ -134,41 +150,63 @@
       color: #000;
     }
 
+    .logo-footer {
+      width: 80px;
+      opacity: 0.7;
+      margin: 2rem auto 0;
+      display: block;
+    }
+
     @media (max-width: 700px) {
-      .form-row { flex-direction: column; }
-      .horarios { flex-direction: column; align-items: center; }
-      .horario-box { max-width: 100%; }
+      .roll {
+        width: 100%;
+      }
+
+      .horarios {
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+      }
+
+      .horario-box {
+        min-width: 100px;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Finalizar Pedido</h1>
+  <div>
+    <h1>Finalizar Pedido</h1>
 
-  <div class="resumen" id="resumen-rolls"></div>
+    <div class="resumen" id="resumen-rolls"></div>
 
-  <form id="formulario">
-    <div class="form-row">
-      <input type="text" id="nombre" placeholder="Nombre" required>
-      <input type="text" id="apellido" placeholder="Apellido" required>
-      <input type="tel" id="celular" placeholder="Celular (09XXXXXXX)" pattern="09[0-9]{7}" maxlength="9" minlength="9" required>
-      <select id="pago" required>
-        <option value="">Forma de pago</option>
-        <option value="Transferencia">Transferencia</option>
-        <option value="Efectivo">Efectivo</option>
-      </select>
-    </div>
+    <form id="formulario">
+      <div class="form-row">
+        <input type="text" id="nombre" placeholder="Nombre" required>
+        <input type="text" id="apellido" placeholder="Apellido" required>
+        <input type="tel" id="celular" placeholder="Celular (09XXXXXXX)" pattern="09[0-9]{7}" maxlength="9" minlength="9" required>
+        <select id="pago" required>
+          <option value="">Forma de pago</option>
+          <option value="Transferencia">Transferencia</option>
+          <option value="Efectivo">Efectivo</option>
+        </select>
+      </div>
 
-    <h3 style="text-align:center;">Seleccioná horario de entrega</h3>
-    <div class="horarios" id="opcionesHorario"></div>
+      <h3 style="text-align:center;">Seleccioná horario de entrega</h3>
+      <div class="horarios" id="opcionesHorario"></div>
 
-    <button type="submit" id="btnConfirmar" disabled>Confirmar pedido</button>
-  </form>
+      <button type="submit" id="btnConfirmar" disabled>Confirmar pedido</button>
+    </form>
 
-  <button class="btn-volver" onclick="cancelarPedido()">Cancelar pedido</button>
+    <button class="btn-volver" onclick="cancelarPedido()">Cancelar pedido</button>
+  </div>
+
+  <img src="logo.png" alt="Logo Sale Sushi" class="logo-footer" />
 
   <script>
     let rolls = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
     let horarioSeleccionado = null;
+    let disponibilidad = [];
 
     const resumen = document.getElementById("resumen-rolls");
     const formulario = document.getElementById("formulario");
@@ -202,17 +240,19 @@
 
       resumen.innerHTML = `
         <h3>Tu pedido:</h3>
-        ${rolls.map((roll, index) => `
-          <div class="roll">
-            <button class="eliminar-btn" onclick="eliminarRoll(${index})">Eliminar</button>
-            <p><strong>Roll ${index + 1}</strong></p>
-            <p>Proteína: ${roll.proteina}</p>
-            <p>Vegetal: ${roll.vegetal}</p>
-            <p>Cobertura: ${roll.cobertura}</p>
-            <p>Precio: $${roll.precio}</p>
-            ${roll.imagen ? `<img src="${roll.imagen}" alt="Roll ${index + 1}" class="roll-img">` : ""}
-          </div>
-        `).join('')}
+        <div class="rolls-grid">
+          ${rolls.map((roll, index) => `
+            <div class="roll">
+              <button class="eliminar-btn" onclick="eliminarRoll(${index})">✖</button>
+              <p><strong>Roll ${index + 1}</strong></p>
+              <p>${roll.proteina}</p>
+              <p>${roll.vegetal}</p>
+              <p>${roll.cobertura}</p>
+              <p>$${roll.precio}</p>
+              ${roll.imagen ? `<img src="${roll.imagen}" alt="Roll ${index + 1}" class="roll-img">` : ""}
+            </div>
+          `).join('')}
+        </div>
         <div class="total">Total del pedido: $${total}</div>
       `;
     }
@@ -233,15 +273,15 @@
       horarioSeleccionado = hora;
       document.querySelectorAll('.horario-box').forEach(el => el.classList.remove('selected'));
       document.getElementById(`hora-${hora}`).classList.add('selected');
-      btnConfirmar.disabled = false;
+      validarFormulario();
     }
 
     async function cargarHorarios() {
       const res = await fetch('/api/disponibilidad');
-      const data = await res.json();
+      disponibilidad = await res.json();
       opcionesHorario.innerHTML = '';
 
-      data.forEach(h => {
+      disponibilidad.forEach(h => {
         const clase = h.disponibles >= rolls.length ? '' : 'disabled';
         const box = document.createElement('div');
         box.className = `horario-box ${clase}`;
@@ -259,8 +299,22 @@
         opcionesHorario.appendChild(box);
       });
 
-      btnConfirmar.disabled = true;
+      validarFormulario();
     }
+
+    function validarFormulario() {
+      const nombre = document.getElementById("nombre").value.trim();
+      const apellido = document.getElementById("apellido").value.trim();
+      const celular = document.getElementById("celular").value.trim();
+      const pago = document.getElementById("pago").value;
+
+      const camposCompletos = nombre && apellido && celular && pago && horarioSeleccionado;
+      const horarioOk = disponibilidad.some(d => d.hora === horarioSeleccionado && d.disponibles >= rolls.length);
+
+      btnConfirmar.disabled = !(camposCompletos && horarioOk);
+    }
+
+    document.getElementById("formulario").addEventListener("input", validarFormulario);
 
     document.getElementById("formulario").addEventListener("submit", async function (e) {
       e.preventDefault();
@@ -269,21 +323,6 @@
       const apellido = document.getElementById("apellido").value.trim();
       const celular = document.getElementById("celular").value.trim();
       const pago = document.getElementById("pago").value;
-
-      if (!nombre || !apellido || !celular || !pago || !horarioSeleccionado) {
-        alert("Por favor completá todos los campos y seleccioná un horario.");
-        return;
-      }
-
-      if (!/^09\d{7}$/.test(celular)) {
-        alert("El número de celular debe empezar con 09 y tener 9 dígitos.");
-        return;
-      }
-
-      const total = rolls.reduce((sum, roll) => sum + roll.precio, 0);
-      localStorage.setItem("totalPedido", total);
-      localStorage.setItem("metodoPago", pago);
-      localStorage.setItem("todosLosRollsResumen", JSON.stringify(rolls));
 
       const payload = {
         nombre_cliente: nombre,

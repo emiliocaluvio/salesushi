@@ -1,54 +1,72 @@
 <!DOCTYPE html>
 <html lang="es">
 <head> 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Resumen del Roll</title>
   <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+
     body {
       background-color: #fdf6ec;
       color: #ff6f61;
       font-family: sans-serif;
       text-align: center;
-      padding: 2rem;
-    }
-
-    .fade-out {
-      opacity: 0;
-      transition: opacity 0.3s ease;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
     h1 {
-      font-size: 2rem;
+      font-size: 1.6rem;
       margin-bottom: 1rem;
     }
 
     .resumen {
       background-color: #fdf6ec;
       border: 2px solid #ff6f61;
-      padding: 1.5rem;
+      padding: 1.2rem;
       border-radius: 10px;
       max-width: 400px;
-      margin: 0 auto 2rem auto;
+      margin: 0 auto 1rem auto;
     }
 
     .resumen p {
       margin: 0.5rem 0;
-      font-size: 1.1rem;
+      font-size: 1rem;
+    }
+
+    .roll-img-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
     }
 
     .roll-img {
-      width: 250px;
-      margin-top: 1.5rem;
+      width: 240px;
+    }
+
+    .mensaje-aviso {
+      font-size: 1rem;
+      margin: 0.8rem auto;
+      color: #a33;
+      font-weight: bold;
+      max-width: 400px;
     }
 
     .botones {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       gap: 1rem;
-      max-width: 400px;
-      margin: 0 auto;
       flex-wrap: wrap;
+      max-width: 400px;
+      margin: 1rem auto 0;
     }
 
     .btn {
@@ -59,8 +77,9 @@
       color: #ff6f61;
       font-size: 1rem;
       cursor: pointer;
-      transition: all 0.3s ease;
       border-radius: 10px;
+      transition: all 0.3s ease;
+      min-width: 120px;
     }
 
     .btn:hover {
@@ -73,44 +92,55 @@
       cursor: not-allowed;
     }
 
-    .mensaje-aviso {
-      font-size: 1rem;
-      margin-bottom: 1.5rem;
-      color: #a33;
-      font-weight: bold;
+    .cancelar {
+      margin-top: 1rem;
+    }
+
+    .logo-footer {
+      width: 90px;
+      opacity: 0.7;
+      margin-top: 2rem;
+      align-self: center;
     }
 
     @media (max-width: 600px) {
-      .botones {
-        flex-direction: column;
-      }
-
       .btn {
         width: 100%;
+      }
+
+      .botones {
+        flex-direction: column;
       }
     }
   </style>
 </head>
 <body>
-  <h1>Resumen del Roll</h1>
+  <div>
+    <h1>Resumen del Roll</h1>
 
-  <div id="resumen" class="resumen"></div>
+    <div id="resumen" class="resumen"></div>
 
-  <div id="mensaje-aviso" class="mensaje-aviso"></div>
+    <div class="mensaje-aviso" id="mensaje-aviso"></div>
+  </div>
 
   <div class="botones">
     <button class="btn" onclick="volver()">⬅ Volver</button>
-    <button id="btnAgregar" class="btn" onclick="agregarOtro()">Agregar otro roll</button>
+    <button class="btn" id="btnAgregar" onclick="agregarOtro()">+1 Roll igual (<span id="contador">1</span>)</button>
     <button class="btn" onclick="finalizar()">Finalizar pedido ➡</button>
   </div>
 
+  <button class="btn cancelar" onclick="cancelarPedido()">Cancelar pedido</button>
+
+  <img src="logo.png" alt="Logo Sale Sushi" class="logo-footer">
+
   <script>
     const roll = JSON.parse(localStorage.getItem("pedido"));
+    let lista = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
+    let cantidadActual = 1;
+    const contador = document.getElementById("contador");
     const resumenDiv = document.getElementById("resumen");
     const mensaje = document.getElementById("mensaje-aviso");
     const btnAgregar = document.getElementById("btnAgregar");
-    const rollsPrevios = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
-    const totalRolls = rollsPrevios.length + 1;
 
     if (roll) {
       resumenDiv.innerHTML = `
@@ -118,7 +148,9 @@
         <p><strong>Vegetal:</strong> ${roll.vegetal}</p>
         <p><strong>Cobertura:</strong> ${roll.cobertura}</p>
         <p><strong>Precio:</strong> $${roll.precio}</p>
-        <img src="${roll.imagen}" alt="Visual del roll" class="roll-img">
+        <div class="roll-img-container">
+          <img src="${roll.imagen}" alt="Visual del roll" class="roll-img">
+        </div>
       `;
     } else {
       resumenDiv.innerHTML = "<p>No hay roll cargado.</p>";
@@ -128,16 +160,29 @@
       try {
         const res = await fetch('/api/disponibilidad');
         const data = await res.json();
-        const puedeAgregar = data.some(h => h.disponibles >= totalRolls);
-        if (!puedeAgregar) {
+        const disponibles = data.map(d => d.disponibles);
+        const maximo = Math.max(...disponibles);
+
+        if (lista.length + cantidadActual >= maximo) {
           btnAgregar.disabled = true;
-          mensaje.textContent = "🚫 Ya no hay cupos disponibles para agregar más rolls en ninguna franja horaria.";
+          mensaje.textContent = "🚫 Ya no hay cupos disponibles para agregar más rolls.";
+        } else {
+          btnAgregar.disabled = false;
+          mensaje.textContent = "";
         }
       } catch (err) {
         console.error("Error verificando cupos:", err);
         mensaje.textContent = "Error al verificar disponibilidad de horarios.";
         btnAgregar.disabled = true;
       }
+    }
+
+    function agregarOtro() {
+      lista.push({ ...roll });
+      localStorage.setItem("todosLosRolls", JSON.stringify(lista));
+      cantidadActual++;
+      contador.textContent = cantidadActual;
+      verificarCupos();
     }
 
     function irA(ruta) {
@@ -151,13 +196,17 @@
       irA("cobertura.html");
     }
 
-    function agregarOtro() {
-      localStorage.removeItem("pedido");
-      irA("proteina.html");
+    function finalizar() {
+      localStorage.setItem("todosLosRolls", JSON.stringify(lista));
+      irA("datos-cliente.html");
     }
 
-    function finalizar() {
-      irA("datos-cliente.html");
+    function cancelarPedido() {
+      if (confirm("¿Estás seguro de cancelar el pedido?")) {
+        localStorage.removeItem("pedido");
+        localStorage.removeItem("todosLosRolls");
+        irA("index.html");
+      }
     }
 
     verificarCupos();

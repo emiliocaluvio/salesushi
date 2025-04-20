@@ -1,51 +1,48 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Elegí tu cobertura</title>
   <style>
-    body {
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
       background-color: #fdf6ec;
       color: #ff6f61;
       font-family: sans-serif;
-      margin: 0;
-      padding: 1.5rem;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
 
-    .fade-out {
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
     h1 {
-      margin-bottom: 1.5rem;
+      font-size: 1.4rem;
+      margin: 1.2rem 0;
       text-align: center;
     }
 
     .coberturas {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       gap: 0.8rem;
       width: 90%;
       max-width: 400px;
-      margin-bottom: 2rem;
+      margin-bottom: 1.5rem;
     }
 
     .opcion {
       border: 2px solid #ff6f61;
-      padding: 0.8rem 1rem;
+      padding: 0.8rem 0.5rem;
       border-radius: 10px;
       text-align: center;
       cursor: pointer;
       transition: 0.3s;
-      font-size: 1rem;
+      font-size: 0.95rem;
     }
 
-    .opcion:hover {
+    .opcion:hover:not(.disabled) {
       background-color: #ff6f61;
       color: #000;
     }
@@ -55,11 +52,16 @@
       color: #000;
     }
 
+    .opcion.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
     .contenedor-roll {
       position: relative;
-      width: 260px;
-      height: 260px;
-      margin-bottom: 2rem;
+      width: 220px;
+      height: 220px;
+      margin-bottom: 1rem;
     }
 
     .contenedor-roll img {
@@ -68,49 +70,80 @@
       left: 0;
       width: 100%;
       height: auto;
-      display: block;
     }
 
-    .navegacion {
+    .botonera {
       display: flex;
       justify-content: space-between;
-      width: 100%;
-      max-width: 400px;
       gap: 1rem;
-      flex-wrap: wrap;
+      width: 90%;
+      max-width: 400px;
+      margin-bottom: 1rem;
     }
 
-    .btn-nav {
+    .btn {
       flex: 1;
       padding: 1rem;
       border: 2px dashed #ff6f61;
-      background-color: transparent;
+      background: transparent;
       color: #ff6f61;
       font-size: 1rem;
-      cursor: pointer;
       border-radius: 10px;
-      transition: all 0.3s ease;
+      cursor: pointer;
+      transition: 0.3s;
     }
 
-    .btn-nav:hover {
+    .btn:hover {
       background-color: #ff6f61;
       color: #000;
     }
 
+    .cancelar {
+      width: 90%;
+      max-width: 400px;
+      padding: 1rem;
+      margin-top: 0.3rem;
+      border: 2px dashed #ff6f61;
+      background: transparent;
+      color: #ff6f61;
+      font-size: 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .cancelar:hover {
+      background-color: #ff6f61;
+      color: #000;
+    }
+
+    .logo-footer {
+      margin-top: auto;
+      margin-bottom: 1rem;
+      width: 60px;
+      opacity: 0.6;
+    }
+
     @media (max-width: 600px) {
-      .navegacion {
-        flex-direction: column;
+      h1 {
+        font-size: 1.2rem;
+        margin-top: 1rem;
       }
 
-      .btn-nav {
-        width: 100%;
+      .btn {
+        font-size: 0.95rem;
+        padding: 0.8rem;
+      }
+
+      .cancelar {
+        font-size: 0.95rem;
       }
     }
   </style>
 </head>
 <body>
 
-  <h1>Paso 3: Elegí tu cobertura</h1>
+  <h1>Paso 3: Elegí tu cobertura (3/3)</h1>
 
   <div id="contenedor" class="coberturas"></div>
 
@@ -121,10 +154,14 @@
     <img id="imgCobertura" src="" alt="" style="display: none;">
   </div>
 
-  <div class="navegacion">
-    <button class="btn-nav" onclick="irA('vegetal.html')">⬅ Volver</button>
-    <button class="btn-nav" onclick="siguiente()">Siguiente ➡</button>
+  <div class="botonera">
+    <button class="btn" onclick="irA('vegetal.html')">⬅ Volver</button>
+    <button class="btn" onclick="siguiente()">Finalizar pedido ➡</button>
   </div>
+
+  <button class="cancelar" onclick="irA('index.html')">Cancelar pedido</button>
+
+  <img src="logo.png" class="logo-footer" alt="Logo Sale Sushi" />
 
   <script>
     const listaCoberturas = ["Sésamo", "Ciboulette", "Nori", "Panko", "Palta", "Salmón"];
@@ -132,10 +169,9 @@
 
     function formatear(nombre) {
       return nombre.toLowerCase()
-                   .replace(/mix de morr[oó]n/g, 'morron')
-                   .normalize("NFD")
-                   .replace(/\p{Diacritic}/gu, "")
-                   .replace(/ /g, "");
+        .replace(/mix de morr[oó]n/g, 'morron')
+        .normalize("NFD").replace(/\p{Diacritic}/gu, "")
+        .replace(/ /g, "");
     }
 
     function cargarRollPreview() {
@@ -145,25 +181,16 @@
       if (seleccion.proteina === "Vegetariano") {
         const vegetales = seleccion.vegetal?.split(", ");
         if (vegetales && vegetales.length === 2) {
-          const vegetal1 = formatear(vegetales[0]);
-          const vegetal2 = formatear(vegetales[1]);
-
-          imgProteina.src = `proteinas/${vegetal1}proteina.png`;
-          imgVegetal.src = `vegetales/${vegetal2}vegetal.png`;
-        } else {
-          imgProteina.src = "";
-          imgVegetal.src = "";
+          imgProteina.src = `proteinas/${formatear(vegetales[0])}proteina.png`;
+          imgVegetal.src = `vegetales/${formatear(vegetales[1])}vegetal.png`;
         }
       } else {
-        const proteina = formatear(seleccion.proteina);
-        const vegetal = formatear(seleccion.vegetal);
-
-        imgProteina.src = `proteinas/${proteina}proteina.png`;
-        imgVegetal.src = `vegetales/${vegetal}vegetal.png`;
+        imgProteina.src = `proteinas/${formatear(seleccion.proteina)}proteina.png`;
+        imgVegetal.src = `vegetales/${formatear(seleccion.vegetal)}vegetal.png`;
       }
 
-      imgProteina.style.display = imgProteina.src ? "block" : "none";
-      imgVegetal.style.display = imgVegetal.src ? "block" : "none";
+      imgProteina.style.display = "block";
+      imgVegetal.style.display = "block";
     }
 
     function cargarCoberturas() {
@@ -174,9 +201,17 @@
         div.className = "opcion";
         div.textContent = c;
 
+        const esVegetariano = seleccion.proteina === "Vegetariano";
+        if (esVegetariano && c === "Salmón") {
+          div.classList.add("disabled");
+        }
+
         div.onclick = () => {
+          if (div.classList.contains("disabled")) return;
+
           document.querySelectorAll(".opcion").forEach(el => el.classList.remove("seleccionada"));
           div.classList.add("seleccionada");
+
           seleccion.cobertura = c;
           const cobertura = formatear(c);
           const imgCob = document.getElementById("imgCobertura");
@@ -204,10 +239,6 @@
       try {
         const res = await fetch('/combinaciones');
         const combinaciones = await res.json();
-
-        if (!res.ok || !Array.isArray(combinaciones)) {
-          throw new Error("Error al obtener combinaciones del servidor.");
-        }
 
         const match = combinaciones.find(item =>
           item.proteina.toLowerCase().trim() === seleccion.proteina.toLowerCase().trim() &&

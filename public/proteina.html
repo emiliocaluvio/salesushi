@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Elegí tus vegetales</title>
+  <title>Elegí tu proteína</title>
   <style>
     html, body {
       height: 100%;
       margin: 0;
-      padding: 0;
     }
 
     body {
@@ -18,23 +17,23 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-between;
       padding: 1rem;
       box-sizing: border-box;
     }
 
     h1 {
       font-size: 1.4rem;
-      margin: 1rem 0;
+      margin-bottom: 1rem;
       text-align: center;
     }
 
-    .vegetales {
+    .proteinas {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       gap: 0.8rem;
       width: 100%;
       max-width: 400px;
+      margin-bottom: 1.5rem;
     }
 
     .opcion {
@@ -47,11 +46,7 @@
       font-size: 0.95rem;
     }
 
-    .opcion:hover {
-      background-color: #ff6f61;
-      color: #000;
-    }
-
+    .opcion:hover,
     .opcion.seleccionada {
       background-color: #ff6f61;
       color: #000;
@@ -61,7 +56,7 @@
       position: relative;
       width: 220px;
       height: 220px;
-      margin: 1rem 0;
+      margin-bottom: 1.5rem;
     }
 
     .contenedor-roll img {
@@ -72,16 +67,18 @@
       height: auto;
     }
 
-    .botones {
+    .botonera {
       display: flex;
       justify-content: center;
       gap: 1rem;
-      margin-top: 1rem;
-      flex-wrap: wrap;
+      width: 100%;
+      max-width: 420px;
+      margin-top: auto;
     }
 
     .btn {
-      padding: 0.8rem 1.2rem;
+      flex: 1;
+      padding: 1rem 0;
       background-color: transparent;
       border: 2px dashed #ff6f61;
       color: #ff6f61;
@@ -96,126 +93,116 @@
     }
 
     .logo-footer {
+      margin-top: 2rem;
       width: 60px;
-      margin-top: 1.5rem;
-      opacity: 0.5;
+      opacity: 0.4;
     }
   </style>
 </head>
 <body>
-  <h1>2/3: Elegí tus vegetales</h1>
+  <h1>1/3: Elegí tu proteína</h1>
 
-  <div id="contenedor" class="vegetales"></div>
+  <div id="contenedor" class="proteinas"></div>
 
   <div class="contenedor-roll">
     <img src="maqueta.png" alt="Maqueta base">
-    <img id="img-proteina" src="" style="display:none;">
-    <img id="img-vegetal1" src="" style="display:none;">
-    <img id="img-vegetal2" src="" style="display:none;">
+    <img id="img-proteina" src="" alt="" style="display: none;">
   </div>
 
-  <div class="botones">
+  <div class="botonera">
     <button class="btn" onclick="cancelar()">Cancelar pedido</button>
     <button class="btn" onclick="siguiente()">Siguiente</button>
   </div>
 
-  <img src="logo.png" alt="Logo pequeño" class="logo-footer" />
+  <img src="logo.png" class="logo-footer" alt="Logo Sale Sushi">
 
   <script>
-    const vegetalesDisponibles = [
-      "Ciboulette", "Cebollín", "Palta", "Mix de morrón",
-      "Pepino", "Palmitos", "Zanahoria"
+    const listaProteinas = [
+      "Salmón",
+      "Langostino",
+      "Langostino Panko",
+      "Pollo Teriyaki",
+      "Pollo Panko",
+      "Kanikama",
+      "Vegetariano"
     ];
 
-    let seleccion = JSON.parse(localStorage.getItem("pedido")) || {};
-    let seleccionados = [];
+    let seleccion = {};
 
-    function normalizar(nombre) {
-      return nombre.toLowerCase().replace(/mix de /g, "").replace(/\s+/g, "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    async function verificarEstadoPedidos() {
+      try {
+        const res = await fetch('/estado-pedidos');
+        const data = await res.json();
+        if (!data.activo) {
+          alert("🚫 Actualmente no estamos tomando pedidos.");
+          window.location.href = "index.html";
+        }
+      } catch (e) {
+        console.error("Error al verificar el estado:", e);
+        alert("No se pudo verificar el estado del sistema.");
+        window.location.href = "index.html";
+      }
     }
 
-    function cargarVegetales() {
+    function normalizarNombre(nombre) {
+      return nombre
+        .toLowerCase()
+        .replace(/\s+/g, "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+    }
+
+    function cargarProteinas() {
       const contenedor = document.getElementById("contenedor");
 
-      const imgProteina = document.getElementById("img-proteina");
-      if (seleccion.proteina && seleccion.proteina !== "Vegetariano") {
-        imgProteina.src = `proteinas/${normalizar(seleccion.proteina)}proteina.png`;
-        imgProteina.style.display = "block";
-      }
-
-      vegetalesDisponibles.forEach(v => {
+      listaProteinas.forEach(p => {
         const div = document.createElement("div");
         div.className = "opcion";
-        div.textContent = v;
+        div.textContent = p;
 
         div.onclick = () => {
-          if (seleccion.proteina === "Vegetariano") {
-            if (div.classList.contains("seleccionada")) {
-              div.classList.remove("seleccionada");
-              seleccionados = seleccionados.filter(s => s !== v);
-            } else if (seleccionados.length < 2) {
-              div.classList.add("seleccionada");
-              seleccionados.push(v);
-            } else {
-              alert("Solo podés elegir 2 vegetales.");
-            }
-          } else {
-            document.querySelectorAll(".opcion").forEach(el => el.classList.remove("seleccionada"));
-            div.classList.add("seleccionada");
-            seleccionados = [v];
-          }
+          document.querySelectorAll(".opcion").forEach(el => el.classList.remove("seleccionada"));
+          div.classList.add("seleccionada");
+          seleccion.proteina = p;
 
-          actualizarImagenes();
+          const imgProteina = document.getElementById("img-proteina");
+          if (p === "Vegetariano") {
+            imgProteina.src = "";
+            imgProteina.style.display = "none";
+          } else {
+            imgProteina.src = `proteinas/${normalizarNombre(p)}proteina.png`;
+            imgProteina.style.display = "block";
+          }
         };
 
         contenedor.appendChild(div);
       });
-
-      actualizarImagenes();
     }
 
-    function actualizarImagenes() {
-      const img1 = document.getElementById("img-vegetal1");
-      const img2 = document.getElementById("img-vegetal2");
-
-      if (seleccion.proteina === "Vegetariano") {
-        if (seleccionados.length === 2) {
-          img1.src = `proteinas/${normalizar(seleccionados[0])}proteina.png`;
-          img2.src = `vegetales/${normalizar(seleccionados[1])}vegetal.png`;
-          img1.style.display = img2.style.display = "block";
-        } else {
-          img1.style.display = img2.style.display = "none";
-        }
-      } else {
-        if (seleccionados.length === 1) {
-          img1.src = `vegetales/${normalizar(seleccionados[0])}vegetal.png`;
-          img1.style.display = "block";
-          img2.style.display = "none";
-        } else {
-          img1.style.display = img2.style.display = "none";
-        }
-      }
+    function irA(ruta) {
+      document.body.classList.add("fade-out");
+      setTimeout(() => {
+        window.location.href = ruta;
+      }, 300);
     }
 
     function siguiente() {
-      if (seleccion.proteina === "Vegetariano" && seleccionados.length !== 2) {
-        return alert("Debés elegir exactamente 2 vegetales.");
-      }
-      if (seleccion.proteina !== "Vegetariano" && seleccionados.length !== 1) {
-        return alert("Debés elegir un vegetal.");
+      if (!seleccion.proteina) {
+        alert("Elegí una proteína antes de continuar.");
+        return;
       }
 
-      seleccion.vegetal = seleccionados.join(", ");
       localStorage.setItem("pedido", JSON.stringify(seleccion));
-      window.location.href = "cobertura.html";
+      irA("vegetal.html");
     }
 
     function cancelar() {
       localStorage.removeItem("pedido");
-      window.location.href = "index.html";
+      irA("index.html");
     }
 
-    cargarVegetales();
+    verificarEstadoPedidos();
+    cargarProteinas();
   </script>
 </body>
 </html>
