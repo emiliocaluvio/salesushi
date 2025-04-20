@@ -41,30 +41,24 @@
 
     .opcion {
       border: 2px solid #ff6f61;
-      padding: 0.8rem 0.5rem;
+      padding: 0.6rem 1rem;
       border-radius: 10px;
       text-align: center;
       cursor: pointer;
       transition: 0.3s;
       font-size: 0.95rem;
       min-width: 140px;
-      flex: 1 1 calc(50% - 0.8rem);
+      flex: 1 1 calc(50% - 1rem);
       box-sizing: border-box;
-      max-width: 45%;
     }
 
-    .opcion.impar {
-      width: 100%;
-      max-width: 45%;
-      margin-left: auto;
-      margin-right: auto;
+    .opcion:nth-child(7) {
+      flex: 0 0 100%;
+      max-width: 140px;
+      margin: 0 auto;
     }
 
-    .opcion:hover:not(.disabled) {
-      background-color: #ff6f61;
-      color: #000;
-    }
-
+    .opcion:hover:not(.disabled),
     .opcion.seleccionada {
       background-color: #ff6f61;
       color: #000;
@@ -77,8 +71,8 @@
 
     .contenedor-roll {
       position: relative;
-      width: 140px;
-      height: 140px;
+      width: 150px;
+      height: 150px;
       margin: 1rem 0;
       flex-shrink: 0;
     }
@@ -93,26 +87,22 @@
 
     .botonera {
       display: flex;
-      flex-wrap: wrap;
       justify-content: center;
       gap: 1rem;
       width: 100%;
-      max-width: 400px;
-      margin-bottom: 1rem;
+      max-width: 420px;
     }
 
     .btn {
       flex: 1;
-      padding: 1rem 0;
+      padding: 0.8rem 0;
+      background-color: transparent;
       border: 2px dashed #ff6f61;
-      background: transparent;
       color: #ff6f61;
       font-size: 1rem;
-      border-radius: 10px;
       cursor: pointer;
-      transition: 0.3s;
-      min-width: 120px;
-      text-align: center;
+      transition: all 0.3s ease;
+      border-radius: 8px;
     }
 
     .btn:hover {
@@ -120,23 +110,45 @@
       color: #000;
     }
 
+    .cancelar-container {
+      width: 100%;
+      max-width: 420px;
+      margin-top: 1rem;
+    }
+
+    .cancelar {
+      width: 100%;
+      padding: 0.8rem 0;
+      border: 2px dashed #ff6f61;
+      background: transparent;
+      color: #ff6f61;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .cancelar:hover {
+      background-color: #ff6f61;
+      color: #000;
+    }
+
     .logo-footer {
-      margin-top: auto;
+      margin-top: 1.5rem;
       margin-bottom: 1rem;
       width: 60px;
       opacity: 0.6;
     }
 
     @media (max-width: 600px) {
-      .btn {
-        font-size: 0.95rem;
-        padding: 0.8rem;
-        width: 100%;
+      .botonera {
+        flex-direction: column;
+        gap: 0.5rem;
       }
 
-      .opcion {
-        max-width: 100%;
-        flex: 1 1 45%;
+      .btn, .cancelar {
+        width: 100%;
+        font-size: 0.95rem;
       }
 
       .contenedor-roll {
@@ -162,7 +174,10 @@
   <div class="botonera">
     <button class="btn" onclick="irA('vegetal.html')">⬅ Volver</button>
     <button class="btn" onclick="siguiente()">Finalizar pedido ➡</button>
-    <button class="btn" onclick="irA('index.html')">Cancelar pedido</button>
+  </div>
+
+  <div class="cancelar-container">
+    <button class="cancelar" onclick="irA('index.html')">Cancelar pedido</button>
   </div>
 
   <img src="logo.png" class="logo-footer" alt="Logo Sale Sushi" />
@@ -210,8 +225,9 @@
           div.classList.add("disabled");
         }
 
-        const esImpar = listaCoberturas.length % 2 !== 0 && index === listaCoberturas.length - 1;
-        if (esImpar) div.classList.add("impar");
+        if (listaCoberturas.length % 2 !== 0 && index === listaCoberturas.length - 1) {
+          div.classList.add("impar");
+        }
 
         div.onclick = () => {
           if (div.classList.contains("disabled")) return;
@@ -231,10 +247,7 @@
     }
 
     function irA(ruta) {
-      document.body.classList.add("fade-out");
-      setTimeout(() => {
-        window.location.href = ruta;
-      }, 300);
+      window.location.href = ruta;
     }
 
     async function siguiente() {
