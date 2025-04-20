@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
-<head> 
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Resumen del Roll</title>
@@ -15,7 +15,6 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 100vh;
     }
 
     h1 {
@@ -68,12 +67,12 @@
       font-weight: bold;
     }
 
-    .fila-botones {
+    .botones-acciones {
       display: flex;
       justify-content: center;
-      width: 100%;
-      max-width: 420px;
       gap: 1rem;
+      max-width: 420px;
+      width: 100%;
       margin-bottom: 1rem;
     }
 
@@ -86,7 +85,9 @@
       font-size: 1rem;
       border-radius: 10px;
       cursor: pointer;
+      min-width: 120px;
       transition: all 0.3s ease;
+      text-align: center;
     }
 
     .btn:hover {
@@ -99,12 +100,6 @@
       cursor: not-allowed;
     }
 
-    .btn-cancelar {
-      width: 100%;
-      max-width: 420px;
-      margin-bottom: 1rem;
-    }
-
     .mensaje-aviso {
       font-size: 1rem;
       margin-bottom: 1rem;
@@ -115,16 +110,12 @@
     .logo-footer {
       width: 60px;
       opacity: 0.6;
-      margin-top: auto;
+      margin-top: 1rem;
     }
 
     @media (max-width: 600px) {
-      .fila-botones {
+      .botones-acciones {
         flex-direction: column;
-      }
-
-      .btn {
-        width: 100%;
       }
     }
   </style>
@@ -143,12 +134,14 @@
 
   <div id="mensaje-aviso" class="mensaje-aviso"></div>
 
-  <div class="fila-botones">
+  <div class="botones-acciones">
     <button class="btn" onclick="volver()">⬅ Volver</button>
     <button class="btn" onclick="finalizar()">Finalizar pedido ➡</button>
   </div>
 
-  <button class="btn btn-cancelar" onclick="cancelarPedido()">Cancelar pedido</button>
+  <div class="botones-acciones">
+    <button class="btn" onclick="cancelarPedido()">Cancelar pedido</button>
+  </div>
 
   <img src="logo.png" alt="Logo Sale Sushi" class="logo-footer">
 
@@ -169,40 +162,37 @@
         <p><strong>Cobertura:</strong> ${roll.cobertura}</p>
         <p><strong>Precio:</strong> $${roll.precio}</p>
       `;
-
-      if (roll.imagen && roll.imagen.startsWith("rolls/")) {
+      if (roll.imagen) {
         imagenRoll.src = roll.imagen;
         imagenRoll.style.display = "block";
-      } else {
-        console.warn("⚠ Imagen no encontrada o ruta incorrecta:", roll.imagen);
       }
-    } else {
-      resumenDiv.innerHTML = "<p>No hay roll cargado.</p>";
     }
 
     async function verificarCupos() {
       try {
-        const res = await fetch('/api/disponibilidad');
-        const data = await res.json();
-        const disponibles = data.map(d => d.disponibles);
-        const maximo = Math.max(...disponibles);
-
-        if (lista.length + cantidadActual > maximo) {
-          mensaje.textContent = "🚫 Ya no hay cupos disponibles para agregar más rolls.";
-        } else {
-          mensaje.textContent = "";
-        }
+        const tablas = ["pedidos19", "pedidos20", "pedidos21"];
+        const totales = await Promise.all(tablas.map(async (tabla) => {
+          const res = await fetch(`/api/${tabla}`);
+          const data = await res.json();
+          return data.length;
+        }));
+        const maximo = Math.max(...totales);
+        const puede = lista.length + cantidadActual <= maximo;
+        mensaje.textContent = puede ? "" : "🚫 No hay más cupos disponibles.";
+        return puede;
       } catch (err) {
         console.error("Error verificando cupos:", err);
-        mensaje.textContent = "Error al verificar disponibilidad de horarios.";
+        mensaje.textContent = "Error al verificar disponibilidad.";
+        return false;
       }
     }
 
-    function agregarOtro() {
+    async function agregarOtro() {
+      const puede = await verificarCupos();
+      if (!puede) return;
       cantidadActual++;
       lista.push({ ...roll });
       contador.textContent = cantidadActual;
-      verificarCupos();
     }
 
     function restarCantidad() {
@@ -210,7 +200,7 @@
         cantidadActual--;
         lista.pop();
         contador.textContent = cantidadActual;
-        verificarCupos();
+        mensaje.textContent = "";
       }
     }
 
@@ -232,10 +222,7 @@
     }
 
     function irA(ruta) {
-      document.body.classList.add("fade-out");
-      setTimeout(() => {
-        window.location.href = ruta;
-      }, 300);
+      window.location.href = ruta;
     }
 
     verificarCupos();
