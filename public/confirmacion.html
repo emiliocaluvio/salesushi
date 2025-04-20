@@ -67,21 +67,18 @@
       font-weight: bold;
     }
 
-    .botonera-doble {
+    .botones-superiores {
       display: flex;
       justify-content: center;
       gap: 1rem;
-      max-width: 400px;
+      max-width: 420px;
       width: 100%;
       margin-bottom: 1rem;
     }
 
-    .botonera-simple {
-      display: flex;
-      justify-content: center;
+    .boton-cancelar {
       width: 100%;
-      max-width: 400px;
-      margin-bottom: 1rem;
+      max-width: 420px;
     }
 
     .btn {
@@ -122,7 +119,7 @@
     }
 
     @media (max-width: 600px) {
-      .botonera-doble {
+      .botones-superiores {
         flex-direction: column;
         gap: 0.5rem;
       }
@@ -147,12 +144,12 @@
 
   <div id="mensaje-aviso" class="mensaje-aviso"></div>
 
-  <div class="botonera-doble">
+  <div class="botones-superiores">
     <button class="btn" onclick="volver()">⬅ Volver</button>
     <button class="btn" onclick="finalizar()">Finalizar pedido ➡</button>
   </div>
 
-  <div class="botonera-simple">
+  <div class="boton-cancelar">
     <button class="btn" onclick="cancelarPedido()">Cancelar pedido</button>
   </div>
 
@@ -167,7 +164,7 @@
     const roll = JSON.parse(localStorage.getItem("pedido"));
     let lista = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
     let cantidadActual = 1;
-    let cuposMaximos = 100;
+    let cuposMaximos = 10;
 
     if (roll) {
       resumenDiv.innerHTML = `
@@ -196,7 +193,9 @@
           const res = await fetch(`/horario/${h}`);
           const datos = await res.json();
           const cupo = 10 - datos.length;
-          if (cupo > totalDisponible) totalDisponible = cupo;
+          if (cupo > totalDisponible) {
+            totalDisponible = cupo;
+          }
         }
 
         cuposMaximos = totalDisponible;
@@ -251,10 +250,7 @@
     }
 
     function irA(ruta) {
-      document.body.classList.add("fade-out");
-      setTimeout(() => {
-        window.location.href = ruta;
-      }, 300);
+      window.location.href = ruta;
     }
 
     verificarCupos();
