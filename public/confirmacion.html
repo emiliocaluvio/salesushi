@@ -67,17 +67,12 @@
       font-weight: bold;
     }
 
-    .botones-dobles {
+    .botones-acciones {
       display: flex;
       justify-content: center;
       gap: 1rem;
       max-width: 420px;
       width: 100%;
-      margin-bottom: 1rem;
-    }
-
-    .boton-solo {
-      width: 200px;
       margin-bottom: 1rem;
     }
 
@@ -100,11 +95,6 @@
       color: #000;
     }
 
-    .btn[disabled] {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-
     .mensaje-aviso {
       font-size: 1rem;
       margin-bottom: 1rem;
@@ -123,12 +113,8 @@
         width: 100%;
       }
 
-      .botones-dobles {
+      .botones-acciones {
         flex-direction: column;
-      }
-
-      .boton-solo {
-        width: 100%;
       }
 
       .cantidad-container {
@@ -151,13 +137,13 @@
 
   <div id="mensaje-aviso" class="mensaje-aviso"></div>
 
-  <div class="botones-dobles">
+  <div class="botones-acciones">
     <button class="btn" onclick="volver()">⬅ Volver</button>
     <button class="btn" onclick="finalizar()">Finalizar pedido ➡</button>
   </div>
 
-  <div class="boton-solo">
-    <button class="btn" style="width: 100%;" onclick="cancelarPedido()">Cancelar pedido</button>
+  <div class="botones-acciones" style="justify-content: center;">
+    <button class="btn" onclick="cancelarPedido()">Cancelar pedido</button>
   </div>
 
   <img src="logo.png" alt="Logo Sale Sushi" class="logo-footer">
