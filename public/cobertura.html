@@ -15,21 +15,28 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      box-sizing: border-box;
+    }
+
+    body {
+      overflow-y: auto;
+      padding: 1rem;
     }
 
     h1 {
       font-size: 1.4rem;
-      margin: 1.2rem 0;
+      margin: 1.2rem 0 1rem;
       text-align: center;
     }
 
     .coberturas {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
       gap: 0.8rem;
-      width: 90%;
+      width: 100%;
       max-width: 400px;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
     }
 
     .opcion {
@@ -40,6 +47,17 @@
       cursor: pointer;
       transition: 0.3s;
       font-size: 0.95rem;
+      min-width: 140px;
+      flex: 1 1 calc(50% - 0.8rem);
+      box-sizing: border-box;
+      max-width: 45%;
+    }
+
+    .opcion.impar {
+      width: 100%;
+      max-width: 45%;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .opcion:hover:not(.disabled) {
@@ -59,9 +77,10 @@
 
     .contenedor-roll {
       position: relative;
-      width: 220px;
-      height: 220px;
-      margin-bottom: 1rem;
+      width: 140px;
+      height: 140px;
+      margin: 1rem 0;
+      flex-shrink: 0;
     }
 
     .contenedor-roll img {
@@ -74,16 +93,16 @@
 
     .botonera {
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       gap: 1rem;
-      width: 90%;
+      width: 100%;
       max-width: 400px;
-      margin-bottom: 1rem;
+      margin-bottom: 0.8rem;
     }
 
     .btn {
       flex: 1;
-      padding: 1rem;
+      padding: 1rem 0;
       border: 2px dashed #ff6f61;
       background: transparent;
       color: #ff6f61;
@@ -118,18 +137,13 @@
     }
 
     .logo-footer {
-      margin-top: auto;
+      margin-top: 1.2rem;
       margin-bottom: 1rem;
       width: 60px;
       opacity: 0.6;
     }
 
     @media (max-width: 600px) {
-      h1 {
-        font-size: 1.2rem;
-        margin-top: 1rem;
-      }
-
       .btn {
         font-size: 0.95rem;
         padding: 0.8rem;
@@ -137,6 +151,16 @@
 
       .cancelar {
         font-size: 0.95rem;
+      }
+
+      .opcion {
+        max-width: 100%;
+        flex: 1 1 45%;
+      }
+
+      .contenedor-roll {
+        width: 130px;
+        height: 130px;
       }
     }
   </style>
@@ -196,7 +220,7 @@
     function cargarCoberturas() {
       const contenedor = document.getElementById("contenedor");
 
-      listaCoberturas.forEach(c => {
+      listaCoberturas.forEach((c, index) => {
         const div = document.createElement("div");
         div.className = "opcion";
         div.textContent = c;
@@ -204,6 +228,10 @@
         const esVegetariano = seleccion.proteina === "Vegetariano";
         if (esVegetariano && c === "Salmón") {
           div.classList.add("disabled");
+        }
+
+        if (listaCoberturas.length % 2 !== 0 && index === listaCoberturas.length - 1) {
+          div.classList.add("impar");
         }
 
         div.onclick = () => {
