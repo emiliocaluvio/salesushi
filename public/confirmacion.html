@@ -79,6 +79,7 @@
     .boton-cancelar {
       width: 100%;
       max-width: 420px;
+      margin-bottom: 1rem;
     }
 
     .btn {
@@ -146,7 +147,7 @@
 
   <div class="botones-superiores">
     <button class="btn" onclick="volver()">⬅ Volver</button>
-    <button class="btn" onclick="finalizar()">Finalizar pedido ➡</button>
+    <button class="btn" onclick="finalizar()" id="btnFinalizar">Finalizar pedido ➡</button>
   </div>
 
   <div class="boton-cancelar">
@@ -160,6 +161,7 @@
     const contador = document.getElementById("contador");
     const mensaje = document.getElementById("mensaje-aviso");
     const imagenRoll = document.getElementById("imagenRoll");
+    const btnFinalizar = document.getElementById("btnFinalizar");
 
     const roll = JSON.parse(localStorage.getItem("pedido"));
     let lista = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
@@ -186,21 +188,14 @@
 
     async function verificarCupos() {
       try {
-        const horarios = [19, 20, 21];
-        let totalDisponible = 0;
+        const res = await fetch('/api/disponibilidad');
+        const data = await res.json();
 
-        for (let h of horarios) {
-          const res = await fetch(`/horario/${h}`);
-          const datos = await res.json();
-          const cupo = 10 - datos.length;
-          if (cupo > totalDisponible) {
-            totalDisponible = cupo;
-          }
-        }
+        const disponibles = data.map(d => d.disponibles);
+        const total = Math.max(...disponibles);
+        cuposMaximos = total;
 
-        cuposMaximos = totalDisponible;
-
-        if (cantidadActual >= cuposMaximos) {
+        if ((lista.length + cantidadActual) >= cuposMaximos) {
           mensaje.textContent = "🚫 No hay más cupos disponibles para agregar rolls.";
           return false;
         } else {
@@ -215,12 +210,12 @@
     }
 
     async function agregarOtro() {
-      const puedeAgregar = await verificarCupos();
-      if (puedeAgregar && cantidadActual < cuposMaximos) {
-        cantidadActual++;
-        lista.push({ ...roll });
-        contador.textContent = cantidadActual;
-      }
+      const puede = await verificarCupos();
+      if (!puede) return;
+
+      cantidadActual++;
+      lista.push({ ...roll });
+      contador.textContent = cantidadActual;
     }
 
     function restarCantidad() {
