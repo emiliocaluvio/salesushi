@@ -34,9 +34,8 @@
       font-size: 1.1rem;
       cursor: pointer;
       transition: all 0.3s ease;
-      margin: 0.8rem;
-      width: 90%;
-      max-width: 280px;
+      width: 100%;
+      max-width: 200px;
     }
 
     .btn:hover:enabled {
@@ -99,6 +98,14 @@
       color: #000;
     }
 
+    .botonera {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
     @media (max-width: 600px) {
       body {
         padding: 1rem;
@@ -154,8 +161,10 @@
   <div id="cupos" style="margin-bottom: 1.5rem; font-size: 1rem;"></div>
 
   <!-- Botones -->
-  <button class="btn" onclick="verMenu()">Ver menú</button>
-  <button class="btn" id="btnPedido" onclick="pedidoDirecto()">Hacer pedido</button>
+  <div class="botonera">
+    <button class="btn" onclick="verMenu()">Ver menú</button>
+    <button class="btn" id="btnPedido" onclick="pedidoDirecto()">Hacer pedido</button>
+  </div>
 
   <script>
     function toggleAdmin() {
@@ -200,10 +209,9 @@
       const pass = document.getElementById("clave").value;
 
       if (user === "emi528" && pass === "47393929Emi") {
-  localStorage.setItem("adminAutenticado", "true");
-  irA("admin.html");
-}
- else {
+        localStorage.setItem("adminAutenticado", "true");
+        irA("admin.html");
+      } else {
         alert("Usuario o contraseña incorrectos.");
       }
     }
