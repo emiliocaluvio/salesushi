@@ -49,10 +49,15 @@
       cursor: pointer;
       transition: 0.3s;
       font-size: 0.95rem;
-      min-width: 140px;
-      flex: 1 1 calc(50% - 0.8rem);
+      width: 45%;
       box-sizing: border-box;
+    }
+
+    .opcion.impar {
+      width: 100%;
       max-width: 45%;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .opcion:hover,
@@ -65,7 +70,7 @@
       position: relative;
       width: 140px;
       height: 140px;
-      margin: 0.5rem 0;
+      margin: 1rem 0;
     }
 
     .contenedor-roll img {
@@ -126,23 +131,13 @@
     }
 
     @media (max-width: 600px) {
-      h1 {
-        font-size: 1.2rem;
-        margin-top: 1rem;
-      }
-
-      #mensaje-vegetariano {
-        font-size: 0.95rem;
-      }
-
-      .btn, .cancelar {
-        font-size: 0.95rem;
-        padding: 0.8rem;
-      }
-
       .opcion {
-        max-width: 100%;
-        flex: 1 1 45%;
+        width: 45%;
+      }
+
+      .opcion.impar {
+        width: 100%;
+        max-width: 45%;
       }
 
       .contenedor-roll {
@@ -209,10 +204,14 @@
         imgProteina.style.display = "block";
       }
 
-      vegetalesDisponibles.forEach(v => {
+      vegetalesDisponibles.forEach((v, index) => {
         const div = document.createElement("div");
         div.className = "opcion";
         div.textContent = v;
+
+        if (vegetalesDisponibles.length % 2 !== 0 && index === vegetalesDisponibles.length - 1) {
+          div.classList.add("impar");
+        }
 
         div.onclick = () => {
           if (seleccion.proteina === "Vegetariano") {
@@ -294,3 +293,4 @@
   </script>
 </body>
 </html>
+ñ
