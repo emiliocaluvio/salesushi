@@ -48,7 +48,7 @@
       align-items: center;
       justify-content: center;
       gap: 1rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
     }
 
     .cantidad-btn {
@@ -62,12 +62,17 @@
       transition: 0.3s;
     }
 
+    .cantidad-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
     .cantidad-numero {
       font-size: 1.2rem;
       font-weight: bold;
     }
 
-    .botones-fila {
+    .botones-superiores {
       display: flex;
       justify-content: center;
       gap: 1rem;
@@ -119,8 +124,9 @@
     }
 
     @media (max-width: 600px) {
-      .botones-fila {
+      .botones-superiores {
         flex-direction: column;
+        gap: 0.5rem;
       }
 
       .btn {
@@ -136,14 +142,14 @@
   <img id="imagenRoll" class="roll-img" src="" alt="Visual del roll" style="display:none;">
 
   <div class="cantidad-container">
-    <button class="cantidad-btn" onclick="restarCantidad()">−</button>
+    <button class="cantidad-btn" id="btnRestar" onclick="restarCantidad()">−</button>
     <span class="cantidad-numero" id="contador">1</span>
-    <button class="cantidad-btn" onclick="agregarOtro()">+</button>
+    <button class="cantidad-btn" id="btnSumar" onclick="agregarOtro()">+</button>
   </div>
 
   <div id="mensaje-aviso" class="mensaje-aviso"></div>
 
-  <div class="botones-fila">
+  <div class="botones-superiores">
     <button class="btn" onclick="volver()">⬅ Volver</button>
     <button class="btn" onclick="finalizar()">Finalizar pedido ➡</button>
   </div>
@@ -156,9 +162,10 @@
 
   <script>
     const resumenDiv = document.getElementById("resumen");
-    const imagenRoll = document.getElementById("imagenRoll");
     const contador = document.getElementById("contador");
     const mensaje = document.getElementById("mensaje-aviso");
+    const imagenRoll = document.getElementById("imagenRoll");
+    const btnSumar = document.getElementById("btnSumar");
 
     const roll = JSON.parse(localStorage.getItem("pedido"));
     let lista = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
@@ -172,9 +179,12 @@
         <p><strong>Cobertura:</strong> ${roll.cobertura}</p>
         <p><strong>Precio:</strong> $${roll.precio}</p>
       `;
+
       if (roll.imagen) {
         imagenRoll.src = roll.imagen;
         imagenRoll.style.display = "block";
+      } else {
+        console.warn("⚠ No se encontró la imagen del roll.");
       }
     } else {
       resumenDiv.innerHTML = "<p>No hay roll cargado.</p>";
@@ -188,35 +198,33 @@
         for (let h of horarios) {
           const res = await fetch(`/horario/${h}`);
           const datos = await res.json();
-          const disponibles = 10 - datos.length;
-          if (disponibles > totalDisponible) {
-            totalDisponible = disponibles;
+          const cupo = 10 - datos.length;
+          if (cupo > totalDisponible) {
+            totalDisponible = cupo;
           }
         }
 
         cuposMaximos = totalDisponible;
 
         if (cantidadActual >= cuposMaximos) {
-          mensaje.textContent = "🚫 No hay más cupos disponibles.";
-          return false;
+          mensaje.textContent = "🚫 No hay más cupos disponibles para agregar rolls.";
+          btnSumar.disabled = true;
         } else {
           mensaje.textContent = "";
-          return true;
+          btnSumar.disabled = false;
         }
       } catch (err) {
         console.error("Error verificando disponibilidad:", err);
         mensaje.textContent = "Error al verificar disponibilidad.";
-        return false;
+        btnSumar.disabled = true;
       }
     }
 
     async function agregarOtro() {
-      const puede = await verificarCupos();
-      if (puede && cantidadActual < cuposMaximos) {
-        cantidadActual++;
-        lista.push({ ...roll });
-        contador.textContent = cantidadActual;
-      }
+      cantidadActual++;
+      lista.push({ ...roll });
+      contador.textContent = cantidadActual;
+      await verificarCupos();
     }
 
     function restarCantidad() {
@@ -225,7 +233,12 @@
         lista.pop();
         contador.textContent = cantidadActual;
         mensaje.textContent = "";
+        btnSumar.disabled = false;
       }
+    }
+
+    function volver() {
+      irA("cobertura.html");
     }
 
     function finalizar() {
@@ -239,10 +252,6 @@
         localStorage.removeItem("todosLosRolls");
         irA("index.html");
       }
-    }
-
-    function volver() {
-      irA("cobertura.html");
     }
 
     function irA(ruta) {
