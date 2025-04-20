@@ -67,7 +67,7 @@
       font-weight: bold;
     }
 
-    .botones-superiores {
+    .botones-fila {
       display: flex;
       justify-content: center;
       gap: 1rem;
@@ -79,7 +79,6 @@
     .boton-cancelar {
       width: 100%;
       max-width: 420px;
-      margin-bottom: 1rem;
     }
 
     .btn {
@@ -120,9 +119,8 @@
     }
 
     @media (max-width: 600px) {
-      .botones-superiores {
+      .botones-fila {
         flex-direction: column;
-        gap: 0.5rem;
       }
 
       .btn {
@@ -145,9 +143,9 @@
 
   <div id="mensaje-aviso" class="mensaje-aviso"></div>
 
-  <div class="botones-superiores">
+  <div class="botones-fila">
     <button class="btn" onclick="volver()">⬅ Volver</button>
-    <button class="btn" onclick="finalizar()" id="btnFinalizar">Finalizar pedido ➡</button>
+    <button class="btn" onclick="finalizar()">Finalizar pedido ➡</button>
   </div>
 
   <div class="boton-cancelar">
@@ -158,10 +156,9 @@
 
   <script>
     const resumenDiv = document.getElementById("resumen");
+    const imagenRoll = document.getElementById("imagenRoll");
     const contador = document.getElementById("contador");
     const mensaje = document.getElementById("mensaje-aviso");
-    const imagenRoll = document.getElementById("imagenRoll");
-    const btnFinalizar = document.getElementById("btnFinalizar");
 
     const roll = JSON.parse(localStorage.getItem("pedido"));
     let lista = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
@@ -175,12 +172,9 @@
         <p><strong>Cobertura:</strong> ${roll.cobertura}</p>
         <p><strong>Precio:</strong> $${roll.precio}</p>
       `;
-
       if (roll.imagen) {
         imagenRoll.src = roll.imagen;
         imagenRoll.style.display = "block";
-      } else {
-        console.warn("⚠ No se encontró la imagen del roll.");
       }
     } else {
       resumenDiv.innerHTML = "<p>No hay roll cargado.</p>";
@@ -188,15 +182,22 @@
 
     async function verificarCupos() {
       try {
-        const res = await fetch('/api/disponibilidad');
-        const data = await res.json();
+        const horarios = [19, 20, 21];
+        let totalDisponible = 0;
 
-        const disponibles = data.map(d => d.disponibles);
-        const total = Math.max(...disponibles);
-        cuposMaximos = total;
+        for (let h of horarios) {
+          const res = await fetch(`/horario/${h}`);
+          const datos = await res.json();
+          const disponibles = 10 - datos.length;
+          if (disponibles > totalDisponible) {
+            totalDisponible = disponibles;
+          }
+        }
 
-        if ((lista.length + cantidadActual) >= cuposMaximos) {
-          mensaje.textContent = "🚫 No hay más cupos disponibles para agregar rolls.";
+        cuposMaximos = totalDisponible;
+
+        if (cantidadActual >= cuposMaximos) {
+          mensaje.textContent = "🚫 No hay más cupos disponibles.";
           return false;
         } else {
           mensaje.textContent = "";
@@ -211,11 +212,11 @@
 
     async function agregarOtro() {
       const puede = await verificarCupos();
-      if (!puede) return;
-
-      cantidadActual++;
-      lista.push({ ...roll });
-      contador.textContent = cantidadActual;
+      if (puede && cantidadActual < cuposMaximos) {
+        cantidadActual++;
+        lista.push({ ...roll });
+        contador.textContent = cantidadActual;
+      }
     }
 
     function restarCantidad() {
@@ -225,10 +226,6 @@
         contador.textContent = cantidadActual;
         mensaje.textContent = "";
       }
-    }
-
-    function volver() {
-      irA("cobertura.html");
     }
 
     function finalizar() {
@@ -242,6 +239,10 @@
         localStorage.removeItem("todosLosRolls");
         irA("index.html");
       }
+    }
+
+    function volver() {
+      irA("cobertura.html");
     }
 
     function irA(ruta) {
