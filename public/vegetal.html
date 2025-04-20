@@ -20,8 +20,15 @@
 
     h1 {
       font-size: 1.4rem;
-      margin: 1.2rem 0;
+      margin: 1.2rem 0 0.3rem 0;
       text-align: center;
+    }
+
+    #mensaje-vegetariano {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      color: #ff6f61;
+      font-weight: bold;
     }
 
     .vegetales {
@@ -43,7 +50,7 @@
       transition: 0.3s;
       font-size: 0.95rem;
       min-width: 140px;
-      flex: 1 1 calc(50% - 1rem);
+      flex: 1 1 calc(50% - 0.8rem);
       box-sizing: border-box;
       max-width: 45%;
     }
@@ -56,10 +63,9 @@
 
     .contenedor-roll {
       position: relative;
-      width: 150px;
-      height: 150px;
-      margin-top: 1rem;
-      margin-bottom: 1rem;
+      width: 140px;
+      height: 140px;
+      margin: 0.5rem 0;
     }
 
     .contenedor-roll img {
@@ -76,7 +82,6 @@
       gap: 1rem;
       width: 100%;
       max-width: 400px;
-      margin-top: auto;
     }
 
     .btn {
@@ -126,6 +131,10 @@
         margin-top: 1rem;
       }
 
+      #mensaje-vegetariano {
+        font-size: 0.95rem;
+      }
+
       .btn, .cancelar {
         font-size: 0.95rem;
         padding: 0.8rem;
@@ -137,14 +146,15 @@
       }
 
       .contenedor-roll {
-        width: 140px;
-        height: 140px;
+        width: 130px;
+        height: 130px;
       }
     }
   </style>
 </head>
 <body>
   <h1>Paso 2: Elegí tus vegetales (2/3)</h1>
+  <div id="mensaje-vegetariano"></div>
 
   <div id="contenedor" class="vegetales"></div>
 
@@ -184,6 +194,13 @@
 
     function cargarVegetales() {
       const contenedor = document.getElementById("contenedor");
+      const mensaje = document.getElementById("mensaje-vegetariano");
+
+      if (seleccion.proteina === "Vegetariano") {
+        mensaje.textContent = "Seleccioná 2 vegetales.";
+      } else {
+        mensaje.textContent = "";
+      }
 
       const imgProteina = document.getElementById("img-proteina");
       if (seleccion.proteina && seleccion.proteina !== "Vegetariano") {
