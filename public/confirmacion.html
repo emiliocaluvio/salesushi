@@ -8,91 +8,72 @@
     html, body {
       height: 100%;
       margin: 0;
-      padding: 0;
       background-color: #fdf6ec;
       color: #ff6f61;
       font-family: sans-serif;
+      text-align: center;
+      padding: 1.5rem;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      box-sizing: border-box;
+      justify-content: space-between;
     }
 
     h1 {
-      font-size: 1.5rem;
-      margin-top: 1rem;
+      font-size: 1.6rem;
       margin-bottom: 1rem;
     }
 
     .resumen {
+      background-color: #fdf6ec;
       border: 2px solid #ff6f61;
+      padding: 1.2rem;
       border-radius: 10px;
-      padding: 1rem;
-      width: 90%;
       max-width: 400px;
-      text-align: left;
+      margin: 0 auto 1rem auto;
     }
 
     .resumen p {
-      margin: 0.4rem 0;
-    }
-
-    .roll-img-container {
-      display: flex;
-      justify-content: center;
-      margin-top: 1rem;
+      margin: 0.5rem 0;
+      font-size: 1rem;
     }
 
     .roll-img {
-      width: 220px;
+      width: 240px;
+      margin: 1rem auto;
+      display: block;
     }
 
-    .cantidad-panel {
+    .cantidad-container {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.6rem;
-      margin: 1rem 0;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
     }
 
-    .cantidad-panel button {
-      padding: 0.5rem 0.8rem;
-      font-size: 1rem;
+    .cantidad-btn {
+      padding: 0.5rem 1rem;
+      font-size: 1.2rem;
       border: 2px dashed #ff6f61;
       background: transparent;
       color: #ff6f61;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       transition: 0.3s;
     }
 
-    .cantidad-panel button:hover {
-      background-color: #ff6f61;
-      color: #000;
-    }
-
-    .cantidad-panel span {
+    .cantidad-numero {
       font-size: 1.2rem;
       font-weight: bold;
-      width: 30px;
-      text-align: center;
-    }
-
-    .mensaje-aviso {
-      color: #a33;
-      font-size: 0.95rem;
-      font-weight: bold;
-      margin-bottom: 1rem;
-      text-align: center;
     }
 
     .botones-acciones {
       display: flex;
       justify-content: center;
       gap: 1rem;
-      width: 90%;
       max-width: 400px;
-      margin-bottom: 1rem;
+      margin: 0 auto 0.8rem;
+      flex-wrap: wrap;
     }
 
     .btn {
@@ -104,7 +85,8 @@
       font-size: 1rem;
       border-radius: 10px;
       cursor: pointer;
-      transition: 0.3s;
+      min-width: 120px;
+      transition: all 0.3s ease;
     }
 
     .btn:hover {
@@ -117,46 +99,42 @@
       cursor: not-allowed;
     }
 
-    .btn-cancelar {
-      width: 90%;
-      max-width: 400px;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      border: 2px dashed #ff6f61;
-      background-color: transparent;
-      color: #ff6f61;
+    .mensaje-aviso {
       font-size: 1rem;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .btn-cancelar:hover {
-      background-color: #ff6f61;
-      color: #000;
+      margin: 0.8rem auto;
+      color: #a33;
+      font-weight: bold;
+      max-width: 400px;
     }
 
     .logo-footer {
-      width: 70px;
+      width: 90px;
       opacity: 0.7;
-      margin-bottom: 1rem;
+      margin-top: 1rem;
+      align-self: center;
+    }
+
+    @media (max-width: 600px) {
+      .btn {
+        width: 100%;
+      }
+
+      .botones-acciones {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
 <body>
-
   <h1>Resumen del Roll</h1>
 
   <div id="resumen" class="resumen"></div>
+  <img id="imagenRoll" class="roll-img" src="" alt="Visual del roll" style="display:none;">
 
-  <div class="roll-img-container">
-    <img id="rollImage" class="roll-img" src="" alt="Imagen del roll">
-  </div>
-
-  <div class="cantidad-panel">
-    <button onclick="restar()">-</button>
-    <span id="contador">1</span>
-    <button onclick="sumar()">+</button>
+  <div class="cantidad-container">
+    <button class="cantidad-btn" onclick="restarCantidad()">−</button>
+    <span class="cantidad-numero" id="contador">1</span>
+    <button class="cantidad-btn" onclick="agregarOtro()">+</button>
   </div>
 
   <div id="mensaje-aviso" class="mensaje-aviso"></div>
@@ -166,20 +144,21 @@
     <button class="btn" onclick="finalizar()">Finalizar pedido ➡</button>
   </div>
 
-  <button class="btn-cancelar" onclick="cancelarPedido()">Cancelar pedido</button>
+  <div class="botones-acciones">
+    <button class="btn" onclick="cancelarPedido()">Cancelar pedido</button>
+  </div>
 
-  <img src="logo.png" class="logo-footer" alt="Logo Sale Sushi" />
+  <img src="logo.png" alt="Logo Sale Sushi" class="logo-footer">
 
   <script>
     const resumenDiv = document.getElementById("resumen");
     const contador = document.getElementById("contador");
     const mensaje = document.getElementById("mensaje-aviso");
-    const imagen = document.getElementById("rollImage");
+    const imagenRoll = document.getElementById("imagenRoll");
 
-    let roll = JSON.parse(localStorage.getItem("pedido"));
+    const roll = JSON.parse(localStorage.getItem("pedido"));
     let lista = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
-    let cantidad = 1;
-    let maximoDisponible = 10;
+    let cantidadActual = 1;
 
     if (roll) {
       resumenDiv.innerHTML = `
@@ -190,9 +169,13 @@
       `;
 
       if (roll.imagen) {
-        imagen.src = roll.imagen;
-        imagen.alt = "Imagen del roll";
+        imagenRoll.src = roll.imagen;
+        imagenRoll.style.display = "block";
+      } else {
+        console.warn("⚠ No se encontró la imagen del roll.");
       }
+    } else {
+      resumenDiv.innerHTML = "<p>No hay roll cargado.</p>";
     }
 
     async function verificarCupos() {
@@ -200,55 +183,57 @@
         const res = await fetch('/api/disponibilidad');
         const data = await res.json();
         const disponibles = data.map(d => d.disponibles);
-        maximoDisponible = Math.max(...disponibles);
+        const maximo = Math.max(...disponibles);
 
-        if ((lista.length + cantidad) >= maximoDisponible) {
-          mensaje.textContent = "🚫 No hay más cupos disponibles.";
+        if (lista.length + cantidadActual > maximo) {
+          mensaje.textContent = "🚫 Ya no hay cupos disponibles para agregar más rolls.";
         } else {
           mensaje.textContent = "";
         }
-      } catch (e) {
-        mensaje.textContent = "Error al verificar disponibilidad.";
+      } catch (err) {
+        console.error("Error verificando cupos:", err);
+        mensaje.textContent = "Error al verificar disponibilidad de horarios.";
       }
     }
 
-    function sumar() {
-      if ((lista.length + cantidad) < maximoDisponible) {
-        lista.push({...roll});
-        cantidad++;
-        contador.textContent = cantidad;
-        localStorage.setItem("todosLosRolls", JSON.stringify(lista));
-        mensaje.textContent = "";
-      } else {
-        mensaje.textContent = "🚫 No hay más cupos disponibles.";
-      }
+    function agregarOtro() {
+      cantidadActual++;
+      lista.push({ ...roll });
+      contador.textContent = cantidadActual;
+      verificarCupos();
     }
 
-    function restar() {
-      if (cantidad > 1) {
+    function restarCantidad() {
+      if (cantidadActual > 1) {
+        cantidadActual--;
         lista.pop();
-        cantidad--;
-        contador.textContent = cantidad;
-        localStorage.setItem("todosLosRolls", JSON.stringify(lista));
-        mensaje.textContent = "";
+        contador.textContent = cantidadActual;
+        verificarCupos();
       }
     }
 
     function volver() {
-      window.location.href = "cobertura.html";
+      irA("cobertura.html");
     }
 
     function finalizar() {
       localStorage.setItem("todosLosRolls", JSON.stringify(lista));
-      window.location.href = "datos-cliente.html";
+      irA("datos-cliente.html");
     }
 
     function cancelarPedido() {
-      if (confirm("¿Seguro querés cancelar el pedido?")) {
+      if (confirm("¿Estás seguro de cancelar el pedido?")) {
         localStorage.removeItem("pedido");
         localStorage.removeItem("todosLosRolls");
-        window.location.href = "index.html";
+        irA("index.html");
       }
+    }
+
+    function irA(ruta) {
+      document.body.classList.add("fade-out");
+      setTimeout(() => {
+        window.location.href = ruta;
+      }, 300);
     }
 
     verificarCupos();
