@@ -32,18 +32,24 @@
       border-radius: 10px;
     }
 
-    .btn {
+    .botonera {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
       margin-top: 2rem;
-      padding: 1rem 2rem;
-      font-size: 1rem;
+    }
+
+    .btn {
       background-color: transparent;
       border: 2px dashed #ff6f61;
       color: #ff6f61;
+      padding: 1rem 2rem;
+      font-size: 1rem;
       cursor: pointer;
       transition: all 0.3s ease;
-      margin-inline: 0.5rem;
-      width: 90%;
-      max-width: 250px;
+      width: 100%;
+      max-width: 200px;
     }
 
     .btn:hover:enabled {
@@ -69,7 +75,6 @@
       .btn {
         padding: 0.8rem 1rem;
         font-size: 0.95rem;
-        margin-top: 1rem;
       }
     }
   </style>
@@ -79,7 +84,7 @@
 
   <img src="menu.png" alt="Menú" class="menu-img">
 
-  <div>
+  <div class="botonera">
     <button class="btn" onclick="irA('index.html')">Volver al inicio</button>
     <button class="btn" id="btnPedido" onclick="comenzarPedido()">Comenzar pedido</button>
   </div>
