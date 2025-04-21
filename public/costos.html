@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Costos y Ganancias</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #fdf6ec;
+      color: #ff6f61;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+
+    .left, .right {
+      width: 100%;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+
+    @media(min-width: 600px) {
+      .left, .right {
+        width: 50%;
+      }
+    }
+
+    .input-group {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 0.3rem;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ff6f61;
+      border-radius: 4px;
+    }
+
+    .results {
+      background: #fff5f1;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+
+    .results div {
+      margin-bottom: 0.5rem;
+    }
+
+    .total {
+      font-weight: bold;
+      border-top: 1px solid #ff6f61;
+      padding-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h2>Costos y Ganancias</h2>
+  <div class="container">
+    <!-- Lado izquierdo: Costos -->
+    <div class="left">
+      <div class="input-group"><label for="vegetales">Vegetales</label><input type="number" id="vegetales" /></div>
+      <div class="input-group"><label for="arroz">Arroz</label><input type="number" id="arroz" /></div>
+      <div class="input-group"><label for="pollo">Pollo</label><input type="number" id="pollo" /></div>
+      <div class="input-group"><label for="salmon">Salmón</label><input type="number" id="salmon" /></div>
+      <div class="input-group"><label for="langostinos">Langostinos</label><input type="number" id="langostinos" /></div>
+      <div class="input-group"><label for="kanikama">Kanikama</label><input type="number" id="kanikama" /></div>
+      <div class="input-group"><label for="queso">Queso</label><input type="number" id="queso" /></div>
+      <div class="input-group"><label for="cajas">Cajas y demás</label><input type="number" id="cajas" /></div>
+      <div class="input-group"><label for="otros">Otros</label><input type="number" id="otros" /></div>
+    </div>
+
+    <!-- Lado derecho: Ventas y ganancias -->
+    <div class="right">
+      <div class="results" id="resumen">
+        <div>Ventas Salmón: $<span id="ventaSalmon">0</span></div>
+        <div>Ventas Pollo: $<span id="ventaPollo">0</span></div>
+        <div>Ventas Langostino: $<span id="ventaLangostino">0</span></div>
+        <div>Otras ventas: $<span id="ventaOtras">0</span></div>
+        <div class="total">Ganancia neta: $<span id="ganancia">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const tablas = ['pedidos_19', 'pedidos_20', 'pedidos_21'];
+
+    const ventas = {
+      salmon: 0,
+      pollo: 0,
+      langostino: 0,
+      otras: 0
+    };
+
+    function cargarCostosDesdeLocalStorage() {
+      const campos = [
+        'vegetales', 'arroz', 'pollo', 'salmon', 'langostinos',
+        'kanikama', 'queso', 'cajas', 'otros'
+      ];
+
+      campos.forEach(id => {
+        const valor = localStorage.getItem(`costo_${id}`);
+        if (valor !== null) {
+          document.getElementById(id).value = valor;
+        }
+      });
+    }
+
+    function guardarCosto(id) {
+      const valor = document.getElementById(id).value;
+      localStorage.setItem(`costo_${id}`, valor);
+      calcularGanancia();
+    }
+
+    async function cargarVentas() {
+      let totalPedidos = [];
+
+      for (const tabla of tablas) {
+        const response = await fetch(`/api/${tabla}`);
+        const data = await response.json();
+        totalPedidos = totalPedidos.concat(data);
+      }
+
+      totalPedidos.forEach(pedido => {
+        const proteina = pedido.proteina.toLowerCase();
+        const precio = pedido.precio;
+
+        if (proteina.includes('salmon')) ventas.salmon += precio;
+        else if (proteina.includes('pollo')) ventas.pollo += precio;
+        else if (proteina.includes('langostino')) ventas.langostino += precio;
+        else ventas.otras += precio;
+      });
+
+      document.getElementById("ventaSalmon").innerText = ventas.salmon;
+      document.getElementById("ventaPollo").innerText = ventas.pollo;
+      document.getElementById("ventaLangostino").innerText = ventas.langostino;
+      document.getElementById("ventaOtras").innerText = ventas.otras;
+
+      calcularGanancia();
+    }
+
+    function calcularGanancia() {
+      const totalVentas = ventas.salmon + ventas.pollo + ventas.langostino + ventas.otras;
+
+      const costos = [
+        'vegetales', 'arroz', 'pollo', 'salmon', 'langostinos',
+        'kanikama', 'queso', 'cajas', 'otros'
+      ].reduce((acc, id) => acc + Number(document.getElementById(id).value || 0), 0);
+
+      const ganancia = totalVentas - costos;
+      document.getElementById("ganancia").innerText = ganancia;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      cargarCostosDesdeLocalStorage();
+      cargarVentas();
+
+      const campos = [
+        'vegetales', 'arroz', 'pollo', 'salmon', 'langostinos',
+        'kanikama', 'queso', 'cajas', 'otros'
+      ];
+
+      campos.forEach(id => {
+        document.getElementById(id).addEventListener('input', () => guardarCosto(id));
+      });
+    });
+  </script>
+</body>
+</html>
