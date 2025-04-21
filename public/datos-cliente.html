@@ -17,7 +17,10 @@
       justify-content: space-between;
     }
 
-    h1 { text-align: center; margin-bottom: 1.5rem; }
+    h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
 
     form {
       max-width: 900px;
@@ -62,7 +65,9 @@
       position: relative;
     }
 
-    .horario-box input { display: none; }
+    .horario-box input {
+      display: none;
+    }
 
     .horario-box.selected {
       background-color: #ff6f61;
@@ -138,27 +143,27 @@
       flex-wrap: wrap;
     }
 
-    button {
+    .acciones button {
+      flex: 1;
+      max-width: 200px;
       padding: 1rem;
       font-size: 1rem;
       border: 2px dashed #ff6f61;
       background-color: transparent;
       color: #ff6f61;
-      cursor: pointer;
-      transition: 0.3s;
-      flex: 1;
-      max-width: 200px;
       border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
     }
 
-    button[disabled] {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-
-    button:hover:enabled {
+    .acciones button:hover:enabled {
       background-color: #ff6f61;
       color: #000;
+    }
+
+    .acciones button[disabled] {
+      opacity: 0.4;
+      cursor: not-allowed;
     }
 
     .logo-footer {
@@ -166,6 +171,17 @@
       opacity: 0.7;
       margin: 2rem auto 0;
       display: block;
+    }
+
+    @media (max-width: 600px) {
+      .acciones {
+        flex-direction: column;
+      }
+
+      .acciones button {
+        max-width: 100%;
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -341,7 +357,6 @@
         return;
       }
 
-      // ✅ GUARDAR PARA PÁGINA DE GRACIAS
       const total = rolls.reduce((sum, roll) => sum + roll.precio, 0);
       localStorage.setItem("metodoPago", pago);
       localStorage.setItem("totalPedido", total);

@@ -78,14 +78,9 @@
       display: flex;
       justify-content: center;
       gap: 1rem;
-      max-width: 400px;
+      max-width: 420px;
       width: 100%;
       margin-bottom: 1rem;
-    }
-
-    .boton-cancelar {
-      max-width: 400px;
-      width: 100%;
     }
 
     .btn {
@@ -98,7 +93,6 @@
       border-radius: 10px;
       cursor: pointer;
       transition: all 0.3s ease;
-      min-width: 120px;
       text-align: center;
     }
 
@@ -127,10 +121,6 @@
       .btn {
         width: 100%;
       }
-
-      .boton-cancelar {
-        width: 100%;
-      }
     }
   </style>
 </head>
@@ -153,7 +143,8 @@
     <button class="btn" onclick="finalizar()">Finalizar pedido ➡</button>
   </div>
 
-  <div class="boton-cancelar">
+  <div class="fila-botones">
+    <button class="btn" onclick="agregarNuevoRoll()">+ Agregar otro roll</button>
     <button class="btn" onclick="cancelarPedido()">Cancelar pedido</button>
   </div>
 
@@ -189,10 +180,11 @@
       try {
         const res = await fetch('/api/disponibilidad');
         const data = await res.json();
-        cuposDisponibles = Math.max(...data.map(d => d.disponibles));
+        const maxDisponible = Math.max(...data.map(d => d.disponibles));
+        cuposDisponibles = maxDisponible;
 
         if (cantidadActual >= cuposDisponibles) {
-          mensaje.textContent = "🚫 No hay más cupos disponibles para agregar rolls.";
+          mensaje.textContent = "🚫 No hay más cupos disponibles según los horarios.";
           return false;
         } else {
           mensaje.textContent = "";
@@ -211,7 +203,7 @@
         cantidadActual++;
         lista.push({ ...roll });
         contador.textContent = cantidadActual;
-        localStorage.setItem("todosLosRolls", JSON.stringify(lista)); // ✅ actualiza storage
+        localStorage.setItem("todosLosRolls", JSON.stringify(lista));
       }
     }
 
@@ -221,7 +213,7 @@
         lista.pop();
         contador.textContent = cantidadActual;
         mensaje.textContent = "";
-        localStorage.setItem("todosLosRolls", JSON.stringify(lista)); // ✅ actualiza storage
+        localStorage.setItem("todosLosRolls", JSON.stringify(lista));
       }
     }
 
@@ -232,6 +224,13 @@
     function finalizar() {
       localStorage.setItem("todosLosRolls", JSON.stringify(lista));
       irA("datos-cliente.html");
+    }
+
+    function agregarNuevoRoll() {
+      lista.push({ ...roll });
+      localStorage.setItem("todosLosRolls", JSON.stringify(lista));
+      localStorage.removeItem("pedido");
+      irA("proteina.html");
     }
 
     function cancelarPedido() {
