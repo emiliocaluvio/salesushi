@@ -81,7 +81,7 @@
       position: relative;
       width: 180px;
       height: 180px;
-      margin: 1.2rem auto;
+      margin: 1.2rem 0 2rem;
       flex-shrink: 0;
     }
 
@@ -100,10 +100,11 @@
       width: 100%;
       max-width: 420px;
       margin-bottom: 1rem;
+      flex-wrap: wrap;
     }
 
     .btn, .cancelar {
-      flex: 1;
+      flex: 1 1 50%;
       padding: 0.8rem 0;
       max-width: 200px;
       background-color: transparent;
@@ -113,17 +114,12 @@
       cursor: pointer;
       transition: 0.3s;
       border-radius: 8px;
+      text-align: center;
     }
 
     .btn:hover, .cancelar:hover {
       background-color: #ff6f61;
       color: #000;
-    }
-
-    .cancelar-container {
-      display: flex;
-      justify-content: center;
-      width: 100%;
     }
 
     .logo-footer {
@@ -134,19 +130,14 @@
     }
 
     @media (max-width: 600px) {
-      .fila-botones {
-        flex-wrap: wrap;
-      }
-
-      .btn, .cancelar {
-        flex: 1 1 50%;
-        max-width: 100%;
-        font-size: 0.95rem;
-      }
-
       .contenedor-roll {
         width: 150px;
         height: 150px;
+        margin-bottom: 1.5rem;
+      }
+
+      .btn, .cancelar {
+        font-size: 0.95rem;
       }
     }
   </style>
@@ -167,9 +158,6 @@
   <div class="fila-botones">
     <button class="btn" onclick="irA('proteina.html')">⬅ Volver</button>
     <button class="btn" onclick="siguiente()">Siguiente ➡</button>
-  </div>
-
-  <div class="cancelar-container">
     <button class="cancelar" onclick="irA('index.html')">Cancelar pedido</button>
   </div>
 
@@ -210,7 +198,7 @@
         imgProteina.style.display = "block";
       }
 
-      vegetalesDisponibles.forEach((v, index) => {
+      vegetalesDisponibles.forEach((v) => {
         const div = document.createElement("div");
         div.className = "opcion";
         div.textContent = v;

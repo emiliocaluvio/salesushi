@@ -78,7 +78,8 @@
       height: auto;
     }
 
-    .fila-botones {
+    .fila-botones,
+    .cancelar-container {
       display: flex;
       justify-content: center;
       gap: 1rem;
@@ -87,7 +88,7 @@
       margin-bottom: 0.8rem;
     }
 
-    .btn {
+    .btn, .cancelar {
       flex: 1;
       padding: 0.8rem 0;
       max-width: 200px;
@@ -98,34 +99,10 @@
       cursor: pointer;
       transition: 0.3s;
       border-radius: 8px;
-    }
-
-    .btn:hover {
-      background-color: #ff6f61;
-      color: #000;
-    }
-
-    .cancelar-container {
-      display: flex;
-      justify-content: center;
-      width: 100%;
-    }
-
-    .cancelar {
-      padding: 0.8rem 0;
-      background-color: transparent;
-      border: 2px dashed #ff6f61;
-      color: #ff6f61;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: 0.3s;
-      border-radius: 8px;
-      width: 100%;
-      max-width: 420px;
       text-align: center;
     }
 
-    .cancelar:hover {
+    .btn:hover, .cancelar:hover {
       background-color: #ff6f61;
       color: #000;
     }
@@ -138,9 +115,10 @@
     }
 
     @media (max-width: 600px) {
-      .fila-botones {
-        flex-wrap: nowrap;
-        gap: 1rem;
+      .fila-botones,
+      .cancelar-container {
+        flex-wrap: wrap;
+        gap: 0.5rem;
       }
 
       .btn, .cancelar {
@@ -214,7 +192,7 @@
     function cargarCoberturas() {
       const contenedor = document.getElementById("contenedor");
 
-      listaCoberturas.forEach((c, index) => {
+      listaCoberturas.forEach(c => {
         const div = document.createElement("div");
         div.className = "opcion";
         div.textContent = c;

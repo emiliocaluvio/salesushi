@@ -78,13 +78,14 @@
       display: flex;
       justify-content: center;
       gap: 1rem;
-      max-width: 420px;
       width: 100%;
+      max-width: 420px;
       margin-bottom: 1rem;
+      flex-wrap: wrap;
     }
 
     .btn {
-      flex: 1;
+      flex: 1 1 50%;
       padding: 1rem;
       border: 2px dashed #ff6f61;
       background-color: transparent;
@@ -94,6 +95,7 @@
       cursor: pointer;
       transition: all 0.3s ease;
       text-align: center;
+      max-width: 200px;
     }
 
     .btn:hover {
@@ -114,12 +116,12 @@
 
     @media (max-width: 600px) {
       .fila-botones {
-        flex-direction: column;
         gap: 0.5rem;
       }
 
       .btn {
         width: 100%;
+        max-width: 100%;
       }
     }
   </style>
