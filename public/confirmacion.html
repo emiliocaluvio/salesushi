@@ -78,14 +78,14 @@
       display: flex;
       justify-content: center;
       gap: 1rem;
-      max-width: 400px;
+      max-width: 420px;
       width: 100%;
       margin-bottom: 1rem;
     }
 
     .boton-cancelar {
-      max-width: 400px;
       width: 100%;
+      max-width: 420px;
     }
 
     .btn {
@@ -189,7 +189,6 @@
       try {
         const res = await fetch('/api/disponibilidad');
         const data = await res.json();
-
         cuposDisponibles = Math.max(...data.map(d => d.disponibles));
 
         if (cantidadActual >= cuposDisponibles) {
