@@ -93,7 +93,7 @@
       max-width: 420px;
     }
 
-    .btn {
+    .btn, .cancelar {
       flex: 1;
       padding: 0.8rem 0;
       background-color: transparent;
@@ -103,34 +103,19 @@
       cursor: pointer;
       transition: all 0.3s ease;
       border-radius: 8px;
+      max-width: 200px;
     }
 
-    .btn:hover {
+    .btn:hover, .cancelar:hover {
       background-color: #ff6f61;
       color: #000;
     }
 
     .cancelar-container {
+      display: flex;
+      justify-content: center;
       width: 100%;
-      max-width: 420px;
       margin-top: 1rem;
-    }
-
-    .cancelar {
-      width: 100%;
-      padding: 0.8rem 0;
-      border: 2px dashed #ff6f61;
-      background: transparent;
-      color: #ff6f61;
-      border-radius: 8px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .cancelar:hover {
-      background-color: #ff6f61;
-      color: #000;
     }
 
     .logo-footer {
@@ -148,12 +133,8 @@
 
       .btn, .cancelar {
         width: 100%;
+        max-width: 100%;
         font-size: 0.95rem;
-      }
-
-      .contenedor-roll {
-        width: 130px;
-        height: 130px;
       }
     }
   </style>
