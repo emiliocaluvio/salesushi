@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
-<head> 
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Resumen del Roll</title>
   <style>
     html, body {
@@ -78,14 +78,14 @@
       display: flex;
       justify-content: center;
       gap: 1rem;
-      max-width: 420px;
+      max-width: 400px;
       width: 100%;
       margin-bottom: 1rem;
     }
 
     .boton-cancelar {
+      max-width: 400px;
       width: 100%;
-      max-width: 420px;
     }
 
     .btn {
@@ -211,6 +211,7 @@
         cantidadActual++;
         lista.push({ ...roll });
         contador.textContent = cantidadActual;
+        localStorage.setItem("todosLosRolls", JSON.stringify(lista)); // ✅ actualiza storage
       }
     }
 
@@ -220,6 +221,7 @@
         lista.pop();
         contador.textContent = cantidadActual;
         mensaje.textContent = "";
+        localStorage.setItem("todosLosRolls", JSON.stringify(lista)); // ✅ actualiza storage
       }
     }
 
