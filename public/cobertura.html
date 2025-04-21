@@ -86,16 +86,8 @@
       margin-bottom: 1rem;
     }
 
-    .cancelar-container {
-      width: 100%;
-      max-width: 420px;
-      display: flex;
-      justify-content: center;
-      margin-bottom: 1rem;
-    }
-
-    .btn, .cancelar {
-      flex: 1;
+    .btn {
+      flex: 1 1 50%;
       padding: 0.8rem 0;
       background-color: transparent;
       border: 2px dashed #ff6f61;
@@ -108,7 +100,7 @@
       max-width: 200px;
     }
 
-    .btn:hover, .cancelar:hover {
+    .btn:hover {
       background-color: #ff6f61;
       color: #000;
     }
@@ -126,7 +118,7 @@
         margin-bottom: 1.5rem;
       }
 
-      .btn, .cancelar {
+      .btn {
         font-size: 0.95rem;
         max-width: 100%;
       }
@@ -151,8 +143,8 @@
     <button class="btn" onclick="siguiente()">Agregar roll al pedido</button>
   </div>
 
-  <div class="cancelar-container">
-    <button class="cancelar" onclick="irA('index.html')">Cancelar pedido</button>
+  <div class="fila-botones">
+    <button class="btn" onclick="irA('index.html')">Cancelar pedido</button>
   </div>
 
   <img src="logo.png" class="logo-footer" alt="Logo Sale Sushi" />
