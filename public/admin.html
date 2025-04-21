@@ -59,26 +59,6 @@
       transform: translateX(20px);
     }
 
-    h2 {
-      margin-top: 2rem;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 2rem;
-    }
-
-    th, td {
-      border: 1px solid #ff6f61;
-      padding: 0.5rem;
-      text-align: center;
-    }
-
-    th {
-      cursor: pointer;
-    }
-
     button, a {
       padding: 0.4rem 1rem;
       border: 1px dashed #ff6f61;
@@ -96,14 +76,31 @@
       right: 1rem;
     }
 
+    .info-box {
+      max-width: 500px;
+      margin: auto;
+      padding: 1rem;
+      border: 2px dashed #ff6f61;
+      border-radius: 10px;
+      background-color: #fff6f1;
+    }
+
+    .info-box h2 {
+      margin-top: 0;
+    }
+
+    ul {
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin-bottom: 0.5rem;
+    }
+
     @media (max-width: 600px) {
       .top-bar {
         flex-direction: column;
         align-items: flex-start;
-      }
-
-      th, td {
-        font-size: 0.85rem;
       }
     }
   </style>
@@ -118,6 +115,7 @@
   </script>
 
   <button class="logout-btn" onclick="cerrarSesion()">🚪 Cerrar sesión</button>
+  <button style="position:absolute; top:1rem; left:1rem;" onclick="mostrarDatosVenta()">📊 Datos de venta</button>
 
   <h1>Panel de Administración</h1>
 
@@ -132,16 +130,48 @@
   <div id="contenedor-tablas"></div>
 
   <script>
-    const horarios = ['horario_19', 'horario_20', 'horario_21'];
-    const nombres = {
-      'horario_19': 'Pedidos 19:00',
-      'horario_20': 'Pedidos 20:00',
-      'horario_21': 'Pedidos 21:00'
-    };
+    async function mostrarDatosVenta() {
+      const res19 = await fetch('/api/tabla/horario_19');
+      const res20 = await fetch('/api/tabla/horario_20');
+      const res21 = await fetch('/api/tabla/horario_21');
 
-    async function fetchTabla(nombre) {
-      const res = await fetch(`/api/tabla/${nombre}`);
-      return await res.json();
+      const datos = [
+        ...(await res19.json()),
+        ...(await res20.json()),
+        ...(await res21.json())
+      ];
+
+      const contador = (arr, campo) => {
+        return arr.reduce((acc, el) => {
+          const valor = el[campo];
+          acc[valor] = (acc[valor] || 0) + 1;
+          return acc;
+        }, {});
+      };
+
+      const proteinas = contador(datos, "proteina");
+      const vegetales = contador(datos, "vegetal");
+      const coberturas = contador(datos, "cobertura");
+
+      document.body.innerHTML = `
+        <div class="info-box">
+          <h2>📊 Ingredientes en pedidos</h2>
+          <h3>🍣 Proteínas</h3>
+          <ul>${Object.entries(proteinas).map(([k, v]) => `<li>${k}: ${v}</li>`).join('')}</ul>
+          <h3>🥬 Vegetales</h3>
+          <ul>${Object.entries(vegetales).map(([k, v]) => `<li>${k}: ${v}</li>`).join('')}</ul>
+          <h3>🌿 Coberturas</h3>
+          <ul>${Object.entries(coberturas).map(([k, v]) => `<li>${k}: ${v}</li>`).join('')}</ul>
+        </div>
+        <div style="text-align:center; margin-top: 2rem;">
+          <a href="index.html">🏠 Volver al inicio</a>
+        </div>
+      `;
+    }
+
+    function cerrarSesion() {
+      localStorage.removeItem("adminAutenticado");
+      window.location.href = "index.html";
     }
 
     async function cargarEstadoSwitch() {
@@ -159,179 +189,7 @@
       });
     });
 
-    let ordenActual = { campo: '', asc: true };
-    let historicoOffset = 0;
-    let historicoData = [];
-
-    async function cargarTablasHorarias() {
-      const contenedor = document.getElementById("contenedor-tablas");
-      contenedor.innerHTML = '';
-
-      for (const tabla of horarios) {
-        const datos = await fetchTabla(tabla);
-
-        const div = document.createElement("div");
-        const titulo = document.createElement("h2");
-        titulo.id = `titulo-${tabla}`;
-        titulo.textContent = `${nombres[tabla]} (${datos.length})`;
-
-        const boton = document.createElement("button");
-        boton.textContent = `🗑 Limpiar ${nombres[tabla]}`;
-        boton.onclick = async () => {
-          if (!confirm("¿Seguro que querés limpiar la tabla?")) return;
-          const res = await fetch(`/api/limpiar_tabla/${tabla}`, { method: 'DELETE' });
-          const rta = await res.json();
-          alert(rta.message);
-          cargarTablasHorarias();
-        };
-
-        const table = document.createElement("table");
-        table.innerHTML = `
-          <thead>
-            <tr>
-              <th>Cliente</th>
-              <th>Teléfono</th>
-              <th>Pago</th>
-              <th>Proteína</th>
-              <th>Vegetal</th>
-              <th>Cobertura</th>
-              <th>Precio</th>
-              <th>Fecha</th>
-              <th>Eliminar</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${datos.map(p => `
-              <tr id="pedido-${p.id}">
-                <td>${p.nombre_cliente} ${p.apellido_cliente}</td>
-                <td>${p.celular_cliente}</td>
-                <td>${p.metodo_pago}</td>
-                <td>${p.proteina}</td>
-                <td>${p.vegetal}</td>
-                <td>${p.cobertura}</td>
-                <td>$${p.precio}</td>
-                <td>${p.fecha?.split('T')[0]}</td>
-                <td><button onclick="eliminarPedidoHorario(${p.id}, '${tabla}')">❌</button></td>
-              </tr>
-            `).join('')}
-          </tbody>
-        `;
-
-        div.appendChild(titulo);
-        div.appendChild(boton);
-        div.appendChild(table);
-        contenedor.appendChild(div);
-      }
-
-      await cargarHistorico();
-    }
-
-    async function eliminarPedidoHorario(id, tabla) {
-      if (!confirm("¿Eliminar este pedido?")) return;
-
-      await fetch(`/eliminar-pedido-horario/${tabla}/${id}`, { method: 'DELETE' });
-
-      const fila = document.getElementById(`pedido-${id}`);
-      if (fila) fila.remove();
-
-      const titulo = document.getElementById(`titulo-${tabla}`);
-      const match = titulo.textContent.match(/\((\d+)\)/);
-      if (match) {
-        const nuevoValor = Math.max(0, parseInt(match[1]) - 1);
-        titulo.textContent = `${nombres[tabla]} (${nuevoValor})`;
-      }
-    }
-
-    async function cargarHistorico() {
-      const contenedor = document.getElementById("contenedor-tablas");
-
-      if (historicoData.length === 0) {
-        const res = await fetch(`/pedidos`);
-        historicoData = await res.json();
-      }
-
-      let datosAMostrar = historicoData.slice(historicoOffset, historicoOffset + 20);
-
-      const div = document.createElement("div");
-      div.id = "bloque-historico";
-      const titulo = document.createElement("h2");
-      titulo.textContent = `Histórico de Pedidos (${historicoData.length})`;
-      div.appendChild(titulo);
-
-      const table = document.createElement("table");
-      table.innerHTML = `
-        <thead>
-          <tr>
-            <th>Cliente</th>
-            <th>Teléfono</th>
-            <th>Pago</th>
-            <th onclick="ordenarHistorico('proteina')">Proteína 🔽</th>
-            <th>Vegetal</th>
-            <th onclick="ordenarHistorico('cobertura')">Cobertura 🔽</th>
-            <th>Precio</th>
-            <th>Fecha</th>
-            <th>Eliminar</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${datosAMostrar.map(p => `
-            <tr id="pedido-${p.id}">
-              <td>${p.nombre_cliente} ${p.apellido_cliente}</td>
-              <td>${p.celular_cliente}</td>
-              <td>${p.metodo_pago}</td>
-              <td>${p.proteina}</td>
-              <td>${p.vegetal}</td>
-              <td>${p.cobertura}</td>
-              <td>$${p.precio}</td>
-              <td>${p.fecha?.split('T')[0]}</td>
-              <td><button onclick="eliminarPedido(${p.id})">❌</button></td>
-            </tr>
-          `).join('')}
-        </tbody>
-      `;
-
-      div.appendChild(table);
-
-      if (historicoOffset + 20 < historicoData.length) {
-        const btn = document.createElement("button");
-        btn.textContent = "⬇ Ver más";
-        btn.onclick = () => {
-          historicoOffset += 10;
-          cargarTablasHorarias();
-        };
-        div.appendChild(btn);
-      }
-
-      contenedor.appendChild(div);
-    }
-
-    async function eliminarPedido(id) {
-      if (!confirm("¿Eliminar este pedido?")) return;
-      await fetch(`/eliminar-pedido/${id}`, { method: 'DELETE' });
-      const fila = document.getElementById(`pedido-${id}`);
-      if (fila) fila.remove();
-      historicoData = historicoData.filter(p => p.id !== id);
-    }
-
-    function ordenarHistorico(campo) {
-      ordenActual.asc = ordenActual.campo === campo ? !ordenActual.asc : true;
-      ordenActual.campo = campo;
-      historicoData.sort((a, b) => {
-        if (a[campo] < b[campo]) return ordenActual.asc ? -1 : 1;
-        if (a[campo] > b[campo]) return ordenActual.asc ? 1 : -1;
-        return 0;
-      });
-      historicoOffset = 0;
-      cargarTablasHorarias();
-    }
-
-    function cerrarSesion() {
-      localStorage.removeItem("adminAutenticado");
-      window.location.href = "index.html";
-    }
-
     cargarEstadoSwitch();
-    cargarTablasHorarias();
   </script>
 </body>
 </html>
