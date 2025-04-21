@@ -184,14 +184,7 @@
         const data = await res.json();
         const maxDisponible = Math.max(...data.map(d => d.disponibles));
         cuposDisponibles = maxDisponible;
-
-        if (cantidadActual >= cuposDisponibles) {
-          mensaje.textContent = "🚫 No hay más cupos disponibles según los horarios.";
-          return false;
-        } else {
-          mensaje.textContent = "";
-          return true;
-        }
+        return cantidadActual < cuposDisponibles;
       } catch (err) {
         console.error("Error al verificar disponibilidad:", err);
         mensaje.textContent = "Error al verificar disponibilidad.";
@@ -201,11 +194,14 @@
 
     async function agregarOtro() {
       const puede = await verificarCupos();
-      if (puede && cantidadActual < cuposDisponibles) {
+      if (puede) {
         cantidadActual++;
         lista.push({ ...roll });
         contador.textContent = cantidadActual;
         localStorage.setItem("todosLosRolls", JSON.stringify(lista));
+        mensaje.textContent = "";
+      } else {
+        mensaje.textContent = "🚫 No hay más cupos disponibles.";
       }
     }
 
@@ -228,7 +224,13 @@
       irA("datos-cliente.html");
     }
 
-    function agregarNuevoRoll() {
+    async function agregarNuevoRoll() {
+      const puede = await verificarCupos();
+      if (!puede) {
+        mensaje.textContent = "🚫 No se puede agregar otro roll, cupo completo.";
+        return;
+      }
+
       const ultimaGuardada = lista[lista.length - 1];
       const esUltimoIgual = ultimaGuardada && JSON.stringify(ultimaGuardada) === JSON.stringify(roll);
 

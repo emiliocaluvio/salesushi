@@ -67,7 +67,7 @@
       position: relative;
       width: 180px;
       height: 180px;
-      margin: 1.5rem 0;
+      margin: 1.5rem 0 2.5rem;
     }
 
     .contenedor-roll img {
@@ -78,20 +78,24 @@
       height: auto;
     }
 
-    .fila-botones,
-    .cancelar-container {
+    .fila-botones {
       display: flex;
       justify-content: center;
       gap: 1rem;
       width: 100%;
       max-width: 420px;
-      margin-bottom: 0.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .cancelar-container {
+      width: 100%;
+      max-width: 420px;
+      margin-bottom: 1rem;
     }
 
     .btn, .cancelar {
       flex: 1;
       padding: 0.8rem 0;
-      max-width: 200px;
       background-color: transparent;
       border: 2px dashed #ff6f61;
       color: #ff6f61;
@@ -100,6 +104,7 @@
       transition: 0.3s;
       border-radius: 8px;
       text-align: center;
+      max-width: 200px;
     }
 
     .btn:hover, .cancelar:hover {
@@ -115,8 +120,7 @@
     }
 
     @media (max-width: 600px) {
-      .fila-botones,
-      .cancelar-container {
+      .fila-botones {
         flex-wrap: wrap;
         gap: 0.5rem;
       }

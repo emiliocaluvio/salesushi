@@ -81,7 +81,7 @@
       position: relative;
       width: 180px;
       height: 180px;
-      margin: 1.2rem 0 2rem;
+      margin: 1.5rem 0;
       flex-shrink: 0;
     }
 
@@ -100,13 +100,17 @@
       width: 100%;
       max-width: 420px;
       margin-bottom: 1rem;
-      flex-wrap: wrap;
+    }
+
+    .cancelar-container {
+      width: 100%;
+      max-width: 420px;
+      margin-bottom: 1rem;
     }
 
     .btn, .cancelar {
-      flex: 1 1 50%;
+      flex: 1;
       padding: 0.8rem 0;
-      max-width: 200px;
       background-color: transparent;
       border: 2px dashed #ff6f61;
       color: #ff6f61;
@@ -158,6 +162,9 @@
   <div class="fila-botones">
     <button class="btn" onclick="irA('proteina.html')">⬅ Volver</button>
     <button class="btn" onclick="siguiente()">Siguiente ➡</button>
+  </div>
+
+  <div class="cancelar-container">
     <button class="cancelar" onclick="irA('index.html')">Cancelar pedido</button>
   </div>
 
@@ -212,7 +219,6 @@
               div.classList.add("seleccionada");
               seleccionados.push(v);
             }
-
             actualizarBloqueosVegetales();
           } else {
             document.querySelectorAll(".opcion").forEach(el => el.classList.remove("seleccionada"));
