@@ -29,9 +29,8 @@
     }
 
     .proteinas {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
       gap: 0.8rem;
       width: 100%;
       max-width: 400px;
@@ -46,15 +45,7 @@
       cursor: pointer;
       transition: 0.3s;
       font-size: 0.95rem;
-      min-width: 140px;
-      flex: 1 1 calc(50% - 1rem);
       box-sizing: border-box;
-    }
-
-    .opcion:nth-child(7) {
-      flex: 0 0 100%;
-      max-width: 140px;
-      margin: 0 auto;
     }
 
     .opcion:hover,
@@ -63,11 +54,17 @@
       color: #000;
     }
 
+    .proteinas .opcion:last-child:nth-child(odd) {
+      grid-column: span 2;
+      justify-self: center;
+      max-width: 140px;
+    }
+
     .contenedor-roll {
       position: relative;
       width: 180px;
       height: 180px;
-      margin: 1rem auto 1.5rem;
+      margin: 1rem 0 1.5rem;
     }
 
     .contenedor-roll img {
@@ -84,13 +81,12 @@
       gap: 1rem;
       width: 100%;
       max-width: 420px;
-      margin-bottom: 0.8rem;
+      margin-bottom: 1rem;
     }
 
-    .btn {
+    .btn, .cancelar {
       flex: 1;
       padding: 0.8rem 0;
-      max-width: 200px;
       background-color: transparent;
       border: 2px dashed #ff6f61;
       color: #ff6f61;
@@ -98,9 +94,10 @@
       cursor: pointer;
       transition: 0.3s;
       border-radius: 8px;
+      max-width: 200px;
     }
 
-    .btn:hover {
+    .btn:hover, .cancelar:hover {
       background-color: #ff6f61;
       color: #000;
     }
@@ -109,25 +106,6 @@
       display: flex;
       justify-content: center;
       width: 100%;
-      margin-bottom: 1rem;
-    }
-
-    .cancelar {
-      width: 100%;
-      max-width: 420px;
-      padding: 0.8rem 0;
-      border: 2px dashed #ff6f61;
-      background: transparent;
-      color: #ff6f61;
-      border-radius: 8px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .cancelar:hover {
-      background-color: #ff6f61;
-      color: #000;
     }
 
     .logo-footer {
@@ -136,17 +114,16 @@
       margin-top: auto;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 400px) {
       .fila-botones {
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: wrap;
         gap: 0.5rem;
-        align-items: center;
       }
 
       .btn, .cancelar {
+        flex: 1 1 50%;
         max-width: 100%;
-        width: 100%;
-        font-size: 0.95rem;
       }
 
       .contenedor-roll {
@@ -167,8 +144,8 @@
   </div>
 
   <div class="fila-botones">
-    <button class="btn" onclick="siguiente()">Siguiente</button>
-    <button class="btn" onclick="cancelar()">Volver</button>
+    <button class="btn" onclick="cancelar()">⬅ Volver</button>
+    <button class="btn" onclick="siguiente()">Siguiente ➡</button>
   </div>
 
   <div class="cancelar-container">

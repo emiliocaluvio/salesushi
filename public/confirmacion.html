@@ -227,8 +227,14 @@
     }
 
     function agregarNuevoRoll() {
-      lista.push({ ...roll });
-      localStorage.setItem("todosLosRolls", JSON.stringify(lista));
+      const ultimaGuardada = lista[lista.length - 1];
+      const esUltimoIgual = ultimaGuardada && JSON.stringify(ultimaGuardada) === JSON.stringify(roll);
+
+      if (!esUltimoIgual) {
+        lista.push({ ...roll });
+        localStorage.setItem("todosLosRolls", JSON.stringify(lista));
+      }
+
       localStorage.removeItem("pedido");
       irA("proteina.html");
     }

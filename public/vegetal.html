@@ -99,10 +99,10 @@
       gap: 1rem;
       width: 100%;
       max-width: 420px;
-      margin-bottom: 0.8rem;
+      margin-bottom: 1rem;
     }
 
-    .btn {
+    .btn, .cancelar {
       flex: 1;
       padding: 0.8rem 0;
       max-width: 200px;
@@ -115,7 +115,7 @@
       border-radius: 8px;
     }
 
-    .btn:hover {
+    .btn:hover, .cancelar:hover {
       background-color: #ff6f61;
       color: #000;
     }
@@ -124,25 +124,6 @@
       display: flex;
       justify-content: center;
       width: 100%;
-    }
-
-    .cancelar {
-      padding: 0.8rem 0;
-      background-color: transparent;
-      border: 2px dashed #ff6f61;
-      color: #ff6f61;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: 0.3s;
-      border-radius: 8px;
-      width: 100%;
-      max-width: 420px;
-      text-align: center;
-    }
-
-    .cancelar:hover {
-      background-color: #ff6f61;
-      color: #000;
     }
 
     .logo-footer {
@@ -154,13 +135,11 @@
 
     @media (max-width: 600px) {
       .fila-botones {
-        flex-direction: column;
-        gap: 0.5rem;
-        align-items: center;
+        flex-wrap: wrap;
       }
 
       .btn, .cancelar {
-        width: 100%;
+        flex: 1 1 50%;
         max-width: 100%;
         font-size: 0.95rem;
       }
@@ -173,7 +152,7 @@
   </style>
 </head>
 <body>
-  <h1>Paso 2/3: Elegí tus vegetales (2/3)</h1>
+  <h1>Paso 2/3: Elegí tus vegetales</h1>
   <div id="mensaje-vegetariano"></div>
 
   <div id="contenedor" class="vegetales"></div>
@@ -186,8 +165,8 @@
   </div>
 
   <div class="fila-botones">
-    <button class="btn" onclick="irA('proteina.html')">Volver</button>
-    <button class="btn" onclick="siguiente()">Siguiente</button>
+    <button class="btn" onclick="irA('proteina.html')">⬅ Volver</button>
+    <button class="btn" onclick="siguiente()">Siguiente ➡</button>
   </div>
 
   <div class="cancelar-container">
