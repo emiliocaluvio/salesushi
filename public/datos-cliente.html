@@ -11,7 +11,6 @@
       font-family: sans-serif;
       padding: 2rem;
       margin: 0;
-      transition: opacity 0.3s ease;
       display: flex;
       flex-direction: column;
       min-height: 100vh;
@@ -47,8 +46,9 @@
 
     .horarios {
       display: flex;
-      justify-content: center;
-      gap: 1rem;
+      flex-direction: column;
+      gap: 0.8rem;
+      align-items: center;
     }
 
     .horario-box {
@@ -57,8 +57,8 @@
       border-radius: 10px;
       cursor: pointer;
       text-align: center;
-      flex: 1;
-      max-width: 150px;
+      width: 100%;
+      max-width: 200px;
       position: relative;
     }
 
@@ -78,7 +78,6 @@
     .resumen {
       max-width: 900px;
       margin: 2rem auto 1rem;
-      padding: 1rem;
     }
 
     .rolls-grid {
@@ -98,9 +97,14 @@
       position: relative;
     }
 
+    .roll:nth-child(odd):last-child {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
     .roll-img {
       width: 100%;
-      max-width: 160px;
+      max-width: 120px;
       margin: 0.5rem auto;
       display: block;
       border-radius: 8px;
@@ -126,7 +130,15 @@
       text-align: center;
     }
 
-    button, .btn-volver {
+    .acciones {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    button {
       padding: 1rem;
       font-size: 1rem;
       border: 2px dashed #ff6f61;
@@ -134,10 +146,9 @@
       color: #ff6f61;
       cursor: pointer;
       transition: 0.3s;
-      margin-top: 1rem;
-      width: 100%;
-      max-width: 300px;
-      align-self: center;
+      flex: 1;
+      max-width: 200px;
+      border-radius: 10px;
     }
 
     button[disabled] {
@@ -145,7 +156,7 @@
       cursor: not-allowed;
     }
 
-    button:hover:enabled, .btn-volver:hover {
+    button:hover:enabled {
       background-color: #ff6f61;
       color: #000;
     }
@@ -155,22 +166,6 @@
       opacity: 0.7;
       margin: 2rem auto 0;
       display: block;
-    }
-
-    @media (max-width: 700px) {
-      .roll {
-        width: 100%;
-      }
-
-      .horarios {
-        flex-direction: row;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-      }
-
-      .horario-box {
-        min-width: 100px;
-      }
     }
   </style>
 </head>
@@ -195,10 +190,11 @@
       <h3 style="text-align:center;">Seleccioná horario de entrega</h3>
       <div class="horarios" id="opcionesHorario"></div>
 
-      <button type="submit" id="btnConfirmar" disabled>Confirmar pedido</button>
+      <div class="acciones">
+        <button type="submit" id="btnConfirmar" disabled>Confirmar pedido</button>
+        <button type="button" onclick="cancelarPedido()">Cancelar pedido</button>
+      </div>
     </form>
-
-    <button class="btn-volver" onclick="cancelarPedido()">Cancelar pedido</button>
   </div>
 
   <img src="logo.png" alt="Logo Sale Sushi" class="logo-footer" />
@@ -350,8 +346,7 @@
     });
 
     function irA(ruta) {
-      document.body.classList.add("fade-out");
-      setTimeout(() => window.location.href = ruta, 300);
+      window.location.href = ruta;
     }
 
     verificarEstadoPedidos();
