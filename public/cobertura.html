@@ -67,7 +67,7 @@
       position: relative;
       width: 180px;
       height: 180px;
-      margin: 1.5rem 0 2.5rem;
+      margin: 1.5rem 0;
     }
 
     .contenedor-roll img {
@@ -85,16 +85,11 @@
       width: 100%;
       max-width: 420px;
       margin-bottom: 1rem;
+      flex-wrap: wrap;
     }
 
-    .cancelar-container {
-      width: 100%;
-      max-width: 420px;
-      margin-bottom: 1rem;
-    }
-
-    .btn, .cancelar {
-      flex: 1;
+    .btn {
+      flex: 1 1 50%;
       padding: 0.8rem 0;
       background-color: transparent;
       border: 2px dashed #ff6f61;
@@ -107,7 +102,7 @@
       max-width: 200px;
     }
 
-    .btn:hover, .cancelar:hover {
+    .btn:hover {
       background-color: #ff6f61;
       color: #000;
     }
@@ -120,21 +115,14 @@
     }
 
     @media (max-width: 600px) {
-      .fila-botones {
-        flex-wrap: wrap;
-        gap: 0.5rem;
-      }
-
-      .btn, .cancelar {
-        flex: 1 1 50%;
-        width: 100%;
-        max-width: 100%;
-        font-size: 0.95rem;
-      }
-
       .contenedor-roll {
         width: 150px;
         height: 150px;
+      }
+
+      .btn {
+        font-size: 0.95rem;
+        max-width: 100%;
       }
     }
   </style>
@@ -157,8 +145,8 @@
     <button class="btn" onclick="siguiente()">Agregar roll al pedido</button>
   </div>
 
-  <div class="cancelar-container">
-    <button class="cancelar" onclick="irA('index.html')">Cancelar pedido</button>
+  <div class="fila-botones">
+    <button class="btn" onclick="irA('index.html')">Cancelar pedido</button>
   </div>
 
   <img src="logo.png" class="logo-footer" alt="Logo Sale Sushi" />

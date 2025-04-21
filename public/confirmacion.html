@@ -103,7 +103,7 @@
       color: #000;
     }
 
-    .btn[disabled] {
+    .btn:disabled {
       opacity: 0.4;
       cursor: not-allowed;
     }
@@ -146,7 +146,7 @@
   </div>
 
   <div class="fila-botones">
-    <button class="btn" onclick="agregarNuevoRoll()">+ Agregar otro roll</button>
+    <button class="btn" id="btn-agregar-roll" onclick="agregarNuevoRoll()">+ Agregar otro roll</button>
     <button class="btn" onclick="cancelarPedido()">Cancelar pedido</button>
   </div>
 
@@ -157,6 +157,7 @@
     const imagenRoll = document.getElementById("imagenRoll");
     const contador = document.getElementById("contador");
     const mensaje = document.getElementById("mensaje-aviso");
+    const btnAgregar = document.getElementById("btn-agregar-roll");
 
     const roll = JSON.parse(localStorage.getItem("pedido"));
     let lista = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
@@ -184,10 +185,13 @@
         const data = await res.json();
         const maxDisponible = Math.max(...data.map(d => d.disponibles));
         cuposDisponibles = maxDisponible;
-        return cantidadActual < cuposDisponibles;
+        const permitido = lista.length < cuposDisponibles;
+        btnAgregar.disabled = !permitido;
+        return permitido;
       } catch (err) {
         console.error("Error al verificar disponibilidad:", err);
         mensaje.textContent = "Error al verificar disponibilidad.";
+        btnAgregar.disabled = true;
         return false;
       }
     }
@@ -212,6 +216,7 @@
         contador.textContent = cantidadActual;
         mensaje.textContent = "";
         localStorage.setItem("todosLosRolls", JSON.stringify(lista));
+        verificarCupos(); // actualiza estado del botón
       }
     }
 
