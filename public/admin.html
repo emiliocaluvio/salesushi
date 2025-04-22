@@ -145,180 +145,155 @@
     <label>hasta: <input type="date" id="hasta"></label>
     <button onclick="filtrarHistorico()">🔍 Filtrar</button>
   </div>
-  
 
   <script>
-    const horarios = ['horario_19', 'horario_20', 'horario_21'];
-    const nombres = {
-      'horario_19': 'Pedidos 19:00',
-      'horario_20': 'Pedidos 20:00',
-      'horario_21': 'Pedidos 21:00'
-    };
-
-    async function fetchTabla(nombre) {
-      const res = await fetch(`/api/tabla/${nombre}`);
-      return await res.json();
-    }
-
-    async function cargarTablasHorarias() {
-      const contenedor = document.getElementById("contenedor-tablas");
+    async function cargarHistorico() {
+      const contenedor = document.getElementById("historico-tablas");
       contenedor.innerHTML = '';
 
-      for (const tabla of horarios) {
-        const datos = await fetchTabla(tabla);
+      const res = await fetch('/pedidos');
+      let datos = await res.json();
 
-        const div = document.createElement("div");
-        const titulo = document.createElement("h2");
-        titulo.id = `titulo-${tabla}`;
-        titulo.textContent = `${nombres[tabla]} (${datos.length})`;
+      datos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
-        const boton = document.createElement("button");
-        boton.textContent = `🗑 Limpiar ${nombres[tabla]}`;
-        boton.onclick = async () => {
-          if (!confirm("¿Seguro que querés limpiar la tabla?")) return;
-          const res = await fetch(`/api/limpiar_tabla/${tabla}`, { method: 'DELETE' });
-          const rta = await res.json();
-          alert(rta.message);
-          cargarTablasHorarias();
-        };
-
-        const table = document.createElement("table");
-        table.innerHTML = `
-          <thead>
-            <tr>
-              <th>Cliente</th>
-              <th>Teléfono</th>
-              <th>Pago</th>
-              <th>Proteína</th>
-              <th>Vegetal</th>
-              <th>Cobertura</th>
-              <th>Precio</th>
-              <th>Fecha</th>
-              <th>Eliminar</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${datos.map(p => `
-              <tr id="pedido-${tabla}-${p.id}">
-                <td>${p.nombre_cliente} ${p.apellido_cliente}</td>
-                <td>${p.celular_cliente}</td>
-                <td>${p.metodo_pago}</td>
-                <td>${p.proteina}</td>
-                <td>${p.vegetal}</td>
-                <td>${p.cobertura}</td>
-                <td>$${p.precio}</td>
-                <td>${p.fecha?.split('T')[0]}</td>
-                <td><button onclick="eliminarPedidoHorario(${p.id}, '${tabla}')">❌</button></td>
-              </tr>
-            `).join('')}
-          </tbody>
-        `;
-
-        div.appendChild(titulo);
-        div.appendChild(boton);
-        div.appendChild(table);
-        contenedor.appendChild(div);
+      const grupos = {};
+      for (const p of datos) {
+        const clave = `${p.nombre_cliente}|${p.apellido_cliente}|${p.celular_cliente}|${p.metodo_pago}|${p.fecha}`;
+        if (!grupos[clave]) grupos[clave] = [];
+        grupos[clave].push(p);
       }
-    }
 
-    async function cargarHistorico(filtrado = false) {
-  const contenedor = document.getElementById("historico-tablas");
-  contenedor.innerHTML = '';
+      const div = document.createElement("div");
+      const titulo = document.createElement("h2");
+      titulo.textContent = "Pedidos Históricos";
 
-  const res = await fetch('/pedidos');
-  let datos = await res.json();
+      const tabla = document.createElement("table");
+      tabla.innerHTML = `
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Teléfono</th>
+            <th>Pago</th>
+            <th>Proteína</th>
+            <th>Vegetal</th>
+            <th>Cobertura</th>
+            <th>Precio</th>
+            <th>Fecha</th>
+            <th>Eliminar</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpo-historico"></tbody>
+      `;
 
-  // Orden descendente: más nuevo arriba
-  datos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+      const cuerpo = tabla.querySelector("tbody");
 
-  const div = document.createElement("div");
-  const titulo = document.createElement("h2");
-  titulo.textContent = "Pedidos Históricos";
-
-  const tabla = document.createElement("table");
-  tabla.innerHTML = `
-    <thead>
-      <tr>
-        <th>Cliente</th>
-        <th>Teléfono</th>
-        <th>Pago</th>
-        <th>Proteína</th>
-        <th>Vegetal</th>
-        <th>Cobertura</th>
-        <th>Precio</th>
-        <th>Fecha</th>
-        <th>Eliminar</th>
-      </tr>
-    </thead>
-    <tbody id="cuerpo-historico"></tbody>
-  `;
-
-  const cuerpo = tabla.querySelector("tbody");
-
-  datos.forEach(p => {
-    const fila = document.createElement("tr");
-    fila.id = `pedido-pedidos_historico-${p.id}`;
-    fila.innerHTML = `
-      <td>${p.nombre_cliente} ${p.apellido_cliente}</td>
-      <td>${p.celular_cliente}</td>
-      <td>${p.metodo_pago}</td>
-      <td>${p.proteina}</td>
-      <td>${p.vegetal}</td>
-      <td>${p.cobertura}</td>
-      <td>$${p.precio}</td>
-      <td>${p.fecha?.split('T')[0]}</td>
-      <td><button onclick="eliminarPedidoHistorico(${p.id})">❌</button></td>
-    `;
-    cuerpo.appendChild(fila);
-  });
-
-  div.appendChild(titulo);
-  div.appendChild(tabla);
-  contenedor.appendChild(div);
-}
-
-function filtrarHistorico() {
-  const desde = document.getElementById("desde").value;
-  const hasta = document.getElementById("hasta").value;
-
-  if (!desde || !hasta) {
-    alert("Seleccioná ambas fechas");
-    return;
-  }
-
-  fetch('/pedidos')
-    .then(res => res.json())
-    .then(data => {
-      const filtrados = data.filter(p => {
-        const fecha = p.fecha?.split('T')[0];
-        return fecha >= desde && fecha <= hasta;
-      });
-
-      // Reescribimos la tabla solo con los resultados
-      const cuerpo = document.getElementById("cuerpo-historico");
-      cuerpo.innerHTML = '';
-
-      filtrados
-        .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
-        .forEach(p => {
+      for (const clave in grupos) {
+        const [nombre, apellido, celular, pago, fecha] = clave.split("|");
+        const rolls = grupos[clave];
+        rolls.forEach((p, i) => {
           const fila = document.createElement("tr");
           fila.id = `pedido-pedidos_historico-${p.id}`;
           fila.innerHTML = `
-            <td>${p.nombre_cliente} ${p.apellido_cliente}</td>
-            <td>${p.celular_cliente}</td>
-            <td>${p.metodo_pago}</td>
+            ${i === 0 ? `<td rowspan="${rolls.length}">${nombre} ${apellido}</td>` : ''}
+            ${i === 0 ? `<td rowspan="${rolls.length}">${celular}</td>` : ''}
+            ${i === 0 ? `<td rowspan="${rolls.length}">${pago}</td>` : ''}
             <td>${p.proteina}</td>
             <td>${p.vegetal}</td>
             <td>${p.cobertura}</td>
             <td>$${p.precio}</td>
-            <td>${p.fecha?.split('T')[0]}</td>
+            ${i === 0 ? `<td rowspan="${rolls.length}">${fecha.split("T")[0]}</td>` : ''}
             <td><button onclick="eliminarPedidoHistorico(${p.id})">❌</button></td>
           `;
           cuerpo.appendChild(fila);
         });
-    });
-}
+      }
 
+      div.appendChild(titulo);
+      div.appendChild(tabla);
+      contenedor.appendChild(div);
+    }
+
+    function filtrarHistorico() {
+      const desde = document.getElementById("desde").value;
+      const hasta = document.getElementById("hasta").value;
+
+      if (!desde || !hasta) {
+        alert("Seleccioná ambas fechas");
+        return;
+      }
+
+      fetch('/pedidos')
+        .then(res => res.json())
+        .then(data => {
+          const filtrados = data.filter(p => {
+            const fecha = p.fecha?.split('T')[0];
+            return fecha >= desde && fecha <= hasta;
+          });
+
+          // agrupamos
+          const cuerpo = document.getElementById("cuerpo-historico");
+          cuerpo.innerHTML = '';
+          const grupos = {};
+          filtrados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).forEach(p => {
+            const clave = `${p.nombre_cliente}|${p.apellido_cliente}|${p.celular_cliente}|${p.metodo_pago}|${p.fecha}`;
+            if (!grupos[clave]) grupos[clave] = [];
+            grupos[clave].push(p);
+          });
+
+          for (const clave in grupos) {
+            const [nombre, apellido, celular, pago, fecha] = clave.split("|");
+            const rolls = grupos[clave];
+            rolls.forEach((p, i) => {
+              const fila = document.createElement("tr");
+              fila.id = `pedido-pedidos_historico-${p.id}`;
+              fila.innerHTML = `
+                ${i === 0 ? `<td rowspan="${rolls.length}">${nombre} ${apellido}</td>` : ''}
+                ${i === 0 ? `<td rowspan="${rolls.length}">${celular}</td>` : ''}
+                ${i === 0 ? `<td rowspan="${rolls.length}">${pago}</td>` : ''}
+                <td>${p.proteina}</td>
+                <td>${p.vegetal}</td>
+                <td>${p.cobertura}</td>
+                <td>$${p.precio}</td>
+                ${i === 0 ? `<td rowspan="${rolls.length}">${fecha.split("T")[0]}</td>` : ''}
+                <td><button onclick="eliminarPedidoHistorico(${p.id})">❌</button></td>
+              `;
+              cuerpo.appendChild(fila);
+            });
+          }
+        });
+    }
+
+    async function eliminarPedidoHistorico(id) {
+      if (!confirm("¿Eliminar este pedido histórico?")) return;
+      await fetch(`/eliminar-pedido/${id}`, { method: 'DELETE' });
+      document.getElementById(`pedido-pedidos_historico-${id}`)?.remove();
+    }
+
+    async function eliminarPedidoHorario(id, tabla) {
+      if (!confirm("¿Eliminar este pedido?")) return;
+      await fetch(`/eliminar-pedido-horario/${tabla}/${id}`, { method: 'DELETE' });
+      document.getElementById(`pedido-${tabla}-${id}`)?.remove();
+    }
+
+    function cerrarSesion() {
+      localStorage.removeItem("adminAutenticado");
+      window.location.href = "index.html";
+    }
+
+    async function cargarEstadoSwitch() {
+      const res = await fetch('/estado-pedidos');
+      const data = await res.json();
+      document.getElementById("switchPedidos").checked = data.activo;
+    }
+
+    document.getElementById("switchPedidos").addEventListener("change", async () => {
+      const activo = document.getElementById("switchPedidos").checked;
+      await fetch('/estado-pedidos', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ activo })
+      });
+    });
 
     async function mostrarDatosVenta() {
       const res1 = await fetch('/api/tabla/horario_19');
@@ -357,38 +332,6 @@ function filtrarHistorico() {
         </div>
       `;
     }
-
-    async function eliminarPedidoHorario(id, tabla) {
-      if (!confirm("¿Eliminar este pedido?")) return;
-      await fetch(`/eliminar-pedido-horario/${tabla}/${id}`, { method: 'DELETE' });
-      document.getElementById(`pedido-${tabla}-${id}`)?.remove();
-    }
-
-    async function eliminarPedidoHistorico(id) {
-      if (!confirm("¿Eliminar este pedido histórico?")) return;
-      await fetch(`/eliminar-pedido/${id}`, { method: 'DELETE' });
-      document.getElementById(`pedido-pedidos_historico-${id}`)?.remove();
-    }
-
-    function cerrarSesion() {
-      localStorage.removeItem("adminAutenticado");
-      window.location.href = "index.html";
-    }
-
-    async function cargarEstadoSwitch() {
-      const res = await fetch('/estado-pedidos');
-      const data = await res.json();
-      document.getElementById("switchPedidos").checked = data.activo;
-    }
-
-    document.getElementById("switchPedidos").addEventListener("change", async () => {
-      const activo = document.getElementById("switchPedidos").checked;
-      await fetch('/estado-pedidos', {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ activo })
-      });
-    });
 
     cargarEstadoSwitch();
     cargarTablasHorarias();
