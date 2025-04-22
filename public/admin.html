@@ -153,10 +153,8 @@
       'horario_21': 'Pedidos 21:00'
     };
 
-    async function fetchTabla(nombre, offset = 0, limit = null) {
-      let url = `/api/tabla/${nombre}`;
-      if (limit !== null) url += `?offset=${offset}&limit=${limit}`;
-      const res = await fetch(url);
+    async function fetchTabla(nombre) {
+      const res = await fetch(`/api/tabla/${nombre}`);
       return await res.json();
     }
 
@@ -260,10 +258,11 @@
       contenedor.appendChild(div);
 
       async function cargarMas() {
-        const datos = await fetchTabla('pedidos_historico', offset, limit);
+        const res = await fetch('/pedidos');
+        const datos = await res.json();
         const cuerpo = document.getElementById("cuerpo-historico");
 
-        datos.forEach(p => {
+        datos.slice(offset, offset + limit).forEach(p => {
           const fila = document.createElement("tr");
           fila.innerHTML = `
             <td>${p.nombre_cliente} ${p.apellido_cliente}</td>
@@ -279,22 +278,54 @@
           cuerpo.appendChild(fila);
         });
 
-        offset += datos.length;
+        offset += limit;
       }
 
       await cargarMas();
     }
 
+    async function mostrarDatosVenta() {
+      const res1 = await fetch('/api/tabla/horario_19');
+      const res2 = await fetch('/api/tabla/horario_20');
+      const res3 = await fetch('/api/tabla/horario_21');
+      const datos = [...await res1.json(), ...await res2.json(), ...await res3.json()];
+
+      const contar = (lista, campo) =>
+        lista.reduce((acc, el) => {
+          acc[el[campo]] = (acc[el[campo]] || 0) + 1;
+          return acc;
+        }, {});
+
+      const proteinas = contar(datos, "proteina");
+      const vegetales = contar(datos, "vegetal");
+      const coberturas = contar(datos, "cobertura");
+
+      const contenedor = document.getElementById("contenedor-tablas");
+      contenedor.innerHTML = `
+        <div class="info-box">
+          <h2>📊 Ingredientes en pedidos</h2>
+          <h3>🍣 Proteínas</h3>
+          <ul>${Object.entries(proteinas).map(([k, v]) => `<li>${k}: ${v}</li>`).join('')}</ul>
+          <h3>🥬 Vegetales</h3>
+          <ul>${Object.entries(vegetales).map(([k, v]) => `<li>${k}: ${v}</li>`).join('')}</ul>
+          <h3>🌿 Coberturas</h3>
+          <ul>${Object.entries(coberturas).map(([k, v]) => `<li>${k}: ${v}</li>`).join('')}</ul>
+        </div>
+        <div style="text-align:center; margin-top: 2rem;">
+          <a href="admin.html">🔙 Volver al panel</a>
+        </div>
+      `;
+    }
+
     async function eliminarPedidoHorario(id, tabla) {
       if (!confirm("¿Eliminar este pedido?")) return;
       await fetch(`/eliminar-pedido-horario/${tabla}/${id}`, { method: 'DELETE' });
-      const fila = document.getElementById(`pedido-${tabla}-${id}`);
-      if (fila) fila.remove();
+      document.getElementById(`pedido-${tabla}-${id}`)?.remove();
     }
 
     async function eliminarPedidoHistorico(id) {
       if (!confirm("¿Eliminar este pedido histórico?")) return;
-      await fetch(`/eliminar-pedido-horario/pedidos_historico/${id}`, { method: 'DELETE' });
+      await fetch(`/eliminar-pedido/${id}`, { method: 'DELETE' });
       document.querySelector(`#pedido-pedidos_historico-${id}`)?.remove();
     }
 
