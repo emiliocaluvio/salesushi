@@ -235,34 +235,35 @@
     function calcularPromedios() {
       const totalCantidad = Object.values(cantidades).reduce((a, b) => a + b, 0);
       const totalVentas = Object.values(ventas).reduce((a, b) => a + b, 0);
-      const costoTotal = campos.reduce((acc, id) => acc + Number(document.getElementById(id).value || 0), 0);
 
-      const promCosto = totalCantidad > 0 ? Math.round(costoTotal / totalCantidad) : 0;
+      const costosComunes = ['vegetales', 'paltas', 'arroz', 'queso', 'cajas', 'otros'];
+      const costoComunesTotal = costosComunes.reduce((acc, id) => acc + Number(document.getElementById(id).value || 0), 0);
+      const costoComunPorRoll = totalCantidad > 0 ? costoComunesTotal / totalCantidad : 0;
+
+      const costoEspecifico = {
+        salmon: Number(document.getElementById("salmon").value || 0),
+        pollo: Number(document.getElementById("pollo").value || 0),
+        langostino: Number(document.getElementById("langostinos").value || 0),
+        kanikama: Number(document.getElementById("kanikama").value || 0),
+        vegetariano: 0
+      };
+
+      const promCosto = Math.round(costoComunPorRoll);
       const promVenta = totalCantidad > 0 ? Math.round(totalVentas / totalCantidad) : 0;
 
       document.getElementById("promCosto").innerText = promCosto;
       document.getElementById("promVenta").innerText = promVenta;
 
-      const calcRentabilidad = (tipo, costoUnitario) => {
+      for (const tipo in cantidades) {
         const cant = cantidades[tipo];
         const venta = ventas[tipo];
-        const costo = cant * costoUnitario;
-        const rent = venta - costo;
-        document.getElementById(`costo${capitalize(tipo)}`).innerText = cant ? costoUnitario : 0;
+        const costoTotal = (costoComunPorRoll * cant) + costoEspecifico[tipo];
+        const costoUnitario = cant > 0 ? Math.round(costoTotal / cant) : 0;
+        const rent = venta - costoTotal;
+
+        document.getElementById(`costo${capitalize(tipo)}`).innerText = costoUnitario;
         document.getElementById(`venta${capitalize(tipo)}Prom`).innerText = venta;
         document.getElementById(`rent${capitalize(tipo)}`).innerText = rent;
-      };
-
-      const costoPorProteina = {
-        salmon: Number(document.getElementById("salmon").value || 0),
-        pollo: Number(document.getElementById("pollo").value || 0),
-        langostino: Number(document.getElementById("langostinos").value || 0),
-        kanikama: Number(document.getElementById("kanikama").value || 0),
-        vegetariano: (Number(document.getElementById("vegetales").value || 0) + Number(document.getElementById("queso").value || 0)) / 2
-      };
-
-      for (const tipo of Object.keys(cantidades)) {
-        calcRentabilidad(tipo, Math.round(costoPorProteina[tipo]));
       }
     }
 
@@ -312,7 +313,7 @@
         document.getElementById(id).addEventListener('input', () => guardarCosto(id));
       });
       calcularGanancia();
-      cargarVentas(); // Esto también calcula los promedios y grafica
+      cargarVentas();
     });
   </script>
 </body>
