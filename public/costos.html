@@ -260,9 +260,9 @@
         const cant = cantidades[tipo];
         const venta = ventas[tipo];
         const ventaProm = cant > 0 ? Math.round(venta / cant) : 0;
-        const costoTotal = (costoComunPorRoll * cant) + costoEspecifico[tipo];
-        const costoUnitario = cant > 0 ? Math.round(costoTotal / cant) : 0;
-        const rentabilidad = cant > 0 ? Math.round((ventaProm - costoUnitario) * cant) : 0;
+        const costoEspecificoUnitario = cant > 0 ? costoEspecifico[tipo] / cant : 0;
+        const costoUnitario = Math.round(costoComunPorRoll + costoEspecificoUnitario);
+        const rentabilidad = ventaProm - costoUnitario;
 
         document.getElementById(`costo${capitalize(tipo)}`).innerText = costoUnitario;
         document.getElementById(`venta${capitalize(tipo)}Prom`).innerText = ventaProm;
