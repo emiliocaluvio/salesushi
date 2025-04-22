@@ -85,10 +85,6 @@
       text-align: center;
     }
 
-    th {
-      cursor: pointer;
-    }
-
     button, a {
       padding: 0.4rem 1rem;
       border: 1px dashed #ff6f61;
@@ -264,6 +260,7 @@
 
         datos.slice(offset, offset + limit).forEach(p => {
           const fila = document.createElement("tr");
+          fila.id = `pedido-pedidos_historico-${p.id}`;
           fila.innerHTML = `
             <td>${p.nombre_cliente} ${p.apellido_cliente}</td>
             <td>${p.celular_cliente}</td>
@@ -300,8 +297,13 @@
       const vegetales = contar(datos, "vegetal");
       const coberturas = contar(datos, "cobertura");
 
-      const contenedor = document.getElementById("contenedor-tablas");
-      contenedor.innerHTML = `
+      const contenedorTablas = document.getElementById("contenedor-tablas");
+      const historico = document.getElementById("historico-tablas");
+
+      contenedorTablas.innerHTML = '';
+      historico.innerHTML = '';
+
+      contenedorTablas.innerHTML = `
         <div class="info-box">
           <h2>📊 Ingredientes en pedidos</h2>
           <h3>🍣 Proteínas</h3>
@@ -326,7 +328,7 @@
     async function eliminarPedidoHistorico(id) {
       if (!confirm("¿Eliminar este pedido histórico?")) return;
       await fetch(`/eliminar-pedido/${id}`, { method: 'DELETE' });
-      document.querySelector(`#pedido-pedidos_historico-${id}`)?.remove();
+      document.getElementById(`pedido-pedidos_historico-${id}`)?.remove();
     }
 
     function cerrarSesion() {
