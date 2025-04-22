@@ -236,6 +236,7 @@
 
     function calcularPromedios() {
       const totalCantidad = Object.values(cantidades).reduce((a, b) => a + b, 0);
+      const totalCostos = campos.reduce((acc, id) => acc + Number(document.getElementById(id).value || 0), 0);
       const totalVentas = Object.values(ventas).reduce((a, b) => a + b, 0);
 
       const costosComunes = ['vegetales', 'paltas', 'arroz', 'queso', 'cajas', 'otros'];
@@ -250,7 +251,7 @@
         vegetariano: 0
       };
 
-      const promCosto = Math.round(costoComunPorRoll);
+      const promCosto = totalCantidad > 0 ? Math.round(totalCostos / totalCantidad) : 0;
       const promVenta = totalCantidad > 0 ? Math.round(totalVentas / totalCantidad) : 0;
 
       document.getElementById("promCosto").innerText = promCosto;
@@ -260,9 +261,8 @@
         const cant = cantidades[tipo];
         const venta = ventas[tipo];
         const ventaProm = cant > 0 ? Math.round(venta / cant) : 0;
-        const costoEspecificoUnitario = cant > 0 ? costoEspecifico[tipo] / cant : 0;
-        const costoUnitario = Math.round(costoComunPorRoll + costoEspecificoUnitario);
-        const rentabilidad = ventaProm - costoUnitario;
+        const costoUnitario = cant > 0 ? Math.round((costoComunPorRoll * cant + costoEspecifico[tipo]) / cant) : 0;
+        const rentabilidad = cant > 0 ? ventaProm - costoUnitario : 0;
 
         document.getElementById(`costo${capitalize(tipo)}`).innerText = costoUnitario;
         document.getElementById(`venta${capitalize(tipo)}Prom`).innerText = ventaProm;
