@@ -1,13 +1,3 @@
-Perfecto hermano, acá va el código HTML completo, corregido con:
-
-- ✅ Lógica de costeo **mixto** (común + específico).
-- ✅ Cálculo **correcto del promedio de venta por roll**.
-- ✅ Se muestra **el total de costos** arriba, para entender la ganancia.
-- ✅ Todo lo demás queda exactamente igual a lo que vos ya tenías.
-
-Pegalo entero en Visual Studio Code y va a andar todo:
-
-```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -177,7 +167,7 @@ Pegalo entero en Visual Studio Code y va a andar todo:
     const campos = ['vegetales', 'paltas', 'arroz', 'pollo', 'salmon', 'langostinos', 'kanikama', 'queso', 'cajas', 'otros'];
 
     function normalizarTexto(txt) {
-      return txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+      return txt.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
     }
 
     function cargarCostosDesdeLocalStorage() {
@@ -272,11 +262,11 @@ Pegalo entero en Visual Studio Code y va a andar todo:
         const ventaProm = cant > 0 ? Math.round(venta / cant) : 0;
         const costoTotal = (costoComunPorRoll * cant) + costoEspecifico[tipo];
         const costoUnitario = cant > 0 ? Math.round(costoTotal / cant) : 0;
-        const rent = venta - costoTotal;
+        const rentabilidad = cant > 0 ? Math.round((ventaProm - costoUnitario) * cant) : 0;
 
         document.getElementById(`costo${capitalize(tipo)}`).innerText = costoUnitario;
         document.getElementById(`venta${capitalize(tipo)}Prom`).innerText = ventaProm;
-        document.getElementById(`rent${capitalize(tipo)}`).innerText = rent;
+        document.getElementById(`rent${capitalize(tipo)}`).innerText = rentabilidad;
       }
     }
 
