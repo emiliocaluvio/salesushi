@@ -166,7 +166,6 @@
     const tablas = ['horario_19', 'horario_20', 'horario_21'];
     const ventas = { salmon: 0, pollo: 0, langostino: 0, kanikama: 0, vegetariano: 0, otras: 0 };
     const cantidades = { salmon: 0, pollo: 0, langostino: 0, kanikama: 0, vegetariano: 0 };
-
     const campos = ['vegetales', 'paltas', 'arroz', 'pollo', 'salmon', 'langostinos', 'kanikama', 'queso', 'cajas', 'otros'];
 
     function normalizarTexto(txt) {
@@ -212,7 +211,6 @@
       totalPedidos.forEach(p => {
         const prot = normalizarTexto(p.proteina);
         const precio = p.precio;
-
         if (prot.includes('salmon')) { ventas.salmon += precio; cantidades.salmon++ }
         else if (prot.includes('pollo')) { ventas.pollo += precio; cantidades.pollo++ }
         else if (prot.includes('langostino')) { ventas.langostino += precio; cantidades.langostino++ }
@@ -252,11 +250,10 @@
         const costo = cantidad > 0 ? Math.round(suma / cantidad) : 0;
         const venta = cantidad > 0 ? Math.round(ventaTotal / cantidad) : 0;
         const rentabilidad = venta - costo;
-
         document.getElementById(costoID).innerText = costo;
         document.getElementById(ventaID).innerText = venta;
         document.getElementById(rentID).innerText = rentabilidad;
-      }
+      };
 
       calc(['pollo', 'langostinos', 'kanikama'], cantidades.salmon, ventas.salmon, 'ventaSalmonProm', 'costoSalmon', 'rentSalmon');
       calc(['salmon', 'langostinos', 'kanikama'], cantidades.pollo, ventas.pollo, 'ventaPolloProm', 'costoPollo', 'rentPollo');
