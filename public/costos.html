@@ -97,12 +97,17 @@
       border-radius: 6px;
       margin-bottom: 1rem;
     }
+
+    .section-title {
+      margin-top: 2rem;
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
   <h2>Costos y Ganancias</h2>
   <div class="container">
-    <!-- Lado izquierdo: Costos -->
     <div class="left">
       <div class="input-group"><label for="vegetales">Vegetales</label><input type="number" id="vegetales" /></div>
       <div class="input-group"><label for="paltas">Paltas</label><input type="number" id="paltas" /></div>
@@ -116,7 +121,6 @@
       <div class="input-group"><label for="otros">Otros</label><input type="number" id="otros" /></div>
     </div>
 
-    <!-- Lado derecho: Ventas + Ingredientes -->
     <div class="right">
       <div class="results" id="resumen">
         <h3>💰 Ventas</h3>
@@ -141,23 +145,35 @@
 
   <div class="bottom-box">
     <a href="admin.html">🔙 Volver al panel</a>
+
     <div class="results">
-      <h3>📈 Promedios</h3>
+      <h3>📈 Promedios Generales</h3>
       <div>Promedio de costo por roll: $<span id="promCosto">0</span></div>
       <div>Promedio de venta por roll: $<span id="promVenta">0</span></div>
+    </div>
+
+    <div class="results">
+      <h3>📊 Promedios por proteína</h3>
+      <div>Costo promedio Salmón: $<span id="costoSalmon">0</span> — Venta: $<span id="ventaSalmonProm">0</span> — Rentabilidad: $<span id="rentSalmon">0</span></div>
+      <div>Costo promedio Pollo: $<span id="costoPollo">0</span> — Venta: $<span id="ventaPolloProm">0</span> — Rentabilidad: $<span id="rentPollo">0</span></div>
+      <div>Costo promedio Langostino: $<span id="costoLangostino">0</span> — Venta: $<span id="ventaLangostinoProm">0</span> — Rentabilidad: $<span id="rentLangostino">0</span></div>
+      <div>Costo promedio Kanikama: $<span id="costoKanikama">0</span> — Venta: $<span id="ventaKanikamaProm">0</span> — Rentabilidad: $<span id="rentKanikama">0</span></div>
+      <div>Costo promedio Vegetariano: $<span id="costoVegetariano">0</span> — Venta: $<span id="ventaVegetarianoProm">0</span> — Rentabilidad: $<span id="rentVegetariano">0</span></div>
     </div>
   </div>
 
   <script>
     const tablas = ['horario_19', 'horario_20', 'horario_21'];
-    const ventas = { salmon: 0, pollo: 0, langostino: 0, otras: 0 };
+    const ventas = { salmon: 0, pollo: 0, langostino: 0, kanikama: 0, vegetariano: 0, otras: 0 };
+    const cantidades = { salmon: 0, pollo: 0, langostino: 0, kanikama: 0, vegetariano: 0 };
+
+    const campos = ['vegetales', 'paltas', 'arroz', 'pollo', 'salmon', 'langostinos', 'kanikama', 'queso', 'cajas', 'otros'];
 
     function normalizarTexto(txt) {
       return txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     }
 
     function cargarCostosDesdeLocalStorage() {
-      const campos = ['vegetales', 'paltas', 'arroz', 'pollo', 'salmon', 'langostinos', 'kanikama', 'queso', 'cajas', 'otros'];
       campos.forEach(id => {
         const valor = localStorage.getItem(`costo_${id}`);
         if (valor !== null) document.getElementById(id).value = valor;
@@ -189,58 +205,69 @@
       const vegetales = contar(totalPedidos, "vegetal");
       const coberturas = contar(totalPedidos, "cobertura");
 
-      document.getElementById("proteinas").innerHTML = Object.entries(proteinas)
-        .map(([k, v]) => `<li>${k}: ${v}</li>`).join('');
-      document.getElementById("vegetalesList").innerHTML = Object.entries(vegetales)
-        .map(([k, v]) => `<li>${k}: ${v}</li>`).join('');
-      document.getElementById("coberturas").innerHTML = Object.entries(coberturas)
-        .map(([k, v]) => `<li>${k}: ${v}</li>`).join('');
+      document.getElementById("proteinas").innerHTML = Object.entries(proteinas).map(([k, v]) => `<li>${k}: ${v}</li>`).join('');
+      document.getElementById("vegetalesList").innerHTML = Object.entries(vegetales).map(([k, v]) => `<li>${k}: ${v}</li>`).join('');
+      document.getElementById("coberturas").innerHTML = Object.entries(coberturas).map(([k, v]) => `<li>${k}: ${v}</li>`).join('');
 
-      totalPedidos.forEach(pedido => {
-        const proteina = normalizarTexto(pedido.proteina);
-        const precio = pedido.precio;
+      totalPedidos.forEach(p => {
+        const prot = normalizarTexto(p.proteina);
+        const precio = p.precio;
 
-        if (proteina.includes('salmon')) ventas.salmon += precio;
-        else if (proteina.includes('pollo')) ventas.pollo += precio;
-        else if (proteina.includes('langostino')) ventas.langostino += precio;
-        else ventas.otras += precio;
+        if (prot.includes('salmon')) { ventas.salmon += precio; cantidades.salmon++ }
+        else if (prot.includes('pollo')) { ventas.pollo += precio; cantidades.pollo++ }
+        else if (prot.includes('langostino')) { ventas.langostino += precio; cantidades.langostino++ }
+        else if (prot.includes('kanikama')) { ventas.kanikama += precio; cantidades.kanikama++ }
+        else { ventas.vegetariano += precio; cantidades.vegetariano++ }
       });
 
       document.getElementById("ventaSalmon").innerText = ventas.salmon;
       document.getElementById("ventaPollo").innerText = ventas.pollo;
       document.getElementById("ventaLangostino").innerText = ventas.langostino;
-      document.getElementById("ventaOtras").innerText = ventas.otras;
+      document.getElementById("ventaOtras").innerText = ventas.vegetariano + ventas.kanikama;
 
       calcularGanancia();
       calcularPromedios(totalPedidos);
     }
 
     function calcularGanancia() {
-      const totalVentas = ventas.salmon + ventas.pollo + ventas.langostino + ventas.otras;
-      const campos = ['vegetales', 'paltas', 'arroz', 'pollo', 'salmon', 'langostinos', 'kanikama', 'queso', 'cajas', 'otros'];
+      const totalVentas = ventas.salmon + ventas.pollo + ventas.langostino + ventas.kanikama + ventas.vegetariano;
       const costos = campos.reduce((acc, id) => acc + Number(document.getElementById(id).value || 0), 0);
       document.getElementById("ganancia").innerText = totalVentas - costos;
     }
 
     function calcularPromedios(pedidos) {
       const totalVentas = pedidos.reduce((acc, p) => acc + p.precio, 0);
-      const totalCantidad = pedidos.length;
-
-      const campos = ['vegetales', 'paltas', 'arroz', 'pollo', 'salmon', 'langostinos', 'kanikama', 'queso', 'cajas', 'otros'];
       const costoTotal = campos.reduce((acc, id) => acc + Number(document.getElementById(id).value || 0), 0);
+      const totalCantidad = pedidos.length;
 
       const promCosto = totalCantidad > 0 ? Math.round(costoTotal / totalCantidad) : 0;
       const promVenta = totalCantidad > 0 ? Math.round(totalVentas / totalCantidad) : 0;
 
       document.getElementById("promCosto").innerText = promCosto;
       document.getElementById("promVenta").innerText = promVenta;
+
+      const calc = (excluir, cantidad, ventaTotal, ventaID, costoID, rentID) => {
+        const incluidos = campos.filter(c => !excluir.includes(c));
+        const suma = incluidos.reduce((acc, id) => acc + Number(document.getElementById(id).value || 0), 0);
+        const costo = cantidad > 0 ? Math.round(suma / cantidad) : 0;
+        const venta = cantidad > 0 ? Math.round(ventaTotal / cantidad) : 0;
+        const rentabilidad = venta - costo;
+
+        document.getElementById(costoID).innerText = costo;
+        document.getElementById(ventaID).innerText = venta;
+        document.getElementById(rentID).innerText = rentabilidad;
+      }
+
+      calc(['pollo', 'langostinos', 'kanikama'], cantidades.salmon, ventas.salmon, 'ventaSalmonProm', 'costoSalmon', 'rentSalmon');
+      calc(['salmon', 'langostinos', 'kanikama'], cantidades.pollo, ventas.pollo, 'ventaPolloProm', 'costoPollo', 'rentPollo');
+      calc(['salmon', 'pollo', 'kanikama'], cantidades.langostino, ventas.langostino, 'ventaLangostinoProm', 'costoLangostino', 'rentLangostino');
+      calc(['salmon', 'pollo', 'langostinos'], cantidades.kanikama, ventas.kanikama, 'ventaKanikamaProm', 'costoKanikama', 'rentKanikama');
+      calc(['salmon', 'pollo', 'langostinos', 'kanikama'], cantidades.vegetariano, ventas.vegetariano, 'ventaVegetarianoProm', 'costoVegetariano', 'rentVegetariano');
     }
 
     document.addEventListener("DOMContentLoaded", () => {
       cargarCostosDesdeLocalStorage();
       cargarVentas();
-
-      const campos = ['vegetales', 'paltas', 'arroz', 'pollo', 'salmon', 'langostinos', 'kanikama', 'queso', 'cajas', 'otros'];
       campos.forEach(id => {
         document.getElementById(id).addEventListener('input', () => guardarCosto(id));
       });
