@@ -85,10 +85,6 @@
       text-align: center;
     }
 
-    th {
-      cursor: pointer;
-    }
-
     button, a {
       padding: 0.4rem 1rem;
       border: 1px dashed #ff6f61;
@@ -145,12 +141,11 @@
   <div id="contenedor-tablas"></div>
 
   <script>
-    const horarios = ['horario_19', 'horario_20', 'horario_21', 'pedidos_historico'];
+    const horarios = ['horario_19', 'horario_20', 'horario_21'];
     const nombres = {
       'horario_19': 'Pedidos 19:00',
       'horario_20': 'Pedidos 20:00',
-      'horario_21': 'Pedidos 21:00',
-      'pedidos_historico': 'Pedidos Históricos'
+      'horario_21': 'Pedidos 21:00'
     };
 
     async function fetchTabla(nombre) {
@@ -170,18 +165,15 @@
         titulo.id = `titulo-${tabla}`;
         titulo.textContent = `${nombres[tabla]} (${datos.length})`;
 
-        let boton = '';
-        if (tabla !== 'pedidos_historico') {
-          boton = document.createElement("button");
-          boton.textContent = `🗑 Limpiar ${nombres[tabla]}`;
-          boton.onclick = async () => {
-            if (!confirm("¿Seguro que querés limpiar la tabla?")) return;
-            const res = await fetch(`/api/limpiar_tabla/${tabla}`, { method: 'DELETE' });
-            const rta = await res.json();
-            alert(rta.message);
-            cargarTablasHorarias();
-          };
-        }
+        const boton = document.createElement("button");
+        boton.textContent = `🗑 Limpiar ${nombres[tabla]}`;
+        boton.onclick = async () => {
+          if (!confirm("¿Seguro que querés limpiar la tabla?")) return;
+          const res = await fetch(`/api/limpiar_tabla/${tabla}`, { method: 'DELETE' });
+          const rta = await res.json();
+          alert(rta.message);
+          cargarTablasHorarias();
+        };
 
         const table = document.createElement("table");
         table.innerHTML = `
@@ -209,71 +201,101 @@
                 <td>${p.cobertura}</td>
                 <td>$${p.precio}</td>
                 <td>${p.fecha?.split('T')[0]}</td>
-                <td>${tabla !== 'pedidos_historico' ? `<button onclick="eliminarPedidoHorario(${p.id}, '${tabla}')">❌</button>` : ''}</td>
+                <td><button onclick="eliminarPedidoHorario(${p.id}, '${tabla}')">❌</button></td>
               </tr>
             `).join('')}
           </tbody>
         `;
 
         div.appendChild(titulo);
-        if (boton) div.appendChild(boton);
+        div.appendChild(boton);
         div.appendChild(table);
         contenedor.appendChild(div);
       }
     }
 
-    async function mostrarDatosVenta() {
-      const res19 = await fetch('/api/tabla/horario_19');
-      const res20 = await fetch('/api/tabla/horario_20');
-      const res21 = await fetch('/api/tabla/horario_21');
-
-      const datos = [
-        ...(await res19.json()),
-        ...(await res20.json()),
-        ...(await res21.json())
-      ];
-
-      const contar = (lista, campo) =>
-        lista.reduce((acc, el) => {
-          acc[el[campo]] = (acc[el[campo]] || 0) + 1;
-          return acc;
-        }, {});
-
-      const proteinas = contar(datos, "proteina");
-      const vegetales = contar(datos, "vegetal");
-      const coberturas = contar(datos, "cobertura");
-
+    async function cargarHistorico() {
       const contenedor = document.getElementById("contenedor-tablas");
-      contenedor.innerHTML = `
-        <div class="info-box">
-          <h2>📊 Ingredientes en pedidos</h2>
-          <h3>🍣 Proteínas</h3>
-          <ul>${Object.entries(proteinas).map(([k, v]) => `<li>${k}: ${v}</li>`).join('')}</ul>
-          <h3>🥬 Vegetales</h3>
-          <ul>${Object.entries(vegetales).map(([k, v]) => `<li>${k}: ${v}</li>`).join('')}</ul>
-          <h3>🌿 Coberturas</h3>
-          <ul>${Object.entries(coberturas).map(([k, v]) => `<li>${k}: ${v}</li>`).join('')}</ul>
-        </div>
-        <div style="text-align:center; margin-top: 2rem;">
-          <a href="admin.html">🔙 Volver al panel</a>
-        </div>
-      `;
+
+      let offset = 0;
+      const limit = 20;
+
+      const cargarMas = async () => {
+        const res = await fetch(`/api/tabla/pedidos_historico?offset=${offset}&limit=${limit}`);
+        const datos = await res.json();
+
+        let tabla = document.getElementById("tabla-historico");
+        let cuerpo = document.getElementById("cuerpo-historico");
+
+        if (!tabla) {
+          const div = document.createElement("div");
+          const titulo = document.createElement("h2");
+          titulo.textContent = "Pedidos Históricos";
+
+          tabla = document.createElement("table");
+          tabla.id = "tabla-historico";
+          tabla.innerHTML = `
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Teléfono</th>
+                <th>Pago</th>
+                <th>Proteína</th>
+                <th>Vegetal</th>
+                <th>Cobertura</th>
+                <th>Precio</th>
+                <th>Fecha</th>
+                <th>Eliminar</th>
+              </tr>
+            </thead>
+            <tbody id="cuerpo-historico"></tbody>
+          `;
+
+          const boton = document.createElement("button");
+          boton.textContent = "➕ Cargar más históricos";
+          boton.onclick = cargarMas;
+
+          div.appendChild(titulo);
+          div.appendChild(tabla);
+          div.appendChild(boton);
+          contenedor.appendChild(div);
+
+          cuerpo = document.getElementById("cuerpo-historico");
+        }
+
+        datos.forEach(p => {
+          const fila = document.createElement("tr");
+          fila.innerHTML = `
+            <td>${p.nombre_cliente} ${p.apellido_cliente}</td>
+            <td>${p.celular_cliente}</td>
+            <td>${p.metodo_pago}</td>
+            <td>${p.proteina}</td>
+            <td>${p.vegetal}</td>
+            <td>${p.cobertura}</td>
+            <td>$${p.precio}</td>
+            <td>${p.fecha?.split('T')[0]}</td>
+            <td><button onclick="eliminarPedidoHistorico(${p.id})">❌</button></td>
+          `;
+          cuerpo.appendChild(fila);
+        });
+
+        offset += datos.length;
+      };
+
+      await cargarMas();
     }
 
     async function eliminarPedidoHorario(id, tabla) {
       if (!confirm("¿Eliminar este pedido?")) return;
-
       await fetch(`/eliminar-pedido-horario/${tabla}/${id}`, { method: 'DELETE' });
-
       const fila = document.getElementById(`pedido-${tabla}-${id}`);
       if (fila) fila.remove();
+    }
 
-      const titulo = document.getElementById(`titulo-${tabla}`);
-      const match = titulo.textContent.match(/\((\d+)\)/);
-      if (match) {
-        const nuevoValor = Math.max(0, parseInt(match[1]) - 1);
-        titulo.textContent = `${nombres[tabla]} (${nuevoValor})`;
-      }
+    async function eliminarPedidoHistorico(id) {
+      if (!confirm("¿Eliminar este pedido histórico?")) return;
+      await fetch(`/eliminar-pedido-horario/pedidos_historico/${id}`, { method: 'DELETE' });
+      location.reload(); // o podrías borrar la fila manualmente si querés evitar el reload
     }
 
     function cerrarSesion() {
@@ -298,6 +320,7 @@
 
     cargarEstadoSwitch();
     cargarTablasHorarias();
+    cargarHistorico();
   </script>
 </body>
 </html>
