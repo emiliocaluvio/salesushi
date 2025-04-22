@@ -17,12 +17,11 @@
 
     h2 {
       text-align: center;
-      margin-top: 1rem;
+      margin: 1rem 0;
     }
 
     .container {
       display: flex;
-      flex-direction: row;
       flex-wrap: wrap;
     }
 
@@ -32,28 +31,30 @@
       box-sizing: border-box;
     }
 
-    @media(min-width: 600px) {
+    @media(min-width: 768px) {
       .left, .right {
         width: 50%;
       }
     }
 
     .input-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 0.7rem;
     }
 
-    label {
-      display: block;
+    .input-group label {
       font-weight: bold;
-      margin-bottom: 0.3rem;
     }
 
     input[type="number"] {
       width: 6rem;
-      padding: 0.2rem;
+      padding: 0.3rem;
       font-size: 1rem;
       border: 1px solid #ff6f61;
       border-radius: 4px;
+      text-align: right;
     }
 
     .results {
@@ -74,7 +75,7 @@
     }
 
     ul {
-      margin-top: 0.5rem;
+      margin: 0.5rem 0;
       padding-left: 1.5rem;
     }
   </style>
@@ -82,7 +83,7 @@
 <body>
   <h2>Costos y Ganancias</h2>
   <div class="container">
-    <!-- Lado izquierdo -->
+    <!-- Lado izquierdo: Costos -->
     <div class="left">
       <div class="input-group"><label for="vegetales">Vegetales</label><input type="number" id="vegetales" /></div>
       <div class="input-group"><label for="arroz">Arroz</label><input type="number" id="arroz" /></div>
@@ -95,7 +96,7 @@
       <div class="input-group"><label for="otros">Otros</label><input type="number" id="otros" /></div>
     </div>
 
-    <!-- Lado derecho -->
+    <!-- Lado derecho: Ventas + Ingredientes -->
     <div class="right">
       <div class="results" id="resumen">
         <h3>💰 Ventas</h3>
@@ -122,16 +123,15 @@
     const tablas = ['horario_19', 'horario_20', 'horario_21'];
     const ventas = { salmon: 0, pollo: 0, langostino: 0, otras: 0 };
 
+    function normalizarTexto(txt) {
+      return txt.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    }
+
     function cargarCostosDesdeLocalStorage() {
-      const campos = [
-        'vegetales', 'arroz', 'pollo', 'salmon', 'langostinos',
-        'kanikama', 'queso', 'cajas', 'otros'
-      ];
+      const campos = ['vegetales', 'arroz', 'pollo', 'salmon', 'langostinos', 'kanikama', 'queso', 'cajas', 'otros'];
       campos.forEach(id => {
         const valor = localStorage.getItem(`costo_${id}`);
-        if (valor !== null) {
-          document.getElementById(id).value = valor;
-        }
+        if (valor !== null) document.getElementById(id).value = valor;
       });
     }
 
@@ -168,7 +168,7 @@
         .map(([k, v]) => `<li>${k}: ${v}</li>`).join('');
 
       totalPedidos.forEach(pedido => {
-        const proteina = pedido.proteina.toLowerCase();
+        const proteina = normalizarTexto(pedido.proteina);
         const precio = pedido.precio;
 
         if (proteina.includes('salmon')) ventas.salmon += precio;
@@ -187,10 +187,8 @@
 
     function calcularGanancia() {
       const totalVentas = ventas.salmon + ventas.pollo + ventas.langostino + ventas.otras;
-      const costos = [
-        'vegetales', 'arroz', 'pollo', 'salmon', 'langostinos',
-        'kanikama', 'queso', 'cajas', 'otros'
-      ].reduce((acc, id) => acc + Number(document.getElementById(id).value || 0), 0);
+      const costos = ['vegetales', 'arroz', 'pollo', 'salmon', 'langostinos', 'kanikama', 'queso', 'cajas', 'otros']
+        .reduce((acc, id) => acc + Number(document.getElementById(id).value || 0), 0);
 
       document.getElementById("ganancia").innerText = totalVentas - costos;
     }
@@ -199,11 +197,7 @@
       cargarCostosDesdeLocalStorage();
       cargarVentas();
 
-      const campos = [
-        'vegetales', 'arroz', 'pollo', 'salmon', 'langostinos',
-        'kanikama', 'queso', 'cajas', 'otros'
-      ];
-
+      const campos = ['vegetales', 'arroz', 'pollo', 'salmon', 'langostinos', 'kanikama', 'queso', 'cajas', 'otros'];
       campos.forEach(id => {
         document.getElementById(id).addEventListener('input', () => guardarCosto(id));
       });
