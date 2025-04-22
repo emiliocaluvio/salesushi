@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -15,40 +15,33 @@
       flex-direction: column;
       min-height: 100vh;
     }
-
     h2 {
       text-align: center;
       margin: 1rem 0;
     }
-
     .container {
       display: flex;
       flex-wrap: wrap;
     }
-
     .left, .right {
       width: 100%;
       padding: 1rem;
       box-sizing: border-box;
     }
-
     @media(min-width: 768px) {
       .left, .right {
         width: 50%;
       }
     }
-
     .input-group {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 0.7rem;
     }
-
     .input-group label {
       font-weight: bold;
     }
-
     input[type="number"] {
       width: 6rem;
       padding: 0.3rem;
@@ -57,36 +50,30 @@
       border-radius: 4px;
       text-align: right;
     }
-
     .results {
       background: #fff5f1;
       padding: 1rem;
       border-radius: 8px;
       margin-bottom: 1rem;
     }
-
     .results div {
       margin-bottom: 0.5rem;
     }
-
     .total {
       font-weight: bold;
       border-top: 1px solid #ff6f61;
       padding-top: 1rem;
     }
-
     ul {
       margin: 0.5rem 0;
       padding-left: 1.5rem;
     }
-
     .bottom-box {
       width: 100%;
       padding: 1rem;
       box-sizing: border-box;
       text-align: center;
     }
-
     .bottom-box a {
       display: inline-block;
       padding: 0.6rem 1.2rem;
@@ -98,14 +85,12 @@
       border-radius: 6px;
       margin-bottom: 1rem;
     }
-
     .charts-container {
       width: 100%;
       max-width: 800px;
       margin: 2rem auto;
       padding: 1rem;
     }
-
     canvas {
       max-width: 100%;
     }
@@ -115,6 +100,7 @@
   <h2>Costos y Ganancias</h2>
   <div class="container">
     <div class="left">
+      <!-- Inputs de costos -->
       <div class="input-group"><label for="vegetales">Vegetales</label><input type="number" id="vegetales" /></div>
       <div class="input-group"><label for="paltas">Paltas</label><input type="number" id="paltas" /></div>
       <div class="input-group"><label for="arroz">Arroz</label><input type="number" id="arroz" /></div>
@@ -256,6 +242,32 @@
 
       document.getElementById("promCosto").innerText = promCosto;
       document.getElementById("promVenta").innerText = promVenta;
+
+      const calcRentabilidad = (tipo, costoUnitario) => {
+        const cant = cantidades[tipo];
+        const venta = ventas[tipo];
+        const costo = cant * costoUnitario;
+        const rent = venta - costo;
+        document.getElementById(`costo${capitalize(tipo)}`).innerText = cant ? costoUnitario : 0;
+        document.getElementById(`venta${capitalize(tipo)}Prom`).innerText = venta;
+        document.getElementById(`rent${capitalize(tipo)}`).innerText = rent;
+      };
+
+      const costoPorProteina = {
+        salmon: Number(document.getElementById("salmon").value || 0),
+        pollo: Number(document.getElementById("pollo").value || 0),
+        langostino: Number(document.getElementById("langostinos").value || 0),
+        kanikama: Number(document.getElementById("kanikama").value || 0),
+        vegetariano: (Number(document.getElementById("vegetales").value || 0) + Number(document.getElementById("queso").value || 0)) / 2
+      };
+
+      for (const tipo of Object.keys(cantidades)) {
+        calcRentabilidad(tipo, Math.round(costoPorProteina[tipo]));
+      }
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
     function renderizarGraficos() {

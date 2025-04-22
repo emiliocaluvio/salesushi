@@ -318,6 +318,44 @@
       document.getElementById(`pedido-${tabla}-${id}`)?.remove();
     }
 
+    async function mostrarDatosVenta() {
+      const res19 = await fetch('/api/tabla/horario_19');
+      const res20 = await fetch('/api/tabla/horario_20');
+      const res21 = await fetch('/api/tabla/horario_21');
+
+      const datos = [
+        ...(await res19.json()),
+        ...(await res20.json()),
+        ...(await res21.json())
+      ];
+
+      const contar = (arr, campo) =>
+        arr.reduce((acc, el) => {
+          const valor = el[campo];
+          acc[valor] = (acc[valor] || 0) + 1;
+          return acc;
+        }, {});
+
+      const proteinas = contar(datos, "proteina");
+      const vegetales = contar(datos, "vegetal");
+      const coberturas = contar(datos, "cobertura");
+
+      document.body.innerHTML = `
+        <div style="max-width: 500px; margin: auto; padding: 1rem; border: 2px dashed #ff6f61; border-radius: 10px; background-color: #fff6f1;">
+          <h2>📊 Ingredientes en pedidos</h2>
+          <h3>🍣 Proteínas</h3>
+          <ul>${Object.entries(proteinas).map(([k, v]) => `<li>${k}: ${v}</li>`).join('')}</ul>
+          <h3>🥬 Vegetales</h3>
+          <ul>${Object.entries(vegetales).map(([k, v]) => `<li>${k}: ${v}</li>`).join('')}</ul>
+          <h3>🌿 Coberturas</h3>
+          <ul>${Object.entries(coberturas).map(([k, v]) => `<li>${k}: ${v}</li>`).join('')}</ul>
+        </div>
+        <div style="text-align:center; margin-top: 2rem;">
+          <a href="admin.html" style="border: 1px dashed #ff6f61; padding: 0.5rem 1rem; color: #ff6f61; text-decoration: none;">🏠 Volver al panel</a>
+        </div>
+      `;
+    }
+
     function cerrarSesion() {
       localStorage.removeItem("adminAutenticado");
       window.location.href = "index.html";
