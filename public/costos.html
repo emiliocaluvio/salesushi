@@ -78,6 +78,25 @@
       margin: 0.5rem 0;
       padding-left: 1.5rem;
     }
+
+    .bottom-box {
+      width: 100%;
+      padding: 1rem;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    .bottom-box a {
+      display: inline-block;
+      padding: 0.6rem 1.2rem;
+      background: transparent;
+      border: 1px dashed #ff6f61;
+      color: #ff6f61;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -86,6 +105,7 @@
     <!-- Lado izquierdo: Costos -->
     <div class="left">
       <div class="input-group"><label for="vegetales">Vegetales</label><input type="number" id="vegetales" /></div>
+      <div class="input-group"><label for="paltas">Paltas</label><input type="number" id="paltas" /></div>
       <div class="input-group"><label for="arroz">Arroz</label><input type="number" id="arroz" /></div>
       <div class="input-group"><label for="pollo">Pollo</label><input type="number" id="pollo" /></div>
       <div class="input-group"><label for="salmon">Salmón</label><input type="number" id="salmon" /></div>
@@ -119,6 +139,15 @@
     </div>
   </div>
 
+  <div class="bottom-box">
+    <a href="admin.html">🔙 Volver al panel</a>
+    <div class="results">
+      <h3>📈 Promedios</h3>
+      <div>Promedio de costo por roll: $<span id="promCosto">0</span></div>
+      <div>Promedio de venta por roll: $<span id="promVenta">0</span></div>
+    </div>
+  </div>
+
   <script>
     const tablas = ['horario_19', 'horario_20', 'horario_21'];
     const ventas = { salmon: 0, pollo: 0, langostino: 0, otras: 0 };
@@ -128,7 +157,7 @@
     }
 
     function cargarCostosDesdeLocalStorage() {
-      const campos = ['vegetales', 'arroz', 'pollo', 'salmon', 'langostinos', 'kanikama', 'queso', 'cajas', 'otros'];
+      const campos = ['vegetales', 'paltas', 'arroz', 'pollo', 'salmon', 'langostinos', 'kanikama', 'queso', 'cajas', 'otros'];
       campos.forEach(id => {
         const valor = localStorage.getItem(`costo_${id}`);
         if (valor !== null) document.getElementById(id).value = valor;
@@ -183,21 +212,35 @@
       document.getElementById("ventaOtras").innerText = ventas.otras;
 
       calcularGanancia();
+      calcularPromedios(totalPedidos);
     }
 
     function calcularGanancia() {
       const totalVentas = ventas.salmon + ventas.pollo + ventas.langostino + ventas.otras;
-      const costos = ['vegetales', 'arroz', 'pollo', 'salmon', 'langostinos', 'kanikama', 'queso', 'cajas', 'otros']
-        .reduce((acc, id) => acc + Number(document.getElementById(id).value || 0), 0);
-
+      const campos = ['vegetales', 'paltas', 'arroz', 'pollo', 'salmon', 'langostinos', 'kanikama', 'queso', 'cajas', 'otros'];
+      const costos = campos.reduce((acc, id) => acc + Number(document.getElementById(id).value || 0), 0);
       document.getElementById("ganancia").innerText = totalVentas - costos;
+    }
+
+    function calcularPromedios(pedidos) {
+      const totalVentas = pedidos.reduce((acc, p) => acc + p.precio, 0);
+      const totalCantidad = pedidos.length;
+
+      const campos = ['vegetales', 'paltas', 'arroz', 'pollo', 'salmon', 'langostinos', 'kanikama', 'queso', 'cajas', 'otros'];
+      const costoTotal = campos.reduce((acc, id) => acc + Number(document.getElementById(id).value || 0), 0);
+
+      const promCosto = totalCantidad > 0 ? Math.round(costoTotal / totalCantidad) : 0;
+      const promVenta = totalCantidad > 0 ? Math.round(totalVentas / totalCantidad) : 0;
+
+      document.getElementById("promCosto").innerText = promCosto;
+      document.getElementById("promVenta").innerText = promVenta;
     }
 
     document.addEventListener("DOMContentLoaded", () => {
       cargarCostosDesdeLocalStorage();
       cargarVentas();
 
-      const campos = ['vegetales', 'arroz', 'pollo', 'salmon', 'langostinos', 'kanikama', 'queso', 'cajas', 'otros'];
+      const campos = ['vegetales', 'paltas', 'arroz', 'pollo', 'salmon', 'langostinos', 'kanikama', 'queso', 'cajas', 'otros'];
       campos.forEach(id => {
         document.getElementById(id).addEventListener('input', () => guardarCosto(id));
       });
