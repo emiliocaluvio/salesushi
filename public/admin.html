@@ -1,303 +1,303 @@
-  <!DOCTYPE html>
-  <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Administración de Pedidos</title>
-    <style>
-      body {
-        background-color: #fdf6ec;
-        color: #ff6f61;
-        font-family: sans-serif;
-        padding: 1rem;
-      }
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Administración de Pedidos</title>
+  <style>
+    body {
+      background-color: #fdf6ec;
+      color: #ff6f61;
+      font-family: sans-serif;
+      padding: 1rem;
+    }
 
-      h1 {
-        margin-top: 1rem;
-        margin-bottom: 1rem;
-        text-align: center;
-      }
+    h1 {
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
 
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .switch-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .switch-label input[type="checkbox"] {
+      width: 40px;
+      height: 20px;
+      appearance: none;
+      background: #333;
+      border-radius: 20px;
+      position: relative;
+      outline: none;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .switch-label input[type="checkbox"]:checked {
+      background: #ff6f61;
+    }
+
+    .switch-label input[type="checkbox"]::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: #fff;
+      border-radius: 50%;
+      top: 1px;
+      left: 1px;
+      transition: 0.3s;
+    }
+
+    .switch-label input[type="checkbox"]:checked::before {
+      transform: translateX(20px);
+    }
+
+    .header-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 2rem;
+    }
+
+    th, td {
+      border: 1px solid #ff6f61;
+      padding: 0.5rem;
+      text-align: center;
+    }
+
+    th {
+      cursor: pointer;
+    }
+
+    button, a {
+      padding: 0.4rem 1rem;
+      border: 1px dashed #ff6f61;
+      background: transparent;
+      color: #ff6f61;
+      cursor: pointer;
+      margin: 0.3rem;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
       .top-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 1rem;
-        margin-bottom: 2rem;
-      }
-
-      .switch-label {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .switch-label input[type="checkbox"] {
-        width: 40px;
-        height: 20px;
-        appearance: none;
-        background: #333;
-        border-radius: 20px;
-        position: relative;
-        outline: none;
-        cursor: pointer;
-        transition: background 0.3s ease;
-      }
-
-      .switch-label input[type="checkbox"]:checked {
-        background: #ff6f61;
-      }
-
-      .switch-label input[type="checkbox"]::before {
-        content: '';
-        position: absolute;
-        width: 18px;
-        height: 18px;
-        background: #fff;
-        border-radius: 50%;
-        top: 1px;
-        left: 1px;
-        transition: 0.3s;
-      }
-
-      .switch-label input[type="checkbox"]:checked::before {
-        transform: translateX(20px);
-      }
-
-      .header-buttons {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        justify-content: space-between;
-        margin-bottom: 1rem;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 2rem;
+        flex-direction: column;
+        align-items: flex-start;
       }
 
       th, td {
-        border: 1px solid #ff6f61;
-        padding: 0.5rem;
-        text-align: center;
+        font-size: 0.85rem;
       }
 
-      th {
-        cursor: pointer;
+      .header-buttons {
+        flex-direction: column;
+        align-items: flex-start;
       }
+    }
+  </style>
+</head>
+<body>
+  <script>
+    const acceso = localStorage.getItem("adminAutenticado");
+    if (acceso !== "true") {
+      alert("Acceso denegado. Redirigiendo al inicio.");
+      window.location.href = "index.html";
+    }
+  </script>
 
-      button, a {
-        padding: 0.4rem 1rem;
-        border: 1px dashed #ff6f61;
-        background: transparent;
-        color: #ff6f61;
-        cursor: pointer;
-        margin: 0.3rem;
-        text-decoration: none;
-        font-weight: bold;
-      }
+  <div class="header-buttons">
+    <button onclick="mostrarDatosVenta()">📊 Datos de venta</button>
+    <button onclick="window.location.href='costos.html'">💰 Costos y ganancias</button>
+    <button onclick="cerrarSesion()">🚪 Cerrar sesión</button>
+  </div>
 
-      @media (max-width: 600px) {
-        .top-bar {
-          flex-direction: column;
-          align-items: flex-start;
+  <h1>Panel de Administración</h1>
+
+  <div class="top-bar">
+    <a href="index.html">🏠 Volver al inicio</a>
+    <label class="switch-label">
+      <span>Pedidos habilitados</span>
+      <input type="checkbox" id="switchPedidos">
+    </label>
+  </div>
+
+  <div id="contenedor-tablas"></div>
+
+  <script>
+    const horarios = ['horario_19', 'horario_20', 'horario_21', 'pedidos_historico'];
+    const nombres = {
+      'horario_19': 'Pedidos 19:00',
+      'horario_20': 'Pedidos 20:00',
+      'horario_21': 'Pedidos 21:00',
+      'pedidos_historico': 'Pedidos Históricos'
+    };
+
+    async function fetchTabla(nombre) {
+      const res = await fetch(`/api/tabla/${nombre}`);
+      return await res.json();
+    }
+
+    async function cargarTablasHorarias() {
+      const contenedor = document.getElementById("contenedor-tablas");
+      contenedor.innerHTML = '';
+
+      for (const tabla of horarios) {
+        const datos = await fetchTabla(tabla);
+
+        const div = document.createElement("div");
+        const titulo = document.createElement("h2");
+        titulo.id = `titulo-${tabla}`;
+        titulo.textContent = `${nombres[tabla]} (${datos.length})`;
+
+        let boton = '';
+        if (tabla !== 'pedidos_historico') {
+          boton = document.createElement("button");
+          boton.textContent = `🗑 Limpiar ${nombres[tabla]}`;
+          boton.onclick = async () => {
+            if (!confirm("¿Seguro que querés limpiar la tabla?")) return;
+            const res = await fetch(`/api/limpiar_tabla/${tabla}`, { method: 'DELETE' });
+            const rta = await res.json();
+            alert(rta.message);
+            cargarTablasHorarias();
+          };
         }
 
-        th, td {
-          font-size: 0.85rem;
-        }
-
-        .header-buttons {
-          flex-direction: column;
-          align-items: flex-start;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <script>
-      const acceso = localStorage.getItem("adminAutenticado");
-      if (acceso !== "true") {
-        alert("Acceso denegado. Redirigiendo al inicio.");
-        window.location.href = "index.html";
-      }
-    </script>
-
-    <div class="header-buttons">
-      <button onclick="mostrarDatosVenta()">📊 Datos de venta</button>
-      <button onclick="window.location.href='costos.html'">💰 Costos y ganancias</button>
-      <button onclick="cerrarSesion()">🚪 Cerrar sesión</button>
-    </div>
-
-    <h1>Panel de Administración</h1>
-
-    <div class="top-bar">
-      <a href="index.html">🏠 Volver al inicio</a>
-      <label class="switch-label">
-        <span>Pedidos habilitados</span>
-        <input type="checkbox" id="switchPedidos">
-      </label>
-    </div>
-
-    <div id="contenedor-tablas"></div>
-
-    <script>
-      const horarios = ['horario_19', 'horario_20', 'horario_21', 'pedidos_historico'];
-      const nombres = {
-        'horario_19': 'Pedidos 19:00',
-        'horario_20': 'Pedidos 20:00',
-        'horario_21': 'Pedidos 21:00',
-        'historico': 'Pedidos Históricos'
-      };
-
-      async function fetchTabla(nombre) {
-        const res = await fetch(`/api/tabla/${nombre}`);
-        return await res.json();
-      }
-
-      async function cargarTablasHorarias() {
-        const contenedor = document.getElementById("contenedor-tablas");
-        contenedor.innerHTML = '';
-
-        for (const tabla of horarios) {
-          const datos = await fetchTabla(tabla);
-
-          const div = document.createElement("div");
-          const titulo = document.createElement("h2");
-          titulo.id = `titulo-${tabla}`;
-          titulo.textContent = `${nombres[tabla]} (${datos.length})`;
-
-          let boton = '';
-          if (tabla !== 'historico') {
-            boton = document.createElement("button");
-            boton.textContent = `🗑 Limpiar ${nombres[tabla]}`;
-            boton.onclick = async () => {
-              if (!confirm("¿Seguro que querés limpiar la tabla?")) return;
-              const res = await fetch(`/api/limpiar_tabla/${tabla}`, { method: 'DELETE' });
-              const rta = await res.json();
-              alert(rta.message);
-              cargarTablasHorarias();
-            };
-          }
-
-          const table = document.createElement("table");
-          table.innerHTML = `
-            <thead>
-              <tr>
-                <th>Cliente</th>
-                <th>Teléfono</th>
-                <th>Pago</th>
-                <th>Proteína</th>
-                <th>Vegetal</th>
-                <th>Cobertura</th>
-                <th>Precio</th>
-                <th>Fecha</th>
-                <th>Eliminar</th>
+        const table = document.createElement("table");
+        table.innerHTML = `
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Teléfono</th>
+              <th>Pago</th>
+              <th>Proteína</th>
+              <th>Vegetal</th>
+              <th>Cobertura</th>
+              <th>Precio</th>
+              <th>Fecha</th>
+              <th>Eliminar</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${datos.map(p => `
+              <tr id="pedido-${tabla}-${p.id}">
+                <td>${p.nombre_cliente} ${p.apellido_cliente}</td>
+                <td>${p.celular_cliente}</td>
+                <td>${p.metodo_pago}</td>
+                <td>${p.proteina}</td>
+                <td>${p.vegetal}</td>
+                <td>${p.cobertura}</td>
+                <td>$${p.precio}</td>
+                <td>${p.fecha?.split('T')[0]}</td>
+                <td>${tabla !== 'pedidos_historico' ? `<button onclick="eliminarPedidoHorario(${p.id}, '${tabla}')">❌</button>` : ''}</td>
               </tr>
-            </thead>
-            <tbody>
-              ${datos.map(p => `
-                <tr id="pedido-${tabla}-${p.id}">
-                  <td>${p.nombre_cliente} ${p.apellido_cliente}</td>
-                  <td>${p.celular_cliente}</td>
-                  <td>${p.metodo_pago}</td>
-                  <td>${p.proteina}</td>
-                  <td>${p.vegetal}</td>
-                  <td>${p.cobertura}</td>
-                  <td>$${p.precio}</td>
-                  <td>${p.fecha?.split('T')[0]}</td>
-                  <td>${tabla !== 'historico' ? `<button onclick="eliminarPedidoHorario(${p.id}, '${tabla}')">❌</button>` : ''}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          `;
-
-          div.appendChild(titulo);
-          if (boton) div.appendChild(boton);
-          div.appendChild(table);
-          contenedor.appendChild(div);
-        }
-      }
-
-      async function mostrarDatosVenta() {
-        const res19 = await fetch('/api/tabla/horario_19');
-        const res20 = await fetch('/api/tabla/horario_20');
-        const res21 = await fetch('/api/tabla/horario_21');
-
-        const datos = [
-          ...(await res19.json()),
-          ...(await res20.json()),
-          ...(await res21.json())
-        ];
-
-        const contar = (lista, campo) =>
-          lista.reduce((acc, el) => {
-            acc[el[campo]] = (acc[el[campo]] || 0) + 1;
-            return acc;
-          }, {});
-
-        const proteinas = contar(datos, "proteina");
-        const vegetales = contar(datos, "vegetal");
-        const coberturas = contar(datos, "cobertura");
-
-        const contenedor = document.getElementById("contenedor-tablas");
-        contenedor.innerHTML = `
-          <div class="info-box">
-            <h2>📊 Ingredientes en pedidos</h2>
-            <h3>🍣 Proteínas</h3>
-            <ul>${Object.entries(proteinas).map(([k, v]) => `<li>${k}: ${v}</li>`).join('')}</ul>
-            <h3>🥬 Vegetales</h3>
-            <ul>${Object.entries(vegetales).map(([k, v]) => `<li>${k}: ${v}</li>`).join('')}</ul>
-            <h3>🌿 Coberturas</h3>
-            <ul>${Object.entries(coberturas).map(([k, v]) => `<li>${k}: ${v}</li>`).join('')}</ul>
-          </div>
-          <div style="text-align:center; margin-top: 2rem;">
-            <a href="admin.html">🔙 Volver al panel</a>
-          </div>
+            `).join('')}
+          </tbody>
         `;
+
+        div.appendChild(titulo);
+        if (boton) div.appendChild(boton);
+        div.appendChild(table);
+        contenedor.appendChild(div);
       }
+    }
 
-      async function eliminarPedidoHorario(id, tabla) {
-        if (!confirm("¿Eliminar este pedido?")) return;
+    async function mostrarDatosVenta() {
+      const res19 = await fetch('/api/tabla/horario_19');
+      const res20 = await fetch('/api/tabla/horario_20');
+      const res21 = await fetch('/api/tabla/horario_21');
 
-        await fetch(`/eliminar-pedido-horario/${tabla}/${id}`, { method: 'DELETE' });
+      const datos = [
+        ...(await res19.json()),
+        ...(await res20.json()),
+        ...(await res21.json())
+      ];
 
-        const fila = document.getElementById(`pedido-${tabla}-${id}`);
-        if (fila) fila.remove();
+      const contar = (lista, campo) =>
+        lista.reduce((acc, el) => {
+          acc[el[campo]] = (acc[el[campo]] || 0) + 1;
+          return acc;
+        }, {});
 
-        const titulo = document.getElementById(`titulo-${tabla}`);
-        const match = titulo.textContent.match(/\((\d+)\)/);
-        if (match) {
-          const nuevoValor = Math.max(0, parseInt(match[1]) - 1);
-          titulo.textContent = `${nombres[tabla]} (${nuevoValor})`;
-        }
+      const proteinas = contar(datos, "proteina");
+      const vegetales = contar(datos, "vegetal");
+      const coberturas = contar(datos, "cobertura");
+
+      const contenedor = document.getElementById("contenedor-tablas");
+      contenedor.innerHTML = `
+        <div class="info-box">
+          <h2>📊 Ingredientes en pedidos</h2>
+          <h3>🍣 Proteínas</h3>
+          <ul>${Object.entries(proteinas).map(([k, v]) => `<li>${k}: ${v}</li>`).join('')}</ul>
+          <h3>🥬 Vegetales</h3>
+          <ul>${Object.entries(vegetales).map(([k, v]) => `<li>${k}: ${v}</li>`).join('')}</ul>
+          <h3>🌿 Coberturas</h3>
+          <ul>${Object.entries(coberturas).map(([k, v]) => `<li>${k}: ${v}</li>`).join('')}</ul>
+        </div>
+        <div style="text-align:center; margin-top: 2rem;">
+          <a href="admin.html">🔙 Volver al panel</a>
+        </div>
+      `;
+    }
+
+    async function eliminarPedidoHorario(id, tabla) {
+      if (!confirm("¿Eliminar este pedido?")) return;
+
+      await fetch(`/eliminar-pedido-horario/${tabla}/${id}`, { method: 'DELETE' });
+
+      const fila = document.getElementById(`pedido-${tabla}-${id}`);
+      if (fila) fila.remove();
+
+      const titulo = document.getElementById(`titulo-${tabla}`);
+      const match = titulo.textContent.match(/\((\d+)\)/);
+      if (match) {
+        const nuevoValor = Math.max(0, parseInt(match[1]) - 1);
+        titulo.textContent = `${nombres[tabla]} (${nuevoValor})`;
       }
+    }
 
-      function cerrarSesion() {
-        localStorage.removeItem("adminAutenticado");
-        window.location.href = "index.html";
-      }
+    function cerrarSesion() {
+      localStorage.removeItem("adminAutenticado");
+      window.location.href = "index.html";
+    }
 
-      async function cargarEstadoSwitch() {
-        const res = await fetch('/estado-pedidos');
-        const data = await res.json();
-        document.getElementById("switchPedidos").checked = data.activo;
-      }
+    async function cargarEstadoSwitch() {
+      const res = await fetch('/estado-pedidos');
+      const data = await res.json();
+      document.getElementById("switchPedidos").checked = data.activo;
+    }
 
-      document.getElementById("switchPedidos").addEventListener("change", async () => {
-        const activo = document.getElementById("switchPedidos").checked;
-        await fetch('/estado-pedidos', {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ activo })
-        });
+    document.getElementById("switchPedidos").addEventListener("change", async () => {
+      const activo = document.getElementById("switchPedidos").checked;
+      await fetch('/estado-pedidos', {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ activo })
       });
+    });
 
-      cargarEstadoSwitch();
-      cargarTablasHorarias();
-    </script>
-  </body>
-  </html>
+    cargarEstadoSwitch();
+    cargarTablasHorarias();
+  </script>
+</body>
+</html>
