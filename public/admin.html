@@ -140,6 +140,12 @@
 
   <div id="contenedor-tablas"></div>
   <div id="historico-tablas"></div>
+  <div style="margin-top: 2rem; margin-bottom: 1rem;">
+    <label>Filtrar desde: <input type="date" id="desde"></label>
+    <label>hasta: <input type="date" id="hasta"></label>
+    <button onclick="filtrarHistorico()">🔍 Filtrar</button>
+  </div>
+  
 
   <script>
     const horarios = ['horario_19', 'horario_20', 'horario_21'];
@@ -215,50 +221,86 @@
       }
     }
 
-    async function cargarHistorico() {
-      const contenedor = document.getElementById("historico-tablas");
-      contenedor.innerHTML = '';
+    async function cargarHistorico(filtrado = false) {
+  const contenedor = document.getElementById("historico-tablas");
+  contenedor.innerHTML = '';
 
-      let offset = 0;
-      const limit = 20;
+  const res = await fetch('/pedidos');
+  let datos = await res.json();
 
-      const div = document.createElement("div");
-      const titulo = document.createElement("h2");
-      titulo.textContent = "Pedidos Históricos";
+  // Orden descendente: más nuevo arriba
+  datos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
-      const tabla = document.createElement("table");
-      tabla.innerHTML = `
-        <thead>
-          <tr>
-            <th>Cliente</th>
-            <th>Teléfono</th>
-            <th>Pago</th>
-            <th>Proteína</th>
-            <th>Vegetal</th>
-            <th>Cobertura</th>
-            <th>Precio</th>
-            <th>Fecha</th>
-            <th>Eliminar</th>
-          </tr>
-        </thead>
-        <tbody id="cuerpo-historico"></tbody>
-      `;
+  const div = document.createElement("div");
+  const titulo = document.createElement("h2");
+  titulo.textContent = "Pedidos Históricos";
 
-      const boton = document.createElement("button");
-      boton.textContent = "➕ Cargar más históricos";
-      boton.onclick = cargarMas;
+  const tabla = document.createElement("table");
+  tabla.innerHTML = `
+    <thead>
+      <tr>
+        <th>Cliente</th>
+        <th>Teléfono</th>
+        <th>Pago</th>
+        <th>Proteína</th>
+        <th>Vegetal</th>
+        <th>Cobertura</th>
+        <th>Precio</th>
+        <th>Fecha</th>
+        <th>Eliminar</th>
+      </tr>
+    </thead>
+    <tbody id="cuerpo-historico"></tbody>
+  `;
 
-      div.appendChild(titulo);
-      div.appendChild(tabla);
-      div.appendChild(boton);
-      contenedor.appendChild(div);
+  const cuerpo = tabla.querySelector("tbody");
 
-      async function cargarMas() {
-        const res = await fetch('/pedidos');
-        const datos = await res.json();
-        const cuerpo = document.getElementById("cuerpo-historico");
+  datos.forEach(p => {
+    const fila = document.createElement("tr");
+    fila.id = `pedido-pedidos_historico-${p.id}`;
+    fila.innerHTML = `
+      <td>${p.nombre_cliente} ${p.apellido_cliente}</td>
+      <td>${p.celular_cliente}</td>
+      <td>${p.metodo_pago}</td>
+      <td>${p.proteina}</td>
+      <td>${p.vegetal}</td>
+      <td>${p.cobertura}</td>
+      <td>$${p.precio}</td>
+      <td>${p.fecha?.split('T')[0]}</td>
+      <td><button onclick="eliminarPedidoHistorico(${p.id})">❌</button></td>
+    `;
+    cuerpo.appendChild(fila);
+  });
 
-        datos.slice(offset, offset + limit).forEach(p => {
+  div.appendChild(titulo);
+  div.appendChild(tabla);
+  contenedor.appendChild(div);
+}
+
+function filtrarHistorico() {
+  const desde = document.getElementById("desde").value;
+  const hasta = document.getElementById("hasta").value;
+
+  if (!desde || !hasta) {
+    alert("Seleccioná ambas fechas");
+    return;
+  }
+
+  fetch('/pedidos')
+    .then(res => res.json())
+    .then(data => {
+      const filtrados = data.filter(p => {
+        const fecha = p.fecha?.split('T')[0];
+        return fecha >= desde && fecha <= hasta;
+      });
+
+      // Reescribimos la tabla solo con los resultados
+      const cuerpo = document.getElementById("cuerpo-historico");
+      cuerpo.innerHTML = '';
+
+      filtrados
+        .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+        .forEach(p => {
           const fila = document.createElement("tr");
           fila.id = `pedido-pedidos_historico-${p.id}`;
           fila.innerHTML = `
@@ -274,12 +316,9 @@
           `;
           cuerpo.appendChild(fila);
         });
+    });
+}
 
-        offset += limit;
-      }
-
-      await cargarMas();
-    }
 
     async function mostrarDatosVenta() {
       const res1 = await fetch('/api/tabla/horario_19');
