@@ -151,7 +151,10 @@
 
     async function fetchTabla(nombre, offset = 0, limit = null) {
       let url = `/api/tabla/${nombre}`;
-      if (limit !== null) url += `?offset=${offset}&limit=${limit}`;
+      if (offset !== 0 || limit !== null) {
+        url += `?offset=${offset}`;
+        if (limit !== null) url += `&limit=${limit}`;
+      }
       const res = await fetch(url);
       return await res.json();
     }
@@ -291,7 +294,7 @@
     async function eliminarPedidoHistorico(id) {
       if (!confirm("¿Eliminar este pedido histórico?")) return;
       await fetch(`/eliminar-pedido-horario/pedidos_historico/${id}`, { method: 'DELETE' });
-      location.reload();
+      document.querySelector(`#pedido-pedidos_historico-${id}`)?.remove();
     }
 
     function cerrarSesion() {
