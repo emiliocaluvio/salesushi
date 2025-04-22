@@ -1,9 +1,10 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Costos y Ganancias</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       margin: 0;
@@ -98,10 +99,15 @@
       margin-bottom: 1rem;
     }
 
-    .section-title {
-      margin-top: 2rem;
-      font-size: 1.1rem;
-      font-weight: bold;
+    .charts-container {
+      width: 100%;
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+
+    canvas {
+      max-width: 100%;
     }
   </style>
 </head>
@@ -162,9 +168,15 @@
     </div>
   </div>
 
+  <div class="charts-container">
+    <canvas id="graficoTorta"></canvas>
+    <canvas id="graficoBarrasGanancia"></canvas>
+    <canvas id="graficoBarrasVentas"></canvas>
+  </div>
+
   <script>
     const tablas = ['horario_19', 'horario_20', 'horario_21'];
-    const ventas = { salmon: 0, pollo: 0, langostino: 0, kanikama: 0, vegetariano: 0, otras: 0 };
+    const ventas = { salmon: 0, pollo: 0, langostino: 0, kanikama: 0, vegetariano: 0 };
     const cantidades = { salmon: 0, pollo: 0, langostino: 0, kanikama: 0, vegetariano: 0 };
     const campos = ['vegetales', 'paltas', 'arroz', 'pollo', 'salmon', 'langostinos', 'kanikama', 'queso', 'cajas', 'otros'];
 
@@ -225,10 +237,11 @@
 
       calcularGanancia();
       calcularPromedios(totalPedidos);
+      renderizarGraficos();
     }
 
     function calcularGanancia() {
-      const totalVentas = ventas.salmon + ventas.pollo + ventas.langostino + ventas.kanikama + ventas.vegetariano;
+      const totalVentas = Object.values(ventas).reduce((a, b) => a + b, 0);
       const costos = campos.reduce((acc, id) => acc + Number(document.getElementById(id).value || 0), 0);
       document.getElementById("ganancia").innerText = totalVentas - costos;
     }
@@ -243,23 +256,42 @@
 
       document.getElementById("promCosto").innerText = promCosto;
       document.getElementById("promVenta").innerText = promVenta;
+    }
 
-      const calc = (excluir, cantidad, ventaTotal, ventaID, costoID, rentID) => {
-        const incluidos = campos.filter(c => !excluir.includes(c));
-        const suma = incluidos.reduce((acc, id) => acc + Number(document.getElementById(id).value || 0), 0);
-        const costo = cantidad > 0 ? Math.round(suma / cantidad) : 0;
-        const venta = cantidad > 0 ? Math.round(ventaTotal / cantidad) : 0;
-        const rentabilidad = venta - costo;
-        document.getElementById(costoID).innerText = costo;
-        document.getElementById(ventaID).innerText = venta;
-        document.getElementById(rentID).innerText = rentabilidad;
-      };
+    function renderizarGraficos() {
+      const etiquetas = ['Salmón', 'Pollo', 'Langostino', 'Kanikama', 'Vegetariano'];
+      const dataCantidad = etiquetas.map(p => cantidades[normalizarTexto(p)]);
+      const dataGanancia = etiquetas.map(p => ventas[normalizarTexto(p)]);
 
-      calc(['pollo', 'langostinos', 'kanikama'], cantidades.salmon, ventas.salmon, 'ventaSalmonProm', 'costoSalmon', 'rentSalmon');
-      calc(['salmon', 'langostinos', 'kanikama'], cantidades.pollo, ventas.pollo, 'ventaPolloProm', 'costoPollo', 'rentPollo');
-      calc(['salmon', 'pollo', 'kanikama'], cantidades.langostino, ventas.langostino, 'ventaLangostinoProm', 'costoLangostino', 'rentLangostino');
-      calc(['salmon', 'pollo', 'langostinos'], cantidades.kanikama, ventas.kanikama, 'ventaKanikamaProm', 'costoKanikama', 'rentKanikama');
-      calc(['salmon', 'pollo', 'langostinos', 'kanikama'], cantidades.vegetariano, ventas.vegetariano, 'ventaVegetarianoProm', 'costoVegetariano', 'rentVegetariano');
+      new Chart(document.getElementById("graficoTorta"), {
+        type: 'pie',
+        data: {
+          labels: etiquetas,
+          datasets: [{ data: dataCantidad }]
+        }
+      });
+
+      new Chart(document.getElementById("graficoBarrasGanancia"), {
+        type: 'bar',
+        data: {
+          labels: etiquetas,
+          datasets: [{
+            label: 'Ganancia por proteína',
+            data: dataGanancia
+          }]
+        }
+      });
+
+      new Chart(document.getElementById("graficoBarrasVentas"), {
+        type: 'bar',
+        data: {
+          labels: etiquetas,
+          datasets: [{
+            label: 'Ventas por proteína',
+            data: dataGanancia
+          }]
+        }
+      });
     }
 
     document.addEventListener("DOMContentLoaded", () => {
