@@ -1,3 +1,13 @@
+Perfecto hermano, acá va el código HTML completo, corregido con:
+
+- ✅ Lógica de costeo **mixto** (común + específico).
+- ✅ Cálculo **correcto del promedio de venta por roll**.
+- ✅ Se muestra **el total de costos** arriba, para entender la ganancia.
+- ✅ Todo lo demás queda exactamente igual a lo que vos ya tenías.
+
+Pegalo entero en Visual Studio Code y va a andar todo:
+
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -119,6 +129,7 @@
         <div>Ventas Pollo: $<span id="ventaPollo">0</span></div>
         <div>Ventas Langostino: $<span id="ventaLangostino">0</span></div>
         <div>Otras ventas: $<span id="ventaOtras">0</span></div>
+        <div>Total de costos: $<span id="totalCostos">0</span></div>
         <div class="total">Ganancia neta: $<span id="ganancia">0</span></div>
       </div>
 
@@ -145,11 +156,11 @@
 
     <div class="results">
       <h3>📊 Promedios por proteína</h3>
-      <div>Costo promedio Salmón: $<span id="costoSalmon">0</span> — Venta: $<span id="ventaSalmonProm">0</span> — Rentabilidad: $<span id="rentSalmon">0</span></div>
-      <div>Costo promedio Pollo: $<span id="costoPollo">0</span> — Venta: $<span id="ventaPolloProm">0</span> — Rentabilidad: $<span id="rentPollo">0</span></div>
-      <div>Costo promedio Langostino: $<span id="costoLangostino">0</span> — Venta: $<span id="ventaLangostinoProm">0</span> — Rentabilidad: $<span id="rentLangostino">0</span></div>
-      <div>Costo promedio Kanikama: $<span id="costoKanikama">0</span> — Venta: $<span id="ventaKanikamaProm">0</span> — Rentabilidad: $<span id="rentKanikama">0</span></div>
-      <div>Costo promedio Vegetariano: $<span id="costoVegetariano">0</span> — Venta: $<span id="ventaVegetarianoProm">0</span> — Rentabilidad: $<span id="rentVegetariano">0</span></div>
+      <div>Costo promedio Salmón: $<span id="costoSalmon">0</span> — Venta promedio: $<span id="ventaSalmonProm">0</span> — Rentabilidad: $<span id="rentSalmon">0</span></div>
+      <div>Costo promedio Pollo: $<span id="costoPollo">0</span> — Venta promedio: $<span id="ventaPolloProm">0</span> — Rentabilidad: $<span id="rentPollo">0</span></div>
+      <div>Costo promedio Langostino: $<span id="costoLangostino">0</span> — Venta promedio: $<span id="ventaLangostinoProm">0</span> — Rentabilidad: $<span id="rentLangostino">0</span></div>
+      <div>Costo promedio Kanikama: $<span id="costoKanikama">0</span> — Venta promedio: $<span id="ventaKanikamaProm">0</span> — Rentabilidad: $<span id="rentKanikama">0</span></div>
+      <div>Costo promedio Vegetariano: $<span id="costoVegetariano">0</span> — Venta promedio: $<span id="ventaVegetarianoProm">0</span> — Rentabilidad: $<span id="rentVegetariano">0</span></div>
     </div>
   </div>
 
@@ -228,8 +239,9 @@
 
     function calcularGanancia() {
       const totalVentas = Object.values(ventas).reduce((a, b) => a + b, 0);
-      const costos = campos.reduce((acc, id) => acc + Number(document.getElementById(id).value || 0), 0);
-      document.getElementById("ganancia").innerText = totalVentas - costos;
+      const totalCostos = campos.reduce((acc, id) => acc + Number(document.getElementById(id).value || 0), 0);
+      document.getElementById("ganancia").innerText = totalVentas - totalCostos;
+      document.getElementById("totalCostos").innerText = totalCostos;
     }
 
     function calcularPromedios() {
@@ -257,12 +269,13 @@
       for (const tipo in cantidades) {
         const cant = cantidades[tipo];
         const venta = ventas[tipo];
+        const ventaProm = cant > 0 ? Math.round(venta / cant) : 0;
         const costoTotal = (costoComunPorRoll * cant) + costoEspecifico[tipo];
         const costoUnitario = cant > 0 ? Math.round(costoTotal / cant) : 0;
         const rent = venta - costoTotal;
 
         document.getElementById(`costo${capitalize(tipo)}`).innerText = costoUnitario;
-        document.getElementById(`venta${capitalize(tipo)}Prom`).innerText = venta;
+        document.getElementById(`venta${capitalize(tipo)}Prom`).innerText = ventaProm;
         document.getElementById(`rent${capitalize(tipo)}`).innerText = rent;
       }
     }
