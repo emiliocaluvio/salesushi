@@ -39,7 +39,7 @@
     }
 
     .input-group {
-      margin-bottom: 1rem;
+      margin-bottom: 0.7rem;
     }
 
     label {
@@ -49,8 +49,9 @@
     }
 
     input[type="number"] {
-      width: 100%;
-      padding: 0.5rem;
+      width: 6rem;
+      padding: 0.2rem;
+      font-size: 1rem;
       border: 1px solid #ff6f61;
       border-radius: 4px;
     }
@@ -59,6 +60,7 @@
       background: #fff5f1;
       padding: 1rem;
       border-radius: 8px;
+      margin-bottom: 1rem;
     }
 
     .results div {
@@ -70,12 +72,17 @@
       border-top: 1px solid #ff6f61;
       padding-top: 1rem;
     }
+
+    ul {
+      margin-top: 0.5rem;
+      padding-left: 1.5rem;
+    }
   </style>
 </head>
 <body>
   <h2>Costos y Ganancias</h2>
   <div class="container">
-    <!-- Lado izquierdo: Costos -->
+    <!-- Lado izquierdo -->
     <div class="left">
       <div class="input-group"><label for="vegetales">Vegetales</label><input type="number" id="vegetales" /></div>
       <div class="input-group"><label for="arroz">Arroz</label><input type="number" id="arroz" /></div>
@@ -88,34 +95,38 @@
       <div class="input-group"><label for="otros">Otros</label><input type="number" id="otros" /></div>
     </div>
 
-    <!-- Lado derecho: Ventas y ganancias -->
+    <!-- Lado derecho -->
     <div class="right">
       <div class="results" id="resumen">
+        <h3>💰 Ventas</h3>
         <div>Ventas Salmón: $<span id="ventaSalmon">0</span></div>
         <div>Ventas Pollo: $<span id="ventaPollo">0</span></div>
         <div>Ventas Langostino: $<span id="ventaLangostino">0</span></div>
         <div>Otras ventas: $<span id="ventaOtras">0</span></div>
         <div class="total">Ganancia neta: $<span id="ganancia">0</span></div>
       </div>
+
+      <div class="results" id="datos-ingredientes">
+        <h3>📊 Ingredientes en pedidos</h3>
+        <h4>🍣 Proteínas</h4>
+        <ul id="proteinas"></ul>
+        <h4>🥬 Vegetales</h4>
+        <ul id="vegetalesList"></ul>
+        <h4>🌿 Coberturas</h4>
+        <ul id="coberturas"></ul>
+      </div>
     </div>
   </div>
 
   <script>
-    const tablas = ['pedidos_19', 'pedidos_20', 'pedidos_21'];
-
-    const ventas = {
-      salmon: 0,
-      pollo: 0,
-      langostino: 0,
-      otras: 0
-    };
+    const tablas = ['horario_19', 'horario_20', 'horario_21'];
+    const ventas = { salmon: 0, pollo: 0, langostino: 0, otras: 0 };
 
     function cargarCostosDesdeLocalStorage() {
       const campos = [
         'vegetales', 'arroz', 'pollo', 'salmon', 'langostinos',
         'kanikama', 'queso', 'cajas', 'otros'
       ];
-
       campos.forEach(id => {
         const valor = localStorage.getItem(`costo_${id}`);
         if (valor !== null) {
@@ -134,10 +145,27 @@
       let totalPedidos = [];
 
       for (const tabla of tablas) {
-        const response = await fetch(`/api/${tabla}`);
+        const response = await fetch(`/api/tabla/${tabla}`);
         const data = await response.json();
         totalPedidos = totalPedidos.concat(data);
       }
+
+      const contar = (lista, campo) =>
+        lista.reduce((acc, el) => {
+          acc[el[campo]] = (acc[el[campo]] || 0) + 1;
+          return acc;
+        }, {});
+
+      const proteinas = contar(totalPedidos, "proteina");
+      const vegetales = contar(totalPedidos, "vegetal");
+      const coberturas = contar(totalPedidos, "cobertura");
+
+      document.getElementById("proteinas").innerHTML = Object.entries(proteinas)
+        .map(([k, v]) => `<li>${k}: ${v}</li>`).join('');
+      document.getElementById("vegetalesList").innerHTML = Object.entries(vegetales)
+        .map(([k, v]) => `<li>${k}: ${v}</li>`).join('');
+      document.getElementById("coberturas").innerHTML = Object.entries(coberturas)
+        .map(([k, v]) => `<li>${k}: ${v}</li>`).join('');
 
       totalPedidos.forEach(pedido => {
         const proteina = pedido.proteina.toLowerCase();
@@ -159,14 +187,12 @@
 
     function calcularGanancia() {
       const totalVentas = ventas.salmon + ventas.pollo + ventas.langostino + ventas.otras;
-
       const costos = [
         'vegetales', 'arroz', 'pollo', 'salmon', 'langostinos',
         'kanikama', 'queso', 'cajas', 'otros'
       ].reduce((acc, id) => acc + Number(document.getElementById(id).value || 0), 0);
 
-      const ganancia = totalVentas - costos;
-      document.getElementById("ganancia").innerText = ganancia;
+      document.getElementById("ganancia").innerText = totalVentas - costos;
     }
 
     document.addEventListener("DOMContentLoaded", () => {
