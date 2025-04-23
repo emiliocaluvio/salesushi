@@ -298,16 +298,30 @@
         }
       });
 
-      new Chart(document.getElementById("graficoBarrasVentas"), {
-        type: 'bar',
-        data: {
-          labels: etiquetas,
-          datasets: [{
-            label: 'Ventas por proteína',
-            data: dataGanancia
-          }]
-        }
-      });
+      const totalCantidad = Object.values(cantidades).reduce((a, b) => a + b, 0);
+const costoComunesTotal = ['vegetales', 'paltas', 'arroz', 'queso', 'cajas', 'otros']
+.reduce((acc, id) => acc + Number(document.getElementById(id).value || 0), 0);
+
+const dataRentabilidad = etiquetas.map(p => {
+const tipo = normalizarTexto(p);
+const cant = cantidades[tipo];
+const ventaProm = cant > 0 ? Math.round(ventas[tipo] / cant) : 0;
+const costoComun = totalCantidad > 0 ? Math.round(costoComunesTotal / totalCantidad) : 0;
+const costoEsp = tipo === 'vegetariano' ? 0 : Number(document.getElementById(tipo).value || 0);
+const costoUnitario = cant > 0 ? Math.round((costoComun * cant + costoEsp) / cant) : 0;
+return ventaProm - costoUnitario;
+});
+
+new Chart(document.getElementById("graficoBarrasVentas"), {
+type: 'bar',
+data: {
+  labels: etiquetas,
+  datasets: [{
+    label: 'Ganancia neta por roll (por proteína)',
+    data: dataRentabilidad
+  }]
+}
+});
     }
 
     document.addEventListener("DOMContentLoaded", () => {
