@@ -23,11 +23,20 @@
       margin-bottom: 1rem;
     }
 
+    .roll-contenedor {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 2px dashed #ff6f61;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
     .roll-img {
       width: 100%;
-      max-width: 300px;
+      max-width: 400px;
       border-radius: 10px;
-      border: 2px dashed #ff6f61;
       margin: 1rem 0;
     }
 
@@ -36,7 +45,6 @@
       gap: 1rem;
       flex-wrap: wrap;
       justify-content: center;
-      margin-bottom: 1rem;
     }
 
     .ingrediente {
@@ -83,12 +91,13 @@
 <body>
   <h1>Ejemplos:</h1>
 
-  <img id="rollImagen" class="roll-img" src="" alt="Ejemplo de roll" />
-
-  <div class="ingredientes">
-    <div class="ingrediente" id="proteinaBox"></div>
-    <div class="ingrediente" id="vegetalBox"></div>
-    <div class="ingrediente" id="coberturaBox"></div>
+  <div class="roll-contenedor">
+    <div class="ingredientes">
+      <div class="ingrediente" id="proteinaBox"></div>
+      <div class="ingrediente" id="vegetalBox"></div>
+      <div class="ingrediente" id="coberturaBox"></div>
+    </div>
+    <img id="rollImagen" class="roll-img" src="" alt="Ejemplo de roll" />
   </div>
 
   <div class="navegacion">
@@ -116,6 +125,10 @@
       "salmonpaltanori.png"
     ];
 
+    const proteinas = ['salmon', 'polloteriyaki', 'langostino', 'kanikama'];
+    const vegetales = ['palta', 'pepino', 'cebollin', 'ciboulette'];
+    const coberturas = ['nori', 'sesamo', 'panko', 'ciboulette'];
+
     let indiceActual = 0;
 
     function cargarEjemplo() {
@@ -131,27 +144,18 @@
     }
 
     function separarIngredientes(nombre) {
-      const posiblesProteinas = ['salmon', 'polloteriyaki', 'langostino', 'kanikama'];
-      for (const proteina of posiblesProteinas) {
+      for (const proteina of proteinas) {
         if (nombre.startsWith(proteina)) {
-          const resto = nombre.slice(proteina.length);
-          // Separar vegetal y cobertura por heurística
-          const cortes = encontrarCorte(resto);
-          return [proteina, cortes[0], cortes[1]];
+          let resto = nombre.slice(proteina.length);
+          for (const vegetal of vegetales) {
+            if (resto.startsWith(vegetal)) {
+              let cobertura = resto.slice(vegetal.length);
+              return [proteina, vegetal, cobertura];
+            }
+          }
         }
       }
       return ['?', '?', '?'];
-    }
-
-    function encontrarCorte(texto) {
-      // Buscar punto medio entre vegetal y cobertura
-      const posibles = ['palta', 'pepino', 'cebollin', 'ciboulette'];
-      for (const vegetal of posibles) {
-        if (texto.startsWith(vegetal)) {
-          return [vegetal, texto.slice(vegetal.length)];
-        }
-      }
-      return [texto, ''];
     }
 
     function cambiarEjemplo(dir) {
