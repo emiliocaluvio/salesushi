@@ -37,12 +37,11 @@
     .roll-img {
       display: block;
       max-width: 100%;
-      max-height: 800px;
+      max-height: 1600px;
       min-height: 300px;
       border-radius: 10px;
       margin: 1rem auto;
       object-fit: contain;
-      background-color: #fff0e6;
     }
 
     .ingredientes {
@@ -69,15 +68,24 @@
       justify-content: center;
     }
 
+    .acciones-finales {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      width: 100%;
+      max-width: 400px;
+      margin: 1rem auto;
+    }
+
     .btn {
       background-color: transparent;
       border: 2px dashed #ff6f61;
       color: #ff6f61;
       padding: 0.5rem 0.8rem;
-      font-size: 1.5rem;
+      font-size: 1.1rem;
       cursor: pointer;
       transition: all 0.3s ease;
-      min-width: 60px;
+      flex: 1;
       text-align: center;
     }
 
@@ -110,7 +118,7 @@
     <button class="btn" onclick="cambiarEjemplo(1)">→</button>
   </div>
 
-  <div class="navegacion">
+  <div class="acciones-finales">
     <button class="btn" onclick="irA('index.html')">Volver a inicio</button>
     <button class="btn" onclick="irA('proteina.html')">Comenzar pedido</button>
   </div>
@@ -134,7 +142,6 @@
     const vegetales = ['palta', 'pepino', 'cebollin', 'ciboulette'];
     const coberturas = ['nori', 'sesamo', 'panko', 'ciboulette'];
 
-    // Para mostrar bien los nombres compuestos o con tilde
     const traducciones = {
       'langostinopanko': 'Langostino Panko',
       'polloteriyaki': 'Pollo Teriyaki',
