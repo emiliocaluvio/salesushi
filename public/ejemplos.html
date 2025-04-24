@@ -35,11 +35,14 @@
     }
 
     .roll-img {
+      display: block;
       max-width: 100%;
       max-height: 800px;
+      min-height: 300px;
       border-radius: 10px;
-      margin: 1rem 0;
+      margin: 1rem auto;
       object-fit: contain;
+      background-color: #fff0e6;
     }
 
     .ingredientes {
@@ -127,9 +130,25 @@
       "salmonpaltanori.png"
     ];
 
-    const proteinas = ['langostinopanko', 'salmon', 'polloteriyaki', 'langostino', 'kanikama'];
+    const proteinas = ['langostinopanko', 'polloteriyaki', 'salmon', 'langostino', 'kanikama'];
     const vegetales = ['palta', 'pepino', 'cebollin', 'ciboulette'];
     const coberturas = ['nori', 'sesamo', 'panko', 'ciboulette'];
+
+    // Para mostrar bien los nombres compuestos o con tilde
+    const traducciones = {
+      'langostinopanko': 'Langostino Panko',
+      'polloteriyaki': 'Pollo Teriyaki',
+      'sesamo': 'Sésamo',
+      'ciboulette': 'Ciboulette',
+      'cebollin': 'Cebollín',
+      'palta': 'Palta',
+      'pepino': 'Pepino',
+      'nori': 'Nori',
+      'panko': 'Panko',
+      'salmon': 'Salmón',
+      'kanikama': 'Kanikama',
+      'desconocido': 'Desconocido'
+    };
 
     let indiceActual = 0;
 
@@ -140,9 +159,9 @@
       const nombreSinExtension = nombre.replace('.png', '');
       const [proteina, vegetal, cobertura] = identificarComponentes(nombreSinExtension);
 
-      document.getElementById('proteinaBox').textContent = capitalizar(proteina);
-      document.getElementById('vegetalBox').textContent = capitalizar(vegetal);
-      document.getElementById('coberturaBox').textContent = capitalizar(cobertura);
+      document.getElementById('proteinaBox').textContent = traducir(proteina);
+      document.getElementById('vegetalBox').textContent = traducir(vegetal);
+      document.getElementById('coberturaBox').textContent = traducir(cobertura);
     }
 
     function identificarComponentes(nombre) {
@@ -157,7 +176,7 @@
           }
         }
       }
-      return ['Desconocido', 'Desconocido', 'Desconocido'];
+      return ['desconocido', 'desconocido', 'desconocido'];
     }
 
     function cambiarEjemplo(dir) {
@@ -169,8 +188,11 @@
       window.location.href = ruta;
     }
 
+    function traducir(str) {
+      return traducciones[str.toLowerCase()] || capitalizar(str);
+    }
+
     function capitalizar(str) {
-      if (!str) return '';
       return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
