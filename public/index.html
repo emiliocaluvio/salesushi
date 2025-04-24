@@ -135,35 +135,30 @@
 </head>
 <body>
 
-  <!-- Botón ícono para mostrar el login -->
   <button class="toggle-admin" onclick="toggleAdmin()">🔒</button>
 
-  <!-- Formulario de login admin oculto -->
   <div class="admin-login" id="adminLogin">
     <input type="text" id="usuario" placeholder="Usuario">
     <input type="password" id="clave" placeholder="Contraseña">
     <button onclick="accederAdmin()">Admin</button>
   </div>
 
-  <!-- Logo con link a Instagram -->
   <a href="https://instagram.com/sale.sushi" target="_blank" rel="noopener noreferrer">
     <img src="logo.png" alt="Logo Sale Sushi" class="logo" />
   </a>
 
   <div class="linea"></div>
 
-  <!-- Mensaje de bienvenida -->
   <p style="font-size: 1.1rem; margin-bottom: 1.5rem;">
     ¡Bienvenido a <strong>Sale Sushi</strong> 🍣! Armá tu roll ideal en simples pasos.
   </p>
 
-  <!-- Cupos disponibles -->
   <div id="cupos" style="margin-bottom: 1.5rem; font-size: 1rem;"></div>
 
-  <!-- Botones -->
   <div class="botonera">
     <button class="btn" onclick="verMenu()">Ver menú</button>
     <button class="btn" id="btnPedido" onclick="pedidoDirecto()">Hacer pedido</button>
+    <button class="btn" onclick="verEjemplos()">Ver ejemplos</button>
   </div>
 
   <script>
@@ -183,6 +178,12 @@
       localStorage.removeItem("todosLosRolls");
       localStorage.removeItem("pedido");
       irA("menu.html");
+    }
+
+    function verEjemplos() {
+      localStorage.removeItem("todosLosRolls");
+      localStorage.removeItem("pedido");
+      irA("ejemplos.html");
     }
 
     async function pedidoDirecto() {
