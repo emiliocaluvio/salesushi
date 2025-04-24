@@ -31,13 +31,15 @@
       border-radius: 10px;
       padding: 1rem;
       margin-bottom: 1rem;
+      max-width: 90vw;
     }
 
     .roll-img {
-      width: 100%;
-      max-width: 400px;
+      max-width: 100%;
+      max-height: 300px;
       border-radius: 10px;
       margin: 1rem 0;
+      object-fit: contain;
     }
 
     .ingredientes {
@@ -136,40 +138,35 @@
       document.getElementById('rollImagen').src = `ejemplos/${nombre}`;
 
       const nombreSinExtension = nombre.replace('.png', '');
-      const [proteina, vegetal, cobertura] = separarIngredientes(nombreSinExtension);
+      const [proteina, vegetal, cobertura] = identificarComponentes(nombreSinExtension);
 
       document.getElementById('proteinaBox').textContent = capitalizar(proteina);
       document.getElementById('vegetalBox').textContent = capitalizar(vegetal);
       document.getElementById('coberturaBox').textContent = capitalizar(cobertura);
     }
 
-    function separarIngredientes(nombre) {
-      for (const proteina of proteinas) {
-        if (nombre.startsWith(proteina)) {
-          let resto = nombre.slice(proteina.length);
-          for (const vegetal of vegetales) {
-            if (resto.startsWith(vegetal)) {
-              let cobertura = resto.slice(vegetal.length);
-              return [proteina, vegetal, cobertura];
+    function identificarComponentes(nombre) {
+      for (let p of proteinas) {
+        if (nombre.startsWith(p)) {
+          const resto = nombre.slice(p.length);
+          for (let v of vegetales) {
+            if (resto.startsWith(v)) {
+              const c = resto.slice(v.length);
+              return [p, v, c];
             }
           }
         }
       }
-      return ['?', '?', '?'];
+      return ['Desconocido', 'Desconocido', 'Desconocido'];
     }
 
     function cambiarEjemplo(dir) {
-      indiceActual += dir;
-      if (indiceActual < 0) indiceActual = ejemplos.length - 1;
-      if (indiceActual >= ejemplos.length) indiceActual = 0;
+      indiceActual = (indiceActual + dir + ejemplos.length) % ejemplos.length;
       cargarEjemplo();
     }
 
     function irA(ruta) {
-      document.body.classList.add("fade-out");
-      setTimeout(() => {
-        window.location.href = ruta;
-      }, 300);
+      window.location.href = ruta;
     }
 
     function capitalizar(str) {
