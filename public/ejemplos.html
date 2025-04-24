@@ -36,7 +36,7 @@
 
     .roll-img {
       max-width: 100%;
-      max-height: 300px;
+      max-height: 800px;
       border-radius: 10px;
       margin: 1rem 0;
       object-fit: contain;
@@ -70,11 +70,11 @@
       background-color: transparent;
       border: 2px dashed #ff6f61;
       color: #ff6f61;
-      padding: 0.8rem 1.2rem;
-      font-size: 1rem;
+      padding: 0.5rem 0.8rem;
+      font-size: 1.5rem;
       cursor: pointer;
       transition: all 0.3s ease;
-      min-width: 150px;
+      min-width: 60px;
       text-align: center;
     }
 
@@ -103,13 +103,13 @@
   </div>
 
   <div class="navegacion">
-    <button class="btn" onclick="cambiarEjemplo(-1)">⟵ Anterior</button>
-    <button class="btn" onclick="cambiarEjemplo(1)">Siguiente ⟶</button>
+    <button class="btn" onclick="cambiarEjemplo(-1)">←</button>
+    <button class="btn" onclick="cambiarEjemplo(1)">→</button>
   </div>
 
   <div class="navegacion">
-    <button class="btn" onclick="irA('index.html')">Volver al inicio</button>
-    <button class="btn" onclick="irA('proteina.html')">Comenzar pedido</button>
+    <button class="btn" onclick="irA('index.html')">🏠</button>
+    <button class="btn" onclick="irA('proteina.html')">🍣</button>
   </div>
 
   <img src="logo.png" alt="Logo" class="logo" />
@@ -127,7 +127,7 @@
       "salmonpaltanori.png"
     ];
 
-    const proteinas = ['salmon', 'polloteriyaki', 'langostino', 'kanikama'];
+    const proteinas = ['langostinopanko', 'salmon', 'polloteriyaki', 'langostino', 'kanikama'];
     const vegetales = ['palta', 'pepino', 'cebollin', 'ciboulette'];
     const coberturas = ['nori', 'sesamo', 'panko', 'ciboulette'];
 
@@ -146,10 +146,10 @@
     }
 
     function identificarComponentes(nombre) {
-      for (let p of proteinas) {
+      for (let p of proteinas.sort((a, b) => b.length - a.length)) {
         if (nombre.startsWith(p)) {
           const resto = nombre.slice(p.length);
-          for (let v of vegetales) {
+          for (let v of vegetales.sort((a, b) => b.length - a.length)) {
             if (resto.startsWith(v)) {
               const c = resto.slice(v.length);
               return [p, v, c];
@@ -170,6 +170,7 @@
     }
 
     function capitalizar(str) {
+      if (!str) return '';
       return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
