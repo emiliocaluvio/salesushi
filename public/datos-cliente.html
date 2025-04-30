@@ -142,9 +142,21 @@
       gap: 0.5rem;
     }
     .palitos-contador button {
-      padding: 0.2rem 0.6rem;
-      font-size: 1.2rem;
-    }
+  padding: 0.4rem 0.8rem;
+  font-size: 1.2rem;
+  border: 2px dashed #ff6f61;
+  background-color: transparent;
+  color: #ff6f61;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.palitos-contador button:hover {
+  background-color: #ff6f61;
+  color: #000;
+}
+
     @media (max-width: 600px) {
       .acciones { flex-direction: column; }
       .acciones button { max-width: 100%; width: 100%; }
@@ -292,11 +304,18 @@
         const box = document.createElement('div');
         box.className = `horario-box ${clase}`;
         box.id = `hora-${h.hora}`;
-        box.innerHTML = `
-          <input type="radio" name="hora" value="${h.hora}">
-          <strong>${h.hora}</strong><br>
-          ${h.disponibles} disponibles
-        `;
+        const etiquetas = {
+  "19:00": "19-20",
+  "20:00": "20-21",
+  "21:00": "21-22"
+};
+
+box.innerHTML = `
+  <input type="radio" name="hora" value="${h.hora}">
+  <strong>${etiquetas[h.hora]}</strong><br>
+  ${h.disponibles} disponibles
+`;
+
 
         if (clase === '') {
           box.onclick = () => seleccionarHorario(h.hora);
@@ -373,6 +392,9 @@
       localStorage.setItem("metodoPago", pago);
       localStorage.setItem("totalPedido", totalFinal);
       localStorage.setItem("todosLosRollsResumen", JSON.stringify(rolls));
+      localStorage.setItem("cantidadPalitos", cantidadPalitos);
+      localStorage.setItem("comentario", comentario);
+
 
       irA("gracias.html");
       localStorage.removeItem("todosLosRolls");
