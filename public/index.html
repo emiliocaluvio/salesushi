@@ -131,10 +131,22 @@
         font-size: 0.8rem;
       }
     }
+
+    .cartel-takeaway {
+      margin-top: 1.5rem;
+      font-size: 1rem;
+      color: #a94442;
+      background-color: #fbeee6;
+      border: 1px solid #f5c6cb;
+      padding: 0.8rem 1.2rem;
+      border-radius: 8px;
+      max-width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+    }
   </style>
 </head>
 <body>
-
   <button class="toggle-admin" onclick="toggleAdmin()">🔒</button>
 
   <div class="admin-login" id="adminLogin">
@@ -159,6 +171,10 @@
     <button class="btn" onclick="verMenu()">Ver menú</button>
     <button class="btn" id="btnPedido" onclick="pedidoDirecto()">Hacer pedido</button>
     <button class="btn" onclick="verEjemplos()">Ver ejemplos</button>
+  </div>
+
+  <div class="cartel-takeaway">
+    No se hacen envíos. Modalidad take away.
   </div>
 
   <script>

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -116,7 +115,7 @@
   <h1 id="titulo">¡Gracias por tu pedido!</h1>
 
   <div class="mensaje" id="mensaje-principal">
-    Pronto estaremos en contacto para coordinar la entrega. ¡Esperamos que disfrutes tu sushi! 🍣
+    Pronto estaremos en contacto para coordinar la entrega. Recordá que <strong>NO hay delivery</strong>: el pedido se retira por <strong>Rincón 1204</strong>, casi 25 de Mayo, frente a Plaza Constitución. 🍣
   </div>
 
   <div id="info"></div>
@@ -137,8 +136,14 @@
     const metodoPago = localStorage.getItem("metodoPago");
     const total = localStorage.getItem("totalPedido");
     const rolls = JSON.parse(localStorage.getItem("todosLosRollsResumen")) || [];
+    const cantidadPalitos = parseInt(localStorage.getItem("cantidadPalitos")) || 0;
+    const comentario = localStorage.getItem("comentario") || "";
 
-    const totalTexto = total ? `$${total}` : "no disponible";
+    const totalRolls = rolls.reduce((sum, roll) => sum + roll.precio, 0);
+    const totalPalitos = cantidadPalitos * 20;
+    const totalFinal = totalRolls + totalPalitos;
+    const totalTexto = `$${totalFinal}`;
+
     document.getElementById("total").textContent = `Total del pedido: ${totalTexto}`;
 
     if (metodoPago === "Transferencia") {
@@ -153,9 +158,7 @@
     }
 
     function volverInicio() {
-      localStorage.removeItem("metodoPago");
-      localStorage.removeItem("totalPedido");
-      localStorage.removeItem("todosLosRollsResumen");
+      localStorage.clear();
       document.body.classList.add("fade-out");
       setTimeout(() => {
         window.location.href = "index.html";
@@ -187,7 +190,17 @@
           `;
         });
 
-        html += `<p class="total">💰 Total del pedido: ${totalTexto}</p>`;
+        html += `<p class="total">Rolls: $${totalRolls}</p>`;
+        if (cantidadPalitos > 0) {
+          html += `<p class="total">Palitos: $${totalPalitos} (${cantidadPalitos} u)</p>`;
+          html += `<p class="total">Total: $${totalFinal}</p>`;
+        } else {
+          html += `<p class="total">Total: $${totalRolls}</p>`;
+        }
+
+        if (comentario) {
+          html += `<p class="total">📝 Comentario: ${comentario}</p>`;
+        }
 
         if (metodoPago === "Transferencia") {
           html += `
@@ -206,12 +219,9 @@
       resumenDiv.style.display = "block";
     }
 
-    const mensaje = total
-      ? `Hola, hice mi pedido en la web. El total fue de $${total}. ¡Muchas gracias! 🍣`
-      : `Hola, hice mi pedido en la web. ¡Muchas gracias! 🍣`;
-
+    const mensajeWpp = `Hola, hice mi pedido en la web. El total fue de $${totalFinal}. ¡Muchas gracias! 🍣`;
     const numero = "59891037582";
-    const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
+    const url = `https://wa.me/${numero}?text=${encodeURIComponent(mensajeWpp)}`;
     document.getElementById("whatsappBtn").href = url;
   </script>
 </body>

@@ -233,6 +233,37 @@
   
     res.status(200).json({ message: "Pedido eliminado" });
   });
+
+  app.post('/guardar-resumen', async (req, res) => {
+    const {
+      nombre_cliente,
+      apellido_cliente,
+      celular_cliente,
+      metodo_pago,
+      horario,
+      total_pedido,
+      cantidad_rolls,
+      palitos,
+      comentario
+    } = req.body;
+  
+    const { error } = await supabase.from('resumen_pedidos').insert([{
+      nombre_cliente,
+      apellido_cliente,
+      celular_cliente,
+      metodo_pago,
+      horario,
+      total_pedido,
+      cantidad_rolls,
+      palitos,
+      comentario,
+      fecha: new Date()
+    }]);
+  
+    if (error) return res.status(500).json({ error: error.message });
+    res.status(200).json({ message: 'Resumen guardado correctamente' });
+  });
+  
   
 
   app.listen(port, () => {

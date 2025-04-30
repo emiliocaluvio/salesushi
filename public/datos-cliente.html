@@ -16,12 +16,10 @@
       min-height: 100vh;
       justify-content: space-between;
     }
-
     h1 {
       text-align: center;
       margin-bottom: 1.5rem;
     }
-
     form {
       max-width: 900px;
       margin: 0 auto;
@@ -29,14 +27,12 @@
       flex-direction: column;
       gap: 1.5rem;
     }
-
     .form-row {
       display: flex;
       flex-wrap: wrap;
       gap: 1rem;
     }
-
-    input, select {
+    input, select, textarea {
       flex: 1;
       padding: 0.8rem;
       border: 2px solid #ff6f61;
@@ -46,14 +42,12 @@
       font-size: 1rem;
       min-width: 120px;
     }
-
     .horarios {
       display: flex;
       flex-direction: column;
       gap: 0.8rem;
       align-items: center;
     }
-
     .horario-box {
       border: 2px dashed #ff6f61;
       padding: 1rem;
@@ -64,34 +58,16 @@
       max-width: 200px;
       position: relative;
     }
-
-    .horario-box input {
-      display: none;
-    }
-
-    .horario-box.selected {
-      background-color: #ff6f61;
-      color: #000;
-      border-style: solid;
-    }
-
-    .horario-box.disabled {
-      opacity: 0.5;
-      pointer-events: none;
-    }
-
-    .resumen {
-      max-width: 900px;
-      margin: 2rem auto 1rem;
-    }
-
+    .horario-box input { display: none; }
+    .horario-box.selected { background-color: #ff6f61; color: #000; border-style: solid; }
+    .horario-box.disabled { opacity: 0.5; pointer-events: none; }
+    .resumen { max-width: 900px; margin: 2rem auto 1rem; }
     .rolls-grid {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 1rem;
     }
-
     .roll {
       border: 1px dashed #ff6f61;
       border-radius: 8px;
@@ -101,12 +77,7 @@
       text-align: center;
       position: relative;
     }
-
-    .roll:nth-child(odd):last-child {
-      margin-left: auto;
-      margin-right: auto;
-    }
-
+    .roll:nth-child(odd):last-child { margin-left: auto; margin-right: auto; }
     .roll-img {
       width: 100%;
       max-width: 120px;
@@ -114,7 +85,6 @@
       display: block;
       border-radius: 8px;
     }
-
     .eliminar-btn {
       position: absolute;
       top: 0.3rem;
@@ -127,14 +97,12 @@
       font-size: 0.9rem;
       cursor: pointer;
     }
-
     .total {
       margin-top: 1rem;
       font-size: 1.3rem;
       font-weight: bold;
       text-align: center;
     }
-
     .acciones {
       display: flex;
       justify-content: center;
@@ -142,7 +110,6 @@
       margin-top: 1.5rem;
       flex-wrap: wrap;
     }
-
     .acciones button {
       flex: 1;
       max-width: 200px;
@@ -155,33 +122,32 @@
       cursor: pointer;
       transition: all 0.3s ease;
     }
-
-    .acciones button:hover:enabled {
-      background-color: #ff6f61;
-      color: #000;
+    .acciones button:hover:enabled { background-color: #ff6f61; color: #000; }
+    .acciones button[disabled] { opacity: 0.4; cursor: not-allowed; }
+    .logo-footer { width: 80px; opacity: 0.7; margin: 2rem auto 0; display: block; }
+    .palitos-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
     }
-
-    .acciones button[disabled] {
-      opacity: 0.4;
-      cursor: not-allowed;
+    .palitos-box img {
+      width: 40px;
+      height: auto;
     }
-
-    .logo-footer {
-      width: 80px;
-      opacity: 0.7;
-      margin: 2rem auto 0;
-      display: block;
+    .palitos-contador {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
-
+    .palitos-contador button {
+      padding: 0.2rem 0.6rem;
+      font-size: 1.2rem;
+    }
     @media (max-width: 600px) {
-      .acciones {
-        flex-direction: column;
-      }
-
-      .acciones button {
-        max-width: 100%;
-        width: 100%;
-      }
+      .acciones { flex-direction: column; }
+      .acciones button { max-width: 100%; width: 100%; }
     }
   </style>
 </head>
@@ -203,6 +169,19 @@
         </select>
       </div>
 
+      <div class="palitos-box">
+        <img src="palitos.png" alt="Palitos chinos">
+        <span>Agregar palitos chinos ($20):</span>
+        <div class="palitos-contador">
+          <button type="button" onclick="modificarPalitos(-1)">−</button>
+          <span id="cantidadPalitos">0</span>
+          <button type="button" onclick="modificarPalitos(1)">+</button>
+        </div>
+      </div>
+      <p style="font-size: 0.9rem; text-align:center; margin-top:0.5rem;">Un par = 1 bolsa con dos palitos</p>
+
+      <textarea id="comentario" rows="3" placeholder="Comentario / Especificación (opcional)"></textarea>
+
       <h3 style="text-align:center;">Seleccioná horario de entrega</h3>
       <div class="horarios" id="opcionesHorario"></div>
 
@@ -219,11 +198,25 @@
     let rolls = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
     let horarioSeleccionado = null;
     let disponibilidad = [];
+    let cantidadPalitos = 0;
 
     const resumen = document.getElementById("resumen-rolls");
     const formulario = document.getElementById("formulario");
     const opcionesHorario = document.getElementById("opcionesHorario");
     const btnConfirmar = document.getElementById("btnConfirmar");
+
+    function modificarPalitos(valor) {
+      const nuevaCantidad = cantidadPalitos + valor;
+      if (nuevaCantidad < 0) return;
+      if (nuevaCantidad > 10) {
+        alert("Si querés más de 10 pares, por favor indicá la cantidad en Comentarios.");
+        return;
+      }
+      cantidadPalitos = nuevaCantidad;
+      document.getElementById("cantidadPalitos").innerText = cantidadPalitos;
+      renderRolls();
+      validarFormulario();
+    }
 
     async function verificarEstadoPedidos() {
       try {
@@ -248,7 +241,8 @@
       }
 
       formulario.style.display = "flex";
-      const total = rolls.reduce((sum, roll) => sum + roll.precio, 0);
+      const totalRolls = rolls.reduce((sum, roll) => sum + roll.precio, 0);
+      const totalFinal = totalRolls + (cantidadPalitos * 20);
 
       resumen.innerHTML = `
         <h3>Tu pedido:</h3>
@@ -265,7 +259,7 @@
             </div>
           `).join('')}
         </div>
-        <div class="total">Total del pedido: $${total}</div>
+        <div class="total">Total final (con palitos): $${totalFinal}</div>
       `;
     }
 
@@ -335,6 +329,8 @@
       const apellido = document.getElementById("apellido").value.trim();
       const celular = document.getElementById("celular").value.trim();
       const pago = document.getElementById("pago").value;
+      const comentario = document.getElementById("comentario").value.trim();
+      const totalFinal = rolls.reduce((sum, roll) => sum + roll.precio, 0) + (cantidadPalitos * 20);
 
       const payload = {
         nombre_cliente: nombre,
@@ -345,21 +341,37 @@
         rolls
       };
 
-      const res = await fetch('/guardar-pedido-horario', {
+      const resumenPayload = {
+        nombre_cliente: nombre,
+        apellido_cliente: apellido,
+        celular_cliente: celular,
+        metodo_pago: pago,
+        horario: horarioSeleccionado,
+        total_pedido: totalFinal,
+        cantidad_rolls: rolls.length,
+        palitos: cantidadPalitos,
+        comentario
+      };
+
+      const res1 = await fetch('/guardar-pedido-horario', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
 
-      const data = await res.json();
-      if (!res.ok) {
-        alert(data.error || "Hubo un error al guardar el pedido.");
+      const res2 = await fetch('/guardar-resumen', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(resumenPayload)
+      });
+
+      if (!res1.ok || !res2.ok) {
+        alert("Error al guardar el pedido completo.");
         return;
       }
 
-      const total = rolls.reduce((sum, roll) => sum + roll.precio, 0);
       localStorage.setItem("metodoPago", pago);
-      localStorage.setItem("totalPedido", total);
+      localStorage.setItem("totalPedido", totalFinal);
       localStorage.setItem("todosLosRollsResumen", JSON.stringify(rolls));
 
       irA("gracias.html");
