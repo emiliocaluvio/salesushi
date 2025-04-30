@@ -139,8 +139,7 @@
 
   <div id="contenedor-tablas"></div>
   <div id="resumen-pedidos"></div>
-  <button id="btn-ver-mas-resumen" class="btn-ver-mas">Mostrar más resumen</button>
-
+<button id="btn-ver-mas-resumen" class="btn-ver-mas">Mostrar más resumen</button>
 
   <div id="historico-tablas"></div>
   <button id="btn-ver-mas" class="btn-ver-mas">Mostrar más</button>
@@ -155,6 +154,9 @@
 
   <script>
     let visibles = 15;
+    let resumenData = [];
+let visiblesResumen = 20;
+
 const horarios = ['horario_19', 'horario_20', 'horario_21'];
 const nombres = {
   'horario_19': 'Pedidos 19:00',
@@ -387,16 +389,6 @@ function volverAlPanel() {
   document.getElementById("historico-tablas").style.display = 'block';
   document.getElementById("btn-ver-mas").style.display = 'block';
 }
-function eliminarResumen(id) {
-  if (!confirm("¿Eliminar este resumen?")) return;
-  fetch(`/eliminar-resumen/${id}`, { method: 'DELETE' }).then(() => {
-    const fila = document.getElementById(`resumen-${id}`);
-    if (fila) fila.remove();
-    const count = document.querySelectorAll('[id^="resumen-"]').length;
-    document.getElementById("titulo-resumen").textContent = `Resumen de pedidos (${count})`;
-  });
-}
-
 
 function cerrarSesion() {
   localStorage.removeItem("adminAutenticado");
@@ -408,6 +400,78 @@ async function cargarEstadoSwitch() {
   const data = await res.json();
   document.getElementById("switchPedidos").checked = data.activo;
 }
+async function cargarResumenPedidos() {
+  const res = await fetch('/resumen-pedidos');
+  resumenData = await res.json();
+  renderizarResumenPedidos();
+}
+function renderizarResumenPedidos() {
+  const contenedor = document.getElementById("resumen-pedidos");
+  contenedor.innerHTML = '';
+
+  const div = document.createElement("div");
+  const titulo = document.createElement("h2");
+  titulo.id = "titulo-resumen";
+  titulo.textContent = `Resumen de pedidos (${resumenData.length})`;
+
+  const tabla = document.createElement("table");
+  tabla.innerHTML = `
+    <thead>
+      <tr>
+        <th>Cliente</th>
+        <th>Teléfono</th>
+        <th>Pago</th>
+        <th>Horario</th>
+        <th>Rolls</th>
+        <th>Palitos</th>
+        <th>Total</th>
+        <th>Fecha</th>
+        <th>Comentario</th>
+        <th>Eliminar</th>
+      </tr>
+    </thead>
+    <tbody id="cuerpo-resumen"></tbody>
+  `;
+
+  const cuerpo = tabla.querySelector("#cuerpo-resumen");
+  resumenData.slice(0, visiblesResumen).forEach(p => {
+    const fila = document.createElement("tr");
+    fila.id = `resumen-${p.id}`;
+    fila.innerHTML = `
+      <td>${p.nombre_cliente} ${p.apellido_cliente}</td>
+      <td>${p.celular_cliente}</td>
+      <td>${p.metodo_pago}</td>
+      <td>${p.horario}</td>
+      <td>${p.cantidad_rolls}</td>
+      <td>${p.palitos}</td>
+      <td>$${p.total_pedido}</td>
+      <td>${p.fecha?.split('T')[0]}</td>
+      <td>${p.comentario || ''}</td>
+      <td><button onclick="eliminarResumen(${p.id})">❌</button></td>
+    `;
+    cuerpo.appendChild(fila);
+  });
+
+  div.appendChild(titulo);
+  div.appendChild(tabla);
+  contenedor.appendChild(div);
+
+  document.getElementById("btn-ver-mas-resumen").style.display = (visiblesResumen < resumenData.length) ? 'block' : 'none';
+}
+function eliminarResumen(id) {
+  if (!confirm("¿Eliminar este resumen?")) return;
+  fetch(`/eliminar-resumen/${id}`, { method: 'DELETE' }).then(() => {
+    const fila = document.getElementById(`resumen-${id}`);
+    if (fila) fila.remove();
+    resumenData = resumenData.filter(p => p.id !== id);
+    renderizarResumenPedidos();
+  });
+}
+document.getElementById("btn-ver-mas-resumen").onclick = () => {
+  visiblesResumen += 10;
+  renderizarResumenPedidos();
+};
+
     // Incluye: cargarTablasHorarias, cargarHistorico con paginación por clientes, resumen de ventas, etc.
 
     // Al final del script:
@@ -423,78 +487,8 @@ async function cargarEstadoSwitch() {
     cargarEstadoSwitch();
     cargarTablasHorarias();
     cargarResumenPedidos();
- 
-
 
     cargarHistorico();
-    let resumenData = [];
-let visiblesResumen = 20;
-
-async function cargarResumenPedidos() {
-    const res = await fetch('/resumen-pedidos');
-    resumenData = await res.json();
-    renderizarResumenPedidos();
-  }
-
-  function renderizarResumenPedidos() {
-    const contenedor = document.getElementById("resumen-pedidos");
-    contenedor.innerHTML = '';
-
-    const div = document.createElement("div");
-    const titulo = document.createElement("h2");
-    titulo.id = "titulo-resumen";
-    titulo.textContent = `Resumen de pedidos (${resumenData.length})`;
-
-    const tabla = document.createElement("table");
-    tabla.innerHTML = `
-      <thead>
-        <tr>
-          <th>Cliente</th>
-          <th>Teléfono</th>
-          <th>Pago</th>
-          <th>Horario</th>
-          <th>Rolls</th>
-          <th>Palitos</th>
-          <th>Total</th>
-          <th>Fecha</th>
-          <th>Comentario</th>
-          <th>Eliminar</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${resumenData.slice(0, visiblesResumen).map(p => `
-          <tr id="resumen-${p.id}">
-            <td>${p.nombre_cliente} ${p.apellido_cliente}</td>
-            <td>${p.celular_cliente}</td>
-            <td>${p.metodo_pago}</td>
-            <td>${p.horario}</td>
-            <td>${p.cantidad_rolls}</td>
-            <td>${p.palitos}</td>
-            <td>$${p.total_pedido}</td>
-            <td>${p.fecha?.split('T')[0]}</td>
-            <td>${p.comentario || ''}</td>
-            <td><button onclick="eliminarResumen(${p.id})">❌</button></td>
-          </tr>
-        `).join('')}
-      </tbody>
-    `;
-
-    div.appendChild(titulo);
-    div.appendChild(tabla);
-    contenedor.appendChild(div);
-
-    const boton = document.getElementById("btn-ver-mas-resumen");
-    boton.style.display = (visiblesResumen < resumenData.length) ? 'block' : 'none';
-  }
-
-  document.getElementById("btn-ver-mas-resumen").onclick = () => {
-    visiblesResumen += 10;
-    renderizarResumenPedidos();
-  };
-</script>
-
-<!-- Botón debajo de #resumen-pedidos -->
-<button id="btn-ver-mas-resumen" class="btn-ver-mas">Mostrar más resumen</button>
-
+  </script>
 </body>
 </html>
