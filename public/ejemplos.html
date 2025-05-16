@@ -35,15 +35,18 @@
     }
 
     .roll-img {
-      display: block;
-      max-width: 100%;
-      max-height: 1600px;
-      min-height: 300px;
-      border-radius: 10px;
-      margin: 1rem auto;
-      object-fit: contain;
-      transform: scale(1.6); /* 👈 Escala visual */
-    }
+  display: block;
+  max-width: 100%;
+  max-height: 1600px;
+  min-height: 300px;
+  border-radius: 10px;
+  margin: 1rem auto;
+  object-fit: contain;
+  transform: scale(1.9);
+  position: relative;
+  z-index: 1; /* ⬅ por debajo de los botones */
+}
+
 
     .ingredientes {
       display: flex;
@@ -62,12 +65,15 @@
     }
 
     .navegacion {
-      display: flex;
-      gap: 1rem;
-      margin: 1rem 0;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0;
+  flex-wrap: wrap;
+  justify-content: center;
+  position: relative;
+  z-index: 10; /* ⬅ se eleva por encima de la imagen */
+}
+
 
     .acciones-finales {
       display: flex;

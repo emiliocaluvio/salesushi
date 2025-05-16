@@ -216,6 +216,7 @@
     const formulario = document.getElementById("formulario");
     const opcionesHorario = document.getElementById("opcionesHorario");
     const btnConfirmar = document.getElementById("btnConfirmar");
+    let pedidoEnviado = false;
 
     function modificarPalitos(valor) {
       const nuevaCantidad = cantidadPalitos + valor;
@@ -343,6 +344,10 @@ box.innerHTML = `
 
     document.getElementById("formulario").addEventListener("submit", async function (e) {
       e.preventDefault();
+      if (pedidoEnviado) return;
+  pedidoEnviado = true;
+  btnConfirmar.disabled = true;
+
 
       const nombre = document.getElementById("nombre").value.trim();
       const apellido = document.getElementById("apellido").value.trim();

@@ -158,6 +158,8 @@
     const contador = document.getElementById("contador");
     const mensaje = document.getElementById("mensaje-aviso");
     const btnAgregar = document.getElementById("btn-agregar-roll");
+    let accionEnProceso = false; // ← EVITA doble clic
+
 
     const roll = JSON.parse(localStorage.getItem("pedido"));
     let lista = JSON.parse(localStorage.getItem("todosLosRolls")) || [];
@@ -225,28 +227,37 @@
     }
 
     function finalizar() {
-      localStorage.setItem("todosLosRolls", JSON.stringify(lista));
-      irA("datos-cliente.html");
-    }
+  if (accionEnProceso) return;
+  accionEnProceso = true;
 
-    async function agregarNuevoRoll() {
-      const puede = await verificarCupos();
-      if (!puede) {
-        mensaje.textContent = "🚫 No se puede agregar otro roll, cupo completo.";
-        return;
-      }
+  localStorage.setItem("todosLosRolls", JSON.stringify(lista));
+  irA("datos-cliente.html");
+}
 
-      const ultimaGuardada = lista[lista.length - 1];
-      const esUltimoIgual = ultimaGuardada && JSON.stringify(ultimaGuardada) === JSON.stringify(roll);
 
-      if (!esUltimoIgual) {
-        lista.push({ ...roll });
-        localStorage.setItem("todosLosRolls", JSON.stringify(lista));
-      }
+async function agregarNuevoRoll() {
+  if (accionEnProceso) return;
+  accionEnProceso = true;
 
-      localStorage.removeItem("pedido");
-      irA("proteina.html");
-    }
+  const puede = await verificarCupos();
+  if (!puede) {
+    mensaje.textContent = "🚫 No se puede agregar otro roll, cupo completo.";
+    accionEnProceso = false;
+    return;
+  }
+
+  const ultimaGuardada = lista[lista.length - 1];
+  const esUltimoIgual = ultimaGuardada && JSON.stringify(ultimaGuardada) === JSON.stringify(roll);
+
+  if (!esUltimoIgual) {
+    lista.push({ ...roll });
+    localStorage.setItem("todosLosRolls", JSON.stringify(lista));
+  }
+
+  localStorage.removeItem("pedido");
+  irA("proteina.html");
+}
+
 
     function cancelarPedido() {
       if (confirm("¿Estás seguro de cancelar el pedido?")) {
