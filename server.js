@@ -115,7 +115,7 @@
     const checks = await Promise.all([
       supabase.from('horario_19').select('*', { count: 'exact', head: true }),
       supabase.from('horario_20').select('*', { count: 'exact', head: true }),
-      supabase.from('horario_21').select('*', { count: 'exact', head: true })
+      supabase.from('horario_21').select('*', { count: 'exact', head: true }),
       supabase.from('horario_22').select('*', { count: 'exact', head: true })
     ]);
     const todasLlenas = checks.every(({ count }) => count >= 10);
