@@ -157,12 +157,15 @@
     let resumenData = [];
 let visiblesResumen = 20;
 
-const horarios = ['horario_19', 'horario_20', 'horario_21'];
+const horarios = ['horario_19', 'horario_20', 'horario_21', 'horario_22'];
+
 const nombres = {
   'horario_19': 'Pedidos 19:00',
   'horario_20': 'Pedidos 20:00',
-  'horario_21': 'Pedidos 21:00'
+  'horario_21': 'Pedidos 21:00',
+  'horario_22': 'Pedidos 22:00'
 };
+
 
 async function fetchTabla(nombre) {
   const res = await fetch(`/api/tabla/${nombre}`);
@@ -349,14 +352,17 @@ async function mostrarDatosVenta() {
   document.getElementById("btn-ver-mas").style.display = 'none';
 
   const res19 = await fetch('/api/tabla/horario_19');
-  const res20 = await fetch('/api/tabla/horario_20');
-  const res21 = await fetch('/api/tabla/horario_21');
+const res20 = await fetch('/api/tabla/horario_20');
+const res21 = await fetch('/api/tabla/horario_21');
+const res22 = await fetch('/api/tabla/horario_22');
 
-  const datos = [
-    ...(await res19.json()),
-    ...(await res20.json()),
-    ...(await res21.json())
-  ];
+const datos = [
+  ...(await res19.json()),
+  ...(await res20.json()),
+  ...(await res21.json()),
+  ...(await res22.json())
+];
+
 
   const contar = (arr, campo) =>
     arr.reduce((acc, el) => {

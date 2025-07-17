@@ -87,7 +87,8 @@
     const tablaHorario = {
       '19:00': 'horario_19',
       '20:00': 'horario_20',
-      '21:00': 'horario_21'
+      '21:00': 'horario_21',
+      '22:00': 'horario_22'
     }[horario];
 
     if (!tablaHorario) return res.status(400).json({ error: 'Horario inválido' });
@@ -115,6 +116,7 @@
       supabase.from('horario_19').select('*', { count: 'exact', head: true }),
       supabase.from('horario_20').select('*', { count: 'exact', head: true }),
       supabase.from('horario_21').select('*', { count: 'exact', head: true })
+      supabase.from('horario_22').select('*', { count: 'exact', head: true })
     ]);
     const todasLlenas = checks.every(({ count }) => count >= 10);
     if (todasLlenas) {
@@ -126,7 +128,7 @@
 
   // Disponibilidad por horario
   app.get('/api/disponibilidad', async (req, res) => {
-    const horarios = ['horario_19', 'horario_20', 'horario_21'];
+    const horarios = ['horario_19', 'horario_20', 'horario_21', 'horario_22'];
     try {
       const result = await Promise.all(horarios.map(async (tabla, i) => {
         const { count } = await supabase.from(tabla).select('*', { count: 'exact', head: true });
@@ -141,7 +143,8 @@
   // Limpiar tabla horario
   app.delete('/api/limpiar_tabla/:tabla', async (req, res) => {
     const { tabla } = req.params;
-    if (!['horario_19', 'horario_20', 'horario_21'].includes(tabla)) {
+   if (!['horario_19', 'horario_20', 'horario_21', 'horario_22'].includes(tabla)) {
+
       return res.status(400).json({ error: 'Tabla no válida' });
     }
     const { error } = await supabase.from(tabla).delete().neq('id', 0);
@@ -152,7 +155,8 @@
   // Endpoint dinámico para admin
   app.get('/api/tabla/:nombre', async (req, res) => {
     const { nombre } = req.params;
-    if (!['horario_19', 'horario_20', 'horario_21'].includes(nombre)) {
+    if (!['horario_19', 'horario_20', 'horario_21', 'horario_22'].includes(nombre)) {
+
       return res.status(400).json({ error: 'Nombre de tabla inválido' });
     }
     const { data, error } = await supabase.from(nombre).select('*');
@@ -224,7 +228,8 @@
   });
   app.delete('/eliminar-pedido-horario/:tabla/:id', async (req, res) => {
     const { tabla, id } = req.params;
-    if (!['horario_19', 'horario_20', 'horario_21'].includes(tabla)) {
+   if (!['horario_19', 'horario_20', 'horario_21', 'horario_22'].includes(tabla)) {
+
       return res.status(400).json({ error: 'Tabla no válida' });
     }
   
