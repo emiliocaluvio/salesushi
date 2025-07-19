@@ -119,6 +119,8 @@
         <div>Ventas Pollo: $<span id="ventaPollo">0</span></div>
         <div>Ventas Langostino: $<span id="ventaLangostino">0</span></div>
         <div>Otras ventas: $<span id="ventaOtras">0</span></div>
+        <div><strong>Total de ventas:</strong> $<span id="ventaTotal">0</span></div>
+
         <div>Total de costos: $<span id="totalCostos">0</span></div>
         <div class="total">Ganancia neta: $<span id="ganancia">0</span></div>
       </div>
@@ -231,6 +233,8 @@
     function calcularGanancia() {
       const totalVentas = Object.values(ventas).reduce((a, b) => a + b, 0);
       const totalCostos = campos.reduce((acc, id) => acc + Number(document.getElementById(id).value || 0), 0);
+      document.getElementById("ventaTotal").innerText = totalVentas;
+
       document.getElementById("ganancia").innerText = totalVentas - totalCostos;
       document.getElementById("totalCostos").innerText = totalCostos;
     }

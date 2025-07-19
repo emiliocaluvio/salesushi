@@ -362,6 +362,23 @@ const datos = [
   ...(await res21.json()),
   ...(await res22.json())
 ];
+const ventas = {
+  'Salmón': 0,
+  'Pollo': 0,
+  'Langostino': 0,
+  'Otras': 0
+};
+
+datos.forEach(p => {
+  if (p.proteina === 'Salmón') ventas['Salmón'] += p.precio;
+  else if (p.proteina === 'Pollo') ventas['Pollo'] += p.precio;
+  else if (p.proteina === 'Langostino' || p.proteina === 'Langostino Panko') ventas['Langostino'] += p.precio;
+  else ventas['Otras'] += p.precio;
+});
+
+const totalVentas = ventas['Salmón'] + ventas['Pollo'] + ventas['Langostino'] + ventas['Otras'];
+const totalCostos = 0; // Esto lo podés automatizar después
+const gananciaNeta = totalVentas - totalCostos;
 
 
   const contar = (arr, campo) =>
