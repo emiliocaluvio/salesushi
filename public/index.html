@@ -249,7 +249,7 @@
         const res = await fetch('/api/disponibilidad');
         const data = await res.json();
 
-        cont.innerHTML = '<strong>🌟 Rolls disponibles 20/07:</strong><br>';
+        cont.innerHTML = '<strong>🌟 Rolls disponibles 30/08:</strong><br>';
         data.forEach(h => {
           const emoji = h.disponibles === 0 ? '❌' : '🟢';
           cont.innerHTML += `🕒 ${h.hora} — ${h.disponibles} roll${h.disponibles !== 1 ? 's' : ''} disponibles ${emoji}<br>`;
