@@ -1,288 +1,335 @@
-  const express = require('express');
-  const { createClient } = require('@supabase/supabase-js');
-  const sharp = require('sharp');
-  const fs = require('fs');
-  const path = require('path');
+// --- Dependencias ---
+const express = require('express');
+const { createClient } = require('@supabase/supabase-js');
+const sharp = require('sharp');
+const fs = require('fs');
+const path = require('path');
 
-  const supabaseUrl = 'https://wirexcgiyqfgrdglslhp.supabase.co';
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpcmV4Y2dpeXFmZ3JkZ2xzbGhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1NzYwMjUsImV4cCI6MjA2MDE1MjAyNX0.Q0cUsNkRcpGHoDRd-V81M2LO7aFLiZH4StuDnRp5qZ4'; // (clave acortada por seguridad)
-  const supabase = createClient(supabaseUrl, supabaseKey);
+// --- Supabase ---
+const supabaseUrl = 'https://wirexcgiyqfgrdglslhp.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpcmV4Y2dpeXFmZ3JkZ2xzbGhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ1NzYwMjUsImV4cCI6MjA2MDE1MjAyNX0.Q0cUsNkRcpGHoDRd-V81M2LO7aFLiZH4StuDnRp5qZ4';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-  const app = express();
-  const port = process.env.PORT || 3000;
+// --- App / Config ---
+const app = express();
+const port = process.env.PORT || 3000;
 
-  app.use(express.json());
-  app.use(express.static('public'));
+app.use(express.json());
 
-  // Estado del switch
-  app.get('/estado-pedidos', async (req, res) => {
-    const { data, error } = await supabase
+// Static de /public y helper para paths
+const publicDir = path.join(__dirname, 'public');
+app.use(express.static(publicDir, { extensions: ['html'] }));
+
+// Raíz -> index.html (sirve la web)
+app.get('/', (_req, res) => {
+  res.sendFile(path.join(publicDir, 'index.html'));
+});
+
+// Healthcheck (útil para Railway)
+app.get('/health', (_req, res) => res.status(200).send('ok'));
+
+// -------------------
+// Estado del switch
+// -------------------
+app.get('/estado-pedidos', async (req, res) => {
+  const { data, error } = await supabase
+    .from('estado_pedidos')
+    .select('activo')
+    .limit(1)
+    .single();
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ activo: data?.activo ?? false });
+});
+
+app.post('/estado-pedidos', async (req, res) => {
+  const { activo } = req.body;
+  const { data: row, error: selectError } = await supabase
+    .from('estado_pedidos')
+    .select('id')
+    .limit(1)
+    .single();
+
+  if (selectError || !row) {
+    const { error: insertError } = await supabase
       .from('estado_pedidos')
-      .select('activo')
-      .limit(1)
-      .single();
+      .insert([{ activo }]);
+    if (insertError) return res.status(500).json({ error: insertError.message });
+    return res.status(200).json({ message: "Estado creado", activo });
+  }
 
-    if (error) return res.status(500).json({ error: error.message });
-    res.json({ activo: data?.activo ?? false });
-  });
+  const { error: updateError } = await supabase
+    .from('estado_pedidos')
+    .update({ activo })
+    .eq('id', row.id);
 
-  app.post('/estado-pedidos', async (req, res) => {
-    const { activo } = req.body;
-    const { data: row, error: selectError } = await supabase
-      .from('estado_pedidos')
-      .select('id')
-      .limit(1)
-      .single();
+  if (updateError) return res.status(500).json({ error: updateError.message });
+  res.json({ message: "Estado actualizado", activo });
+});
 
-    if (selectError || !row) {
-      const { error: insertError } = await supabase
-        .from('estado_pedidos')
-        .insert([{ activo }]);
-      if (insertError) return res.status(500).json({ error: insertError.message });
-      return res.status(200).json({ message: "Estado creado", activo });
-    }
+// -------------------
+// Combinaciones / Catálogo
+// -------------------
+app.get('/combinaciones', async (req, res) => {
+  const { data, error } = await supabase.from('combinaciones').select('proteina, cobertura, precio');
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
 
-    const { error: updateError } = await supabase
-      .from('estado_pedidos')
-      .update({ activo })
-      .eq('id', row.id);
+app.get('/proteinas-unicas', async (req, res) => {
+  const { data, error } = await supabase.from('combinaciones').select('proteina');
+  if (error) return res.status(500).json({ error: error.message });
+  const unicas = [...new Set(data.map(item => item.proteina))];
+  res.json(unicas);
+});
 
-    if (updateError) return res.status(500).json({ error: updateError.message });
-    res.json({ message: "Estado actualizado", activo });
-  });
+app.get('/vegetales', (req, res) => {
+  const vegetales = ["Ciboulette", "Cebollín", "Palta", "Mix de morrón", "Pepino", "Palmitos", "Zanahoria"];
+  res.json(vegetales);
+});
 
-  // Combinaciones
-  app.get('/combinaciones', async (req, res) => {
-    const { data, error } = await supabase.from('combinaciones').select('proteina, cobertura, precio');
-    if (error) return res.status(500).json({ error: error.message });
-    res.json(data);
-  });
+// -------------------
+// Pedido simple
+// -------------------
+app.post('/guardar-pedido', async (req, res) => {
+  const { nombre_cliente, apellido_cliente, celular_cliente, metodo_pago, proteina, cobertura, vegetal, precio } = req.body;
+  const { error } = await supabase
+    .from('pedidos')
+    .insert([{ nombre_cliente, apellido_cliente, celular_cliente, metodo_pago, proteina, cobertura, vegetal, precio, fecha: new Date() }]);
+  if (error) return res.status(500).json({ error: error.message });
+  res.status(200).json({ message: 'Pedido guardado correctamente' });
+});
 
-  app.get('/proteinas-unicas', async (req, res) => {
-    const { data, error } = await supabase.from('combinaciones').select('proteina');
-    if (error) return res.status(500).json({ error: error.message });
-    const unicas = [...new Set(data.map(item => item.proteina))];
-    res.json(unicas);
-  });
+// ---------------------------------------------
+// Pedido con horario + chequeo de disponibilidad
+// ---------------------------------------------
+app.post('/guardar-pedido-horario', async (req, res) => {
+  const { nombre_cliente, apellido_cliente, celular_cliente, metodo_pago, horario, rolls } = req.body;
 
-  app.get('/vegetales', (req, res) => {
-    const vegetales = ["Ciboulette", "Cebollín", "Palta", "Mix de morrón", "Pepino", "Palmitos", "Zanahoria"];
-    res.json(vegetales);
-  });
+  const tablaHorario = {
+    '19:00': 'horario_19',
+    '20:00': 'horario_20',
+    '21:00': 'horario_21',
+    '22:00': 'horario_22'
+  }[horario];
 
-  // Pedido simple
-  app.post('/guardar-pedido', async (req, res) => {
-    const { nombre_cliente, apellido_cliente, celular_cliente, metodo_pago, proteina, cobertura, vegetal, precio } = req.body;
+  if (!tablaHorario) return res.status(400).json({ error: 'Horario inválido' });
+
+  const { count } = await supabase.from(tablaHorario).select('*', { count: 'exact', head: true });
+  if ((count || 0) + rolls.length > 10) {
+    return res.status(400).json({ error: 'No hay suficientes cupos en ese horario' });
+  }
+
+  const fecha = new Date();
+  const registros = rolls.map(r => ({
+    nombre_cliente, apellido_cliente, celular_cliente, metodo_pago,
+    proteina: r.proteina, cobertura: r.cobertura, vegetal: r.vegetal,
+    precio: r.precio, fecha
+  }));
+
+  const { error: errorHist } = await supabase.from('pedidos').insert(registros);
+  if (errorHist) return res.status(500).json({ error: errorHist.message });
+
+  const { error: errorHorario } = await supabase.from(tablaHorario).insert(registros);
+  if (errorHorario) return res.status(500).json({ error: errorHorario.message });
+
+  // Verifica si hay que desactivar
+  const checks = await Promise.all([
+    supabase.from('horario_19').select('*', { count: 'exact', head: true }),
+    supabase.from('horario_20').select('*', { count: 'exact', head: true }),
+    supabase.from('horario_21').select('*', { count: 'exact', head: true }),
+    supabase.from('horario_22').select('*', { count: 'exact', head: true })
+  ]);
+  const todasLlenas = checks.every(({ count }) => (count || 0) >= 10);
+  if (todasLlenas) {
+    await supabase.from('estado_pedidos').update({ activo: false }).eq('id', 1);
+  }
+
+  res.status(200).json({ message: 'Pedido guardado correctamente' });
+});
+
+// -------------------
+// Disponibilidad por horario
+// -------------------
+app.get('/api/disponibilidad', async (req, res) => {
+  const horarios = ['horario_19', 'horario_20', 'horario_21', 'horario_22'];
+  try {
+    const result = await Promise.all(horarios.map(async (tabla, i) => {
+      const { count } = await supabase.from(tabla).select('*', { count: 'exact', head: true });
+      return { hora: `${19 + i}:00`, disponibles: 10 - (count || 0) };
+    }));
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// -------------------
+// Limpieza de tablas por horario
+// -------------------
+app.delete('/api/limpiar_tabla/:tabla', async (req, res) => {
+  const { tabla } = req.params;
+  if (!['horario_19', 'horario_20', 'horario_21', 'horario_22'].includes(tabla)) {
+    return res.status(400).json({ error: 'Tabla no válida' });
+  }
+  const { error } = await supabase.from(tabla).delete().neq('id', 0);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ message: 'Tabla limpiada correctamente' });
+});
+
+// -------------------
+// Endpoint dinámico para admin
+// -------------------
+app.get('/api/tabla/:nombre', async (req, res) => {
+  const { nombre } = req.params;
+  if (!['horario_19', 'horario_20', 'horario_21', 'horario_22'].includes(nombre)) {
+    return res.status(400).json({ error: 'Nombre de tabla inválido' });
+  }
+  const { data, error } = await supabase.from(nombre).select('*');
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+// -------------------
+// Histórico y eliminaciones
+// -------------------
+app.get('/pedidos', async (req, res) => {
+  const { data, error } = await supabase.from('pedidos').select('*');
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
+app.delete('/eliminar-pedido/:id', async (req, res) => {
+  const { id } = req.params;
+  const { error } = await supabase.from('pedidos').delete().eq('id', id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.status(200).json({ message: "Pedido eliminado" });
+});
+
+app.delete('/api/limpiar_tabla/historico', async (req, res) => {
+  try {
     const { error } = await supabase
       .from('pedidos')
-      .insert([{ nombre_cliente, apellido_cliente, celular_cliente, metodo_pago, proteina, cobertura, vegetal, precio, fecha: new Date() }]);
-    if (error) return res.status(500).json({ error: error.message });
-    res.status(200).json({ message: 'Pedido guardado correctamente' });
-  });
+      .delete()
+      .neq('id', 0); // Esto borra todos los registros
 
-  // Pedido con horario y chequeo automático
-  app.post('/guardar-pedido-horario', async (req, res) => {
-    const { nombre_cliente, apellido_cliente, celular_cliente, metodo_pago, horario, rolls } = req.body;
+    if (error) throw error;
+    res.json({ message: 'Histórico eliminado correctamente' });
+  } catch (err) {
+    console.error('Error al limpiar histórico:', err.message);
+    res.status(500).json({ error: 'Error al limpiar el histórico' });
+  }
+});
 
-    const tablaHorario = {
-      '19:00': 'horario_19',
-      '20:00': 'horario_20',
-      '21:00': 'horario_21',
-      '22:00': 'horario_22'
-    }[horario];
+// -------------------
+// Generador de imágenes
+// -------------------
+app.post('/generar-imagen', async (req, res) => {
+  try {
+    const { proteina, vegetal, cobertura, imagen } = req.body;
+    if (!proteina || !vegetal || !cobertura || !imagen) return res.status(400).json({ error: 'Faltan datos' });
 
-    if (!tablaHorario) return res.status(400).json({ error: 'Horario inválido' });
+    const basePath = path.join(__dirname, 'public');
+    const outputPath = path.join(basePath, 'rolls', imagen);
 
-    const { count } = await supabase.from(tablaHorario).select('*', { count: 'exact', head: true });
-    if ((count || 0) + rolls.length > 10) {
-      return res.status(400).json({ error: 'No hay suficientes cupos en ese horario' });
-    }
+    const normalizar = (nombre) => nombre.toLowerCase().replace(/mix de /g, '').replace(/\s+/g, '')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-    const fecha = new Date();
-    const registros = rolls.map(r => ({
-      nombre_cliente, apellido_cliente, celular_cliente, metodo_pago,
-      proteina: r.proteina, cobertura: r.cobertura, vegetal: r.vegetal,
-      precio: r.precio, fecha
-    }));
+    const prot = proteina === 'Vegetariano' ? vegetal.split(',')[0] : proteina;
+    const veg = proteina === 'Vegetariano' ? vegetal.split(',')[1] : vegetal;
 
-    const { error: errorHist } = await supabase.from('pedidos').insert(registros);
-    if (errorHist) return res.status(500).json({ error: errorHist.message });
+    const capaProteina = path.join(basePath, 'proteinas', `${normalizar(prot)}proteina.png`);
+    const capaVegetal = path.join(basePath, 'vegetales', `${normalizar(veg)}vegetal.png`);
+    const capaCobertura = path.join(basePath, 'coberturas', `${normalizar(cobertura)}cobertura.png`);
+    const maqueta = path.join(basePath, 'maqueta.png');
 
-    const { error: errorHorario } = await supabase.from(tablaHorario).insert(registros);
-    if (errorHorario) return res.status(500).json({ error: errorHorario.message });
+    const composiciones = [];
+    if (fs.existsSync(capaProteina)) composiciones.push({ input: await sharp(capaProteina).resize(1440, 1334).toBuffer(), top: 0, left: 0 });
+    if (fs.existsSync(capaVegetal)) composiciones.push({ input: await sharp(capaVegetal).resize(1440, 1334).toBuffer(), top: 0, left: 0 });
+    if (fs.existsSync(capaCobertura)) composiciones.push({ input: await sharp(capaCobertura).resize(1440, 1334).toBuffer(), top: 0, left: 0 });
 
-    // Verifica si hay que desactivar
-    const checks = await Promise.all([
-      supabase.from('horario_19').select('*', { count: 'exact', head: true }),
-      supabase.from('horario_20').select('*', { count: 'exact', head: true }),
-      supabase.from('horario_21').select('*', { count: 'exact', head: true }),
-      supabase.from('horario_22').select('*', { count: 'exact', head: true })
-    ]);
-    const todasLlenas = checks.every(({ count }) => count >= 10);
-    if (todasLlenas) {
-      await supabase.from('estado_pedidos').update({ activo: false }).eq('id', 1);
-    }
+    if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+    await sharp(maqueta).composite(composiciones).png().toFile(outputPath);
 
-    res.status(200).json({ message: 'Pedido guardado correctamente' });
-  });
+    res.status(200).json({ message: 'Imagen generada con éxito', imagen: `/rolls/${imagen}` });
+  } catch (err) {
+    console.error("❌ Error generando imagen:", err.message);
+    res.status(500).json({ error: 'Error al generar la imagen' });
+  }
+});
 
-  // Disponibilidad por horario
-  app.get('/api/disponibilidad', async (req, res) => {
-    const horarios = ['horario_19', 'horario_20', 'horario_21', 'horario_22'];
-    try {
-      const result = await Promise.all(horarios.map(async (tabla, i) => {
-        const { count } = await supabase.from(tabla).select('*', { count: 'exact', head: true });
-        return { hora: `${19 + i}:00`, disponibles: 10 - count };
-      }));
-      res.json(result);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  });
+// -------------------
+// Eliminar pedido por horario
+// -------------------
+app.delete('/eliminar-pedido-horario/:tabla/:id', async (req, res) => {
+  const { tabla, id } = req.params;
+  if (!['horario_19', 'horario_20', 'horario_21', 'horario_22'].includes(tabla)) {
+    return res.status(400).json({ error: 'Tabla no válida' });
+  }
 
-  // Limpiar tabla horario
-  app.delete('/api/limpiar_tabla/:tabla', async (req, res) => {
-    const { tabla } = req.params;
-   if (!['horario_19', 'horario_20', 'horario_21', 'horario_22'].includes(tabla)) {
+  const { error } = await supabase.from(tabla).delete().eq('id', id);
+  if (error) return res.status(500).json({ error: error.message });
 
-      return res.status(400).json({ error: 'Tabla no válida' });
-    }
-    const { error } = await supabase.from(tabla).delete().neq('id', 0);
-    if (error) return res.status(500).json({ error: error.message });
-    res.json({ message: 'Tabla limpiada correctamente' });
-  });
+  res.status(200).json({ message: "Pedido eliminado" });
+});
 
-  // Endpoint dinámico para admin
-  app.get('/api/tabla/:nombre', async (req, res) => {
-    const { nombre } = req.params;
-    if (!['horario_19', 'horario_20', 'horario_21', 'horario_22'].includes(nombre)) {
+// -------------------
+// Resumen de pedido
+// -------------------
+app.post('/guardar-resumen', async (req, res) => {
+  const {
+    nombre_cliente,
+    apellido_cliente,
+    celular_cliente,
+    metodo_pago,
+    horario,
+    total_pedido,
+    cantidad_rolls,
+    palitos,
+    comentario
+  } = req.body;
 
-      return res.status(400).json({ error: 'Nombre de tabla inválido' });
-    }
-    const { data, error } = await supabase.from(nombre).select('*');
-    if (error) return res.status(500).json({ error: error.message });
-    res.json(data);
-  });
+  const { error } = await supabase.from('resumen_pedidos').insert([{
+    nombre_cliente,
+    apellido_cliente,
+    celular_cliente,
+    metodo_pago,
+    horario,
+    total_pedido,
+    cantidad_rolls,
+    palitos,
+    comentario,
+    fecha: new Date()
+  }]);
 
-  // Histórico y eliminaciones
-  app.get('/pedidos', async (req, res) => {
-    const { data, error } = await supabase.from('pedidos').select('*');
-    if (error) return res.status(500).json({ error: error.message });
-    res.json(data);
-  });
+  if (error) return res.status(500).json({ error: error.message });
+  res.status(200).json({ message: 'Resumen guardado correctamente' });
+});
 
-  app.delete('/eliminar-pedido/:id', async (req, res) => {
-    const { id } = req.params;
-    const { error } = await supabase.from('pedidos').delete().eq('id', id);
-    if (error) return res.status(500).json({ error: error.message });
-    res.status(200).json({ message: "Pedido eliminado" });
-  });
-  app.delete('/api/limpiar_tabla/historico', async (req, res) => {
-    try {
-      const { error } = await supabase
-        .from('pedidos')
-        .delete()
-        .neq('id', 0); // Esto borra todos los registros
-  
-      if (error) throw error;
-      res.json({ message: 'Histórico eliminado correctamente' });
-    } catch (err) {
-      console.error('Error al limpiar histórico:', err.message);
-      res.status(500).json({ error: 'Error al limpiar el histórico' });
-    }
-  });
-  
-  // Generador de imágenes
-  app.post('/generar-imagen', async (req, res) => {
-    try {
-      const { proteina, vegetal, cobertura, imagen } = req.body;
-      if (!proteina || !vegetal || !cobertura || !imagen) return res.status(400).json({ error: 'Faltan datos' });
+app.get('/resumen-pedidos', async (req, res) => {
+  const { data, error } = await supabase.from('resumen_pedidos').select('*');
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
 
-      const basePath = path.join(__dirname, 'public');
-      const outputPath = path.join(basePath, 'rolls', imagen);
+app.delete('/eliminar-resumen/:id', async (req, res) => {
+  const { id } = req.params;
+  const { error } = await supabase.from('resumen_pedidos').delete().eq('id', id);
+  if (error) return res.status(500).json({ error: error.message });
+  res.status(200).json({ message: "Resumen eliminado correctamente" });
+});
 
-      const normalizar = (nombre) => nombre.toLowerCase().replace(/mix de /g, '').replace(/\s+/g, '')
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+// -------------------
+// Fallback para rutas del Front
+// (dejar al FINAL, antes del listen)
+// -------------------
+app.get('*', (req, res, next) => {
+  // No pisar API ni archivos reales (con extensión)
+  if (req.path.startsWith('/api') || req.path.includes('.')) return next();
+  res.sendFile(path.join(publicDir, 'index.html'));
+});
 
-      const prot = proteina === 'Vegetariano' ? vegetal.split(',')[0] : proteina;
-      const veg = proteina === 'Vegetariano' ? vegetal.split(',')[1] : vegetal;
-
-      const capaProteina = path.join(basePath, 'proteinas', `${normalizar(prot)}proteina.png`);
-      const capaVegetal = path.join(basePath, 'vegetales', `${normalizar(veg)}vegetal.png`);
-      const capaCobertura = path.join(basePath, 'coberturas', `${normalizar(cobertura)}cobertura.png`);
-      const maqueta = path.join(basePath, 'maqueta.png');
-
-      const composiciones = [];
-      if (fs.existsSync(capaProteina)) composiciones.push({ input: await sharp(capaProteina).resize(1440, 1334).toBuffer(), top: 0, left: 0 });
-      if (fs.existsSync(capaVegetal)) composiciones.push({ input: await sharp(capaVegetal).resize(1440, 1334).toBuffer(), top: 0, left: 0 });
-      if (fs.existsSync(capaCobertura)) composiciones.push({ input: await sharp(capaCobertura).resize(1440, 1334).toBuffer(), top: 0, left: 0 });
-
-      if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
-      await sharp(maqueta).composite(composiciones).png().toFile(outputPath);
-
-      res.status(200).json({ message: 'Imagen generada con éxito', imagen: `/rolls/${imagen}` });
-    } catch (err) {
-      console.error("❌ Error generando imagen:", err.message);
-      res.status(500).json({ error: 'Error al generar la imagen' });
-    }
-  });
-  app.delete('/eliminar-pedido-horario/:tabla/:id', async (req, res) => {
-    const { tabla, id } = req.params;
-   if (!['horario_19', 'horario_20', 'horario_21', 'horario_22'].includes(tabla)) {
-
-      return res.status(400).json({ error: 'Tabla no válida' });
-    }
-  
-    const { error } = await supabase.from(tabla).delete().eq('id', id);
-    if (error) return res.status(500).json({ error: error.message });
-  
-    res.status(200).json({ message: "Pedido eliminado" });
-  });
-
-  app.post('/guardar-resumen', async (req, res) => {
-    const {
-      nombre_cliente,
-      apellido_cliente,
-      celular_cliente,
-      metodo_pago,
-      horario,
-      total_pedido,
-      cantidad_rolls,
-      palitos,
-      comentario
-    } = req.body;
-  
-    const { error } = await supabase.from('resumen_pedidos').insert([{
-      nombre_cliente,
-      apellido_cliente,
-      celular_cliente,
-      metodo_pago,
-      horario,
-      total_pedido,
-      cantidad_rolls,
-      palitos,
-      comentario,
-      fecha: new Date()
-    }]);
-  
-    if (error) return res.status(500).json({ error: error.message });
-    res.status(200).json({ message: 'Resumen guardado correctamente' });
-  });
-  
-  
-  app.get('/resumen-pedidos', async (req, res) => {
-    const { data, error } = await supabase.from('resumen_pedidos').select('*');
-    if (error) return res.status(500).json({ error: error.message });
-    res.json(data);
-  });
-  
-  app.delete('/eliminar-resumen/:id', async (req, res) => {
-    const { id } = req.params;
-    const { error } = await supabase.from('resumen_pedidos').delete().eq('id', id);
-    if (error) return res.status(500).json({ error: error.message });
-    res.status(200).json({ message: "Resumen eliminado correctamente" });
-  });
-  
-  app.listen(port, () => {
-    console.log(`✅ Servidor escuchando en http://localhost:${port}`);
-  });
+// --- Listen ---
+app.listen(port, '0.0.0.0', () => {
+  console.log(`✅ Servidor escuchando en http://0.0.0.0:${port}`);
+});
