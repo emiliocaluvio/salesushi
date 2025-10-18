@@ -321,7 +321,7 @@ app.delete('/eliminar-resumen/:id', async (req, res) => {
 
 // -------------------
 // Fallback para rutas del Front
-// (dejar al FINAL, antes del listen)
+// (dejar al FINAL, antes del listen)a
 // -------------------
 app.get('*', (req, res, next) => {
   // No pisar API ni archivos reales (con extensión)
