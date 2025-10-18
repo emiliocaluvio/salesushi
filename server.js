@@ -63,7 +63,7 @@ app.post('/estado-pedidos', async (req, res) => {
     .update({ activo })
     .eq('id', row.id);
 
-  if (updateError) return res.status(500).json({ error: updateError.message });
+  if (updateError) return res.status(500).json({ error: error.message });
   res.json({ message: "Estado actualizado", activo });
 });
 
@@ -320,13 +320,16 @@ app.delete('/eliminar-resumen/:id', async (req, res) => {
 });
 
 // -------------------
-// Fallback para rutas del Front
-// (dejar al FINAL, antes del listen)a
+// Fallback para rutas del Front (Express 5-safe)
 // -------------------
-app.get('*', (req, res, next) => {
-  // No pisar API ni archivos reales (con extensión)
-  if (req.path.startsWith('/api') || req.path.includes('.')) return next();
-  res.sendFile(path.join(publicDir, 'index.html'));
+app.use((req, res, next) => {
+  const isGet = req.method === 'GET';
+  const isApi = req.path.startsWith('/api');
+  const isFile = path.extname(req.path) !== '';
+  if (isGet && !isApi && !isFile) {
+    return res.sendFile(path.join(publicDir, 'index.html'));
+  }
+  next();
 });
 
 // --- Listen ---
